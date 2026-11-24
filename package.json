@@ -1,0 +1,23 @@
+{
+  "name": "aiwangluounk.my",
+  "version": "1.0.0",
+  "description": "网络AI（aiwangluounk.my）— 中文网络服务与代理工具知识库、机场品牌评测数据库与套餐决策平台",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && npx pagefind --site dist",
+    "build:astro": "astro build",
+    "build:search": "npx pagefind --site dist",
+    "preview": "astro preview",
+    "check": "astro check",
+    "qa": "node scripts/validate-brands.mjs && node scripts/check-links.mjs && node scripts/audit-seo.mjs"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.0.19",
+    "@astrojs/rss": "^4.0.18",
+    "@astrojs/sitemap": "^3.7.6",
+    "astro": "^6.0.0",
+    "pagefind": "^1.4.0",
+    "zod": "^3.25.0"
+  }
+}

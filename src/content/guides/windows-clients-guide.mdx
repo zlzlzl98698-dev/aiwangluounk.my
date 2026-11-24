@@ -1,0 +1,138 @@
+---
+slug: "windows-clients-guide"
+title: "Windows 代理客户端全矩阵选型与安装指南：Clash Verge Rev、v2rayN、FlClash 等对比"
+description: "全面对比 Windows 平台 Clash Verge Rev、v2rayN、FlClash、Clash Nyanpasu、Hiddify、Karing、Clash Mi 与 Mihomo Party 的内核差异、适用场景、安装包校验及维护状态风险提示。"
+h1: "Windows 代理客户端全矩阵：内核对比、架构核验与安全安装指南"
+pillar: "clients"
+categoryLabel: "Windows 客户端矩阵"
+targetKeyword: "Windows 代理客户端推荐"
+secondaryKeywords:
+  - "Clash Verge Rev"
+  - "v2rayN"
+  - "FlClash"
+  - "Mihomo Party 维护状态"
+appliesTo: "Windows 10 / Windows 11 (x64 / ARM64)"
+prerequisites:
+  - "已获取支持第三方订阅的机场通用订阅链接（非仅限专属客户端的品牌）"
+  - "确认 Windows 账户具备本地管理员权限（开启 TUN 虚拟网卡模式时需要）"
+  - "准备用于验证文件哈希与数字签名的系统终端（PowerShell）"
+pubDate: "2026-11-23"
+updatedDate: "2026-11-23"
+answerSummary: "Windows 桌面端优先在 Clash Verge Rev（Mihomo 内核，兼顾新手与规则覆写）与 v2rayN（Xray/sing-box 多核心，协议兼容面广）之间选择；跨端轻量体验可看 FlClash 或 Hiddify；涉及 Mihomo Party 时务必先独立核实当前维护活跃度，不可盲目按旧教程首选安装。所有客户端的外部真实发布地址在站内均处于待核实状态，下载后必须比对发布者签名或校验和。"
+faqs:
+  - q: "Clash Verge Rev 和 v2rayN 应该怎么选？"
+    a: "如果机场提供标准 Clash YAML 订阅且你需要规则分流、策略组测速或 TUN 模式，优先选基于 Mihomo 内核的 Clash Verge Rev；如果你常手动导入单条 VLESS/Reality/Hysteria2 节点链接或需要切换 Xray 与 sing-box 多核心，v2rayN 更顺手。"
+  - q: "为什么旧教程常推荐 Mihomo Party，而现在需要谨慎？"
+    a: "客户端开源项目的维护节奏会随作者精力与仓库状态变化。站内客户端台账明确对 Mihomo Party 标注了风险提示：选用前必须独立核查其当前版本维护活跃度与安全更新记录，不宜仅凭历史教程将其作为默认首选。"
+  - q: "Windows 安装包出现 x64、x86 和 arm64 后缀怎么区分？"
+    a: "绝大多数台式机与笔记本为 64 位 Intel/AMD 处理器，应选 x64（或 amd64）；仅骁龙处理器等 ARM 架构 Windows 笔记本选择 arm64；现代系统通常不再需要 32 位 x86 版本。"
+relatedLinks:
+  - title: "Clash Verge Rev 专题参考"
+    href: "/clients/clash-verge-rev/"
+    note: "查看 Mihomo 内核与桌面端特性摘要"
+  - title: "v2rayN 专题参考"
+    href: "/clients/v2rayn/"
+    note: "了解 Xray 与 sing-box 多核心切换要点"
+  - title: "系统代理与 TUN 虚拟网卡区别"
+    href: "/guides/articles/tun-vs-system-proxy-dns/"
+    note: "解决游戏、终端及 WSL 不走代理的问题"
+  - title: "订阅导入与 200 OK 空内容排查"
+    href: "/guides/articles/subscription-and-200ok-empty-fix/"
+    note: "处理订阅更新失败或节点列表为空"
+---
+
+## Windows 客户端选型总览与内核分类
+
+在 Windows 10 与 Windows 11 环境下，主流开源及跨平台客户端主要围绕 **Mihomo（原 Clash.Meta）**、**sing-box** 与 **Xray** 三大代理核心展开。选择客户端时，核心不是盲目追求界面炫酷，而是确认它与机场提供的订阅格式、传输协议以及你本地的网络接管需求（系统代理或 TUN 模式）是否匹配。
+
+| 客户端名称 | 底层内核 | 核心优势 | 订阅与协议特征 | 当前状态与注意事项 |
+| :--- | :--- | :--- | :--- | :--- |
+| **Clash Verge Rev** | Mihomo (Clash.Meta) | 规则分流、配置覆写、TUN 集成成熟 | 原生支持 Clash YAML 订阅与规则集 | Windows/macOS/Linux 主流桌面端之一 |
+| **v2rayN** | Xray / sing-box 等多核心 | 协议支持极全，适合单节点与多核心调试 | 兼容单链接与常见订阅，可切换核心 | 下载时需留意是否包含完整核心依赖包 |
+| **FlClash** | Mihomo | 界面简洁轻快，跨平台体验一致 | 兼容 Clash 规则订阅 | 覆盖桌面与 Android，适合追求极简界面用户 |
+| **Clash Nyanpasu** | 多内核支持（Mihomo 等） | 支持在图形界面内灵活切换内核版本 | 适合进阶配置增强与内核对照 | 偏向需要自行测试不同内核版本的桌面用户 |
+| **Hiddify** | sing-box | 自动识别多种订阅格式，上手门槛低 | 支持多协议与自动选点 | 覆盖全主流桌面与移动平台 |
+| **Karing** | sing-box | 面向新手的跨平台统一配置逻辑 | 兼容多种常见订阅格式转换 | 与 iOS 端搭配时可保持相似操作逻辑 |
+| **Clash Mi** | Mihomo | 跨平台 Clash YAML 规则体系统一 | 规则配置逻辑与主流 Clash 一致 | 适合需在 Windows 与苹果端复用规则的用户 |
+| **Mihomo Party** | Mihomo | 曾常见于历史配置与分流迁移教程 | 支持 Clash YAML 与规则管理 | **风险提示：须单独核实当前维护活跃度** |
+
+## 八款 Windows 客户端深度拆解
+
+### 1. Clash Verge Rev（规则分流主力）
+
+`Clash Verge Rev` 基于 Mihomo 内核构建，适合绝大多数拿到机场标准 Clash YAML 订阅链接的 Windows 用户。它的优势在于将「订阅定时更新」「策略组延迟测试」「全局配置覆写（Merge/Script）」以及「虚拟网卡（TUN）服务模式」整合在同一套清晰界面中。
+
+对于需要把 ChatGPT、Gemini、流媒体和国内直连流量拆分开的用户，Clash Verge Rev 可以通过覆写脚本自动给机场订阅追加分流规则，避免每次更新订阅后规则被重置。
+
+### 2. v2rayN（多核心协议万金油）
+
+`v2rayN` 是 Windows 平台历史悠久且持续演进的经典工具，现已扩展支持 Xray、sing-box 等多种核心。相比偏向 YAML 规则驱动的 Clash 系工具，v2rayN 的强项在于：
+
+- **节点链接直导**：直接从剪贴板导入 `vless://`、`vmess://`、`trojan://`、`ss://` 或 `hysteria2://` 节点链接。
+- **核心自由切换**：当机场主要提供 VLESS-Reality 或 Hysteria 2 协议而 Clash 订阅转换偶尔失效时，可直接切换 sing-box 或 Xray 核心运行。
+- **安装包区分**：获取压缩包时需区分「仅主程序」与「含完整核心（With-Core）依赖包」，新手若下载了精简包，启动时会提示缺少核心文件。
+
+### 3. FlClash 与 Clash Nyanpasu（同源 Mihomo 的不同取向）
+
+两者同样以 Mihomo 规则生态为核心，但产品定位有明显区分：
+
+- **FlClash**：强调轻量与跨平台界面一致性，在 Windows 与 Android 之间迁移几乎没有学习成本，适合不需要复杂 JavaScript 覆写脚本的日常用户。
+- **Clash Nyanpasu**：偏向进阶桌面玩家，提供多内核切换管理与配置增强能力，适合需要对比不同 Mihomo 版本稳定性或调试特定内核特性的用户。
+
+### 4. Hiddify 与 Karing（sing-box 生态跨端代表）
+
+`Hiddify` 与 `Karing` 均基于现代通用代理引擎 `sing-box`：
+
+- **Hiddify** 内置对多种订阅格式的自动识别与节点自动优选，界面向导清晰，新手几乎不需要理解 `inbound` 或 `outbound` 概念即可完成连接。
+- **Karing** 同样主打低门槛跨平台配置，如果你同时持有 iPhone/iPad 与 Windows 电脑，希望两边使用相近的规则与订阅导入习惯，Karing 是值得关注的备选。
+
+### 5. Clash Mi 与 Mihomo Party（特殊场景与维护警示）
+
+- **Clash Mi**：定位多平台统一 Mihomo 客户端，界面与配置体系围绕 Clash YAML 展开，适合在多设备间同步配置思路的用户。
+- **Mihomo Party 维护状态重要提示**：部分早期教程或视频常将其列为推荐选项，但根据站内客户端台账的安全审计要求，**在未独立核实其当前项目仓库的近期提交记录、安全补丁响应与发布者签名状态前，不可直接将其作为首选推荐客户端**。若你正在对照历史教程迁移旧配置，建议优先考虑仍保持清晰社区活跃度的 Clash Verge Rev 或 FlClash。
+
+## Windows 系统架构识别与安装前核验
+
+在官方开源发布渠道或项目官方站点获取安装包前，先在本地确认 Windows 系统架构，避免下载错误版本导致无法安装或性能下降。
+
+### 检查 CPU 架构与系统位数
+
+打开 Windows PowerShell，执行以下命令查看处理器架构：
+
+```powershell
+$env:PROCESSOR_ARCHITECTURE
+systeminfo | findstr /B /C:"OS 名称" /C:"OS 版本" /C:"系统类型"
+```
+
+常见返回结果与安装包对应关系如下：
+
+- 返回 `AMD64` 或系统类型为 `x64-based PC`：选择带有 `x64`、`amd64` 或 `win64` 标识的安装包（`.exe` 安装向导或 `.7z`/`.zip` 绿色版）。
+- 返回 `ARM64`：常见于高通骁龙芯片 Windows 笔记本，须严格选择 `arm64` 专属构建包。
+
+### 下载渠道安全与文件校验步骤
+
+由于站内当前对所有客户端的外部真实发布链接均标注为「待核实」，且绝不提供未经签名的第三方打包镜像，请务必遵循以下安全检查流程：
+
+1. **拒绝搜索引擎广告下载站**：切勿从搜索引擎竞价广告或来路不明的中文软件站下载名为「Clash 汉化版」「v2rayN 绿色增强版」的压缩包，这类包常被植入剪贴板劫持木马。
+2. **核对发布者身份与哈希值**：从项目官方发布渠道获取安装包后，在 PowerShell 中计算本地文件的 SHA-256 哈希，并与官方 Release 说明页提供的校验值逐字核对：
+
+```powershell
+Get-FileHash -Path "$HOME\Downloads\installer-package.exe" -Algorithm SHA256
+```
+
+3. **杀毒软件误报处理与边界**：部分开源代理内核因涉及本地网络接口接管（TUN 驱动 `wintun.dll`）可能触发安全软件启发式提示；**前提是你已经核对过 SHA-256 与官方发布者完全一致**，才可将其加入安全软件信任区，切勿对来路不明的包关闭 Defender。
+
+## 首次启动与安全配置建议
+
+完成安装并准备导入机场订阅前，建议先确认三项基础配置，能直接规避 80% 的初期故障：
+
+- **确认机场是否支持第三方订阅**：部分品牌如 [飞猫云](/brands/feimao/)、[隐形人](/brands/yinxingren/)、[SOGO 云](/brands/sogo/) 等在资料中明确标注仅支持专属客户端、不提供通用订阅链接，这类服务无法直接导入 Clash Verge Rev 或 v2rayN。购买前可在 [客户端与订阅对照分析](/compare/dedicated-client-vs-universal-sub/) 中核查。
+- **区分系统代理与 TUN 模式**：日常浏览器访问网页只需开启「系统代理」；若使用命令行工具（Git、npm、curl）、Docker、WSL2 或 UWP 应用无法联网，再按需安装服务模式并开启 TUN。具体原理与 WSL 兼容性回退方法见 [系统代理与 TUN 虚拟网卡深度对比](/guides/articles/tun-vs-system-proxy-dns/)。
+- **避免多客户端同时驻留**：同一台 Windows 电脑切勿同时开启两个代理客户端的系统代理或 TUN 网卡，否则会导致本地 `127.0.0.1` 端口抢占（如 7890 / 7897 / 10808 冲突）或虚拟路由环路。
+
+## 下一步验证与排查
+
+配置完成后，建议按顺序验证：
+
+1. 导入订阅后先查看节点列表数量是否正常，若出现提示成功但无节点，请参考 [订阅导入与 200 OK 空内容排查](/guides/articles/subscription-and-200ok-empty-fix/)。
+2. 对香港、日本、新加坡或美国节点执行一次延迟测试，若全部显示 `Timeout` 且系统时间存在偏差，请按 [节点全超时与时间漂移排查步骤](/guides/articles/time-drift-timeout-troubleshooting/) 定位本地网络与时钟问题。

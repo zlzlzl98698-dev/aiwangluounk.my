@@ -1,0 +1,107 @@
+---
+import { getAffiliateLink } from '../data/links';
+
+interface Props {
+  slug: string;
+  label?: string;
+  contextNote?: string;
+  compact?: boolean;
+}
+
+const { slug, label, contextNote, compact = false } = Astro.props;
+const link = getAffiliateLink(slug);
+---
+
+{link && (
+  <div class={`aff-cta ${compact ? 'aff-cta--compact' : ''}`}>
+    <div class="aff-cta__top">
+      <div>
+        <div class="aff-cta__brand">
+          <strong>{link.brandName}</strong> 推广注册入口
+          {link.linkStatus === 'format_anomaly_unverified' && (
+            <span class="badge badge--vendor">链接格式特殊 · 待核实</span>
+          )}
+        </div>
+        {contextNote && <p class="aff-cta__note">{contextNote}</p>}
+        {link.couponCode && (
+          <p class="aff-cta__coupon">
+            记录优惠码：<code class="mono">{link.couponCode}</code>
+            <span class="aff-cta__coupon-note">（{link.couponNote}）</span>
+          </p>
+        )}
+        {!link.couponCode && (
+          <p class="aff-cta__coupon-note">优惠码状态：{link.couponNote}</p>
+        )}
+      </div>
+      <a
+        href={`/go/${slug}/`}
+        target={link.target}
+        rel={link.rel}
+        class="btn btn-primary aff-cta__btn"
+      >
+        {label ?? `前往 ${link.brandName} 官网注册`}
+      </a>
+    </div>
+    <p class="aff-cta__disclosure">
+      商业关系披露：{link.disclosureText}当前条目为历史收集入口（未在线实时校验可用性），下单前请核对价格与退款条款。
+    </p>
+    {link.urlFormatAnomaly && (
+      <p class="aff-cta__warn">格式提醒：{link.urlFormatAnomaly}。</p>
+    )}
+  </div>
+)}
+
+<style>
+  .aff-cta {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.2rem;
+    margin-block: 1.25rem;
+    box-shadow: var(--shadow-xs);
+  }
+  .aff-cta--compact {
+    padding: 0.85rem 1rem;
+  }
+  .aff-cta__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem 1.25rem;
+  }
+  .aff-cta__brand {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.98rem;
+  }
+  .aff-cta__note {
+    margin: 0.25rem 0;
+    font-size: 0.86rem;
+    color: var(--text-secondary);
+  }
+  .aff-cta__coupon {
+    margin: 0.3rem 0 0;
+    font-size: 0.86rem;
+  }
+  .aff-cta__coupon-note {
+    margin: 0.2rem 0 0;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+  .aff-cta__disclosure {
+    margin: 0.7rem 0 0;
+    padding-top: 0.6rem;
+    border-top: 1px dashed var(--border-hairline);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .aff-cta__warn {
+    margin: 0.35rem 0 0;
+    font-size: 0.78rem;
+    color: var(--status-warn);
+  }
+</style>

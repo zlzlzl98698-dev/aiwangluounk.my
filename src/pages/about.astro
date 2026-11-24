@@ -1,0 +1,98 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { buildBreadcrumbSchema } from '../lib/schema';
+
+const seo = {
+  title: '关于我们与工程研究定位｜网络AI',
+  description: '了解网络AI（aiwangluounk.my）的团队背景、网络工程实验室基准测试环境、三大核心知识系统与拒绝虚假测速的独立运作准则。',
+  pathname: '/about/',
+};
+const schemas = [buildBreadcrumbSchema([{ name: '首页', href: '/' }, { name: '关于我们', href: '/about/' }])];
+---
+
+<BaseLayout seo={seo} schemas={schemas}>
+  <div class="container page-section prose-article">
+    <Breadcrumbs items={[{ name: '首页', href: '/' }, { name: '关于我们', href: '/about/' }]} />
+    <h1>关于网络AI（aiwangluounk.my）</h1>
+    <p>
+      <strong>网络AI</strong> 是一个面向中文技术读者、科研工作者、外贸从业人员及跨境数字游民的<strong>网络代理技术研究型知识库</strong>与<strong>服务提供商标杆数据库</strong>。本站专注于代理底层协议解析、跨平台客户端内核架构、流媒体与人工智能 GeoIP 规则分流，以及基于真实技术边界的品牌客观数据对比。
+    </p>
+
+    <h2>为什么建立这个技术知识库</h2>
+    <p>
+      长期以来，中文代理与翻墙工具生态中充斥着严重的信息污染：大量低质推广站充斥着使用批量换词生成的空洞文章、未标注测试时间与宽带环境的过时跑分截图、以及刻意隐瞒退款限制与流量倍率陷阱的绝对化营销话术。用户在遇到“客户端无法启动”、“DNS 泄漏”、“ChatGPT 403 阻断”或“机场跑路”等突发故障时，极难在搜索引擎中检索到具备工程排查思维且可复现的解决方案。
+    </p>
+    <p>
+      我们建立网络AI 的初衷，就是用<strong>软件工程师与网络协议审计员的严谨标准</strong>，重构一套去伪存真、可被公开审计、严格标注事实边界的静态知识基底，帮助用户告别试错成本。
+    </p>
+
+    <h2>团队工程背景与身份界定</h2>
+    <p>
+      网络AI 由一组长期活跃于开源网络工具社区的资深网络工程师、系统运维人员与分布式计算研究者联合发起与维护。团队具备以下工程技术背景：
+    </p>
+    <ul>
+      <li><strong>路由与传输协议专长</strong>：深入掌握 TCP BBR 拥塞控制、QUIC/HTTP3 传输特性、TLS 1.3 握手与 ALPN 协商、Shadowsocks/VMess/VLESS-Reality 及 Hysteria2/TUIC 新一代 UDP 混淆协议的技术细节与流量指纹特征；</li>
+      <li><strong>开源客户端内核生态贡献</strong>：对 Mihomo（原 Clash.Meta）、sing-box、Xray-core 的配置体系、路由规则集（.mrs / .srs 二进制规则）、DNS 分流逻辑及 TUN 模式网络适配有深入的代码级理解；</li>
+      <li><strong>客观中立与技术驱动</strong>：团队不隶属于任何一家机场服务商、VPN 厂商或代理客户端商业公司，始终坚持技术真相第一的评测立场。</li>
+    </ul>
+
+    <h2>评测实验室基础设施与测试环境规范</h2>
+    <p>
+      为了杜绝脱离实际宽带环境的“真空跑分”，本站所有技术教程排查范例与品牌实测对照，均遵循严格的硬件环境与测试基准流程：
+    </p>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>测试维度</th>
+            <th>测试环境基准</th>
+            <th>技术规格说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>物理骨干宽带</strong></td>
+            <td>三大主流运营商 1000M FTTH</td>
+            <td>包含上海电信（典型国际出口受限网络）、广东移动（大带宽直连网络）与北京联通（北方低延迟出口），覆盖主流网络拓扑。</td>
+          </tr>
+          <tr>
+            <td><strong>边缘路由设备</strong></td>
+            <td>OpenWrt 24.10+ x86 软路由</td>
+            <td>Intel N100 处理器、双 i226-V 2.5G 网卡，运行官方原生固件，排除第三方魔改固件造成的虚拟网卡丢包与性能瓶颈。</td>
+          </tr>
+          <tr>
+            <td><strong>桌面客户端矩阵</strong></td>
+            <td>Windows 11 / macOS Sonoma</td>
+            <td>覆盖 Clash Verge Rev (Mihomo 内核)、v2rayN (Xray 内核)、sing-box 原生客户端及 Surge 5，测试 TUN 虚拟网卡与系统代理稳定性。</td>
+          </tr>
+          <tr>
+            <td><strong>移动客户端矩阵</strong></td>
+            <td>iOS 18 / Android 15</td>
+            <td>覆盖 Shadowrocket、Loon、Stash、FlClash 与 v2rayNG，重点核实后台保活、电池优化豁免及 VpnService 路由兼容性。</td>
+          </tr>
+          <tr>
+            <td><strong>指标测量口径</strong></td>
+            <td>多阶层时延与吞吐实测</td>
+            <td>严格区分 ICMP Ping、TCP 入口握手、TLS RTT 与 HTTP GET 100KB TTFB（首包时间），并以 YouTube 4K 持续缓冲速率为吞吐基准。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>三大核心知识系统</h2>
+    <p>
+      网络AI 的全站架构划分为相互印证、有机联动的核心模块：
+    </p>
+    <ol>
+      <li><strong>教程与排障系统</strong>：涵盖六大系统客户端的详细配置、从零订阅导入、TUN 模式网关分流、DNS 防泄漏方案，以及独创的“连不上/无网络”三阶段故障决策树；</li>
+      <li><strong>品牌评测与比较系统</strong>：收录去重核验后的 31 家唯一品牌，坚持“一实体一权威页”原则，并列呈现品牌官方宣称（Vendor）、历史归档（Historical）与独立实测（Measured）的客观边界；</li>
+      <li><strong>商业决策与避坑体系</strong>：精算月付、年付与不限时流量包的真实单 GB 净价，拆解高倍率计费陷阱，并对仿冒钓鱼站及虚假跑路维权提供风险预警。</li>
+    </ol>
+
+    <h2>用户反馈与勘误渠道</h2>
+    <p>
+      网络技术与服务商网络架构处于持续演进中。如果您在阅读过程中发现任何数据出入、失效链接或需要补充的最新技术变动，欢迎通过 <a href="/contact/">联系与勘误反馈页面</a> 向我们提交工单，技术组将在 72 小时内核验并更新静态构建版本。
+    </p>
+  </div>
+</BaseLayout>

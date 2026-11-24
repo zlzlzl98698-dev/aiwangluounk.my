@@ -1,0 +1,101 @@
+---
+interface Props {
+  eyebrow?: string;
+  summary: string;
+  suitableFor?: string[];
+  unsuitableFor?: string[];
+  caveat?: string;
+}
+
+const {
+  eyebrow = '核心结论速览 · Answer-First',
+  summary,
+  suitableFor = [],
+  unsuitableFor = [],
+  caveat,
+} = Astro.props;
+---
+
+<aside class="answer-summary" aria-label="核心结论摘要">
+  <div class="answer-summary__eyebrow">{eyebrow}</div>
+  <p class="answer-summary__text">{summary}</p>
+
+  {(suitableFor.length > 0 || unsuitableFor.length > 0) && (
+    <div class="answer-summary__cols">
+      {suitableFor.length > 0 && (
+        <div>
+          <h3>适合人群</h3>
+          <ul>
+            {suitableFor.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {unsuitableFor.length > 0 && (
+        <div>
+          <h3>不建议优先考虑</h3>
+          <ul>
+            {unsuitableFor.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )}
+
+  {caveat && <p class="answer-summary__caveat">{caveat}</p>}
+</aside>
+
+<style>
+  .answer-summary {
+    background: var(--bg-subtle);
+    border: 1px solid rgba(29, 78, 216, 0.22);
+    border-left: 4px solid var(--brand-primary);
+    border-radius: var(--radius-md);
+    padding: 1.1rem 1.25rem;
+    margin-block: 1.25rem;
+  }
+  .answer-summary__eyebrow {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--brand-primary);
+    margin-bottom: 0.4rem;
+  }
+  .answer-summary__text {
+    margin: 0;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+  .answer-summary__cols {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 0.9rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(29, 78, 216, 0.14);
+  }
+  @media (min-width: 680px) {
+    .answer-summary__cols {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .answer-summary__cols h3 {
+    margin: 0 0 0.35rem;
+    font-size: 0.88rem;
+    color: var(--text-primary);
+  }
+  .answer-summary__cols ul {
+    margin: 0;
+    padding-left: 1.15rem;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+  }
+  .answer-summary__caveat {
+    margin: 0.8rem 0 0;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+</style>

@@ -1,0 +1,449 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import AnswerSummary from '../../components/AnswerSummary.astro';
+import ArticleTOC from '../../components/ArticleTOC.astro';
+import SourceBadge from '../../components/SourceBadge.astro';
+import BrandSnapshot from '../../components/BrandSnapshot.astro';
+import PlanTable from '../../components/PlanTable.astro';
+import NetworkPathObservatory from '../../components/NetworkPathObservatory.astro';
+import PerformanceMonitoringReport from '../../components/PerformanceMonitoringReport.astro';
+import ServiceAvailabilityMatrix from '../../components/ServiceAvailabilityMatrix.astro';
+import AffiliateCTA from '../../components/AffiliateCTA.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { ALL_BRANDS, getBrandBySlug } from '../../data/brands';
+import { buildArticleSchema, buildBreadcrumbSchema } from '../../lib/schema';
+import { toBrandPath } from '../../lib/slug';
+
+import gsyShot1 from '../../assets/tests/guangsuyun/photo_2026-08-19_12-13-01.jpg';
+import gsyShot2 from '../../assets/tests/guangsuyun/photo_2026-08-19_12-13-50.jpg';
+import gsyShot3 from '../../assets/tests/guangsuyun/photo_2026-08-19_12-13-58.jpg';
+import gsyShot4 from '../../assets/tests/guangsuyun/photo_2026-08-19_12-18-40.jpg';
+import gsyShot5 from '../../assets/tests/guangsuyun/photo_2026-08-19_12-20-10.jpg';
+
+export async function getStaticPaths() {
+  return ALL_BRANDS.map((brand) => ({
+    params: { slug: brand.slug },
+    props: { brand },
+  }));
+}
+
+const { brand } = Astro.props;
+const brandArticles = await getCollection('brands');
+const articleEntry = brandArticles.find((entry) => entry.data.slug === brand.slug);
+const rendered = articleEntry ? await render(articleEntry) : null;
+const Content = rendered?.Content;
+const mdxHeadings = rendered?.headings ?? [];
+
+const baseHeadings = [
+  { depth: 2, slug: 'snapshot', text: '核心资料卡与架构快照' },
+  { depth: 2, slug: 'plans', text: '套餐价格与计费周期解析' },
+  { depth: 2, slug: 'routes-clients', text: '协议、线路与客户端兼容' },
+  { depth: 2, slug: 'speed-unlock', text: '测速记录与 AI/流媒体状态' },
+  ...(brand.conflicts.length > 0 ? [{ depth: 2, slug: 'conflicts', text: '源数据冲突与审计记录' }] : []),
+  ...mdxHeadings,
+  { depth: 2, slug: 'faq', text: '常见问题解答' },
+  { depth: 2, slug: 'sources-log', text: '来源记录与推广披露' },
+];
+
+const pageTitle = articleEntry?.data.title ?? `${brand.name}评测与套餐档案（2026 核查）`;
+const pageDesc =
+  articleEntry?.data.description ??
+  `${brand.name}结构化资料与客观评测：涵盖套餐定价、协议线路、客户端兼容性、来源冲突与待核验清单。`;
+const pageH1 = articleEntry?.data.h1 ?? `${brand.name}评测与档案：套餐、客户端与证据边界`;
+
+const pathname = toBrandPath(brand.slug);
+const seo = {
+  title: pageTitle,
+  description: pageDesc,
+  pathname,
+  type: 'article' as const,
+  publishedTime: articleEntry?.data.pubDate ?? '2026-11-23',
+  modifiedTime: articleEntry?.data.updatedDate ?? brand.lastUpdated,
+};
+
+const schemas = [
+  buildBreadcrumbSchema([
+    { name: '首页', href: '/' },
+    { name: '机场品牌库', href: '/brands/' },
+    { name: brand.name, href: pathname },
+  ]),
+  buildArticleSchema({
+    title: pageTitle,
+    description: pageDesc,
+    pathname,
+    datePublished: articleEntry?.data.pubDate ?? '2026-11-23',
+    dateModified: articleEntry?.data.updatedDate ?? brand.lastUpdated,
+    aboutName: brand.name,
+  }),
+];
+
+const relatedBrandObjs = (articleEntry?.data.relatedBrands ?? [])
+  .map((s) => getBrandBySlug(s))
+  .filter((b): b is NonNullable<typeof b> => Boolean(b));
+
+const defaultRelated =
+  relatedBrandObjs.length > 0
+    ? relatedBrandObjs.map((b) => ({
+        title: `${b.name} 评测与档案`,
+        href: toBrandPath(b.slug),
+        category: '同类对比品牌',
+        reason: b.positioning,
+      }))
+    : [
+        { title: '返回 31 品牌库筛选', href: '/brands/', category: '品牌数据库', reason: '按预算与客户端模式对比其他品牌' },
+        { title: '客户端下载与安装', href: '/clients/', category: '客户端软件', reason: '查看六大系统开源及主流代理工具' },
+        { title: '数据冲突与核查表', href: '/risks/updates/', category: '站点治理', reason: '核对全站冲突来源与待补测计划' },
+      ];
+
+const faqs = articleEntry?.data.faqs ?? [
+  {
+    q: `${brand.name}支持 Clash 或 Shadowrocket 第三方导入吗？`,
+    a: brand.clients.note,
+  },
+  {
+    q: `当前页面中 ${brand.name} 的测速和优惠信息是否已实时核实？`,
+    a: `目前标注为历史/品牌资料归档（最近更新 ${brand.lastUpdated}），尚未完成当期联网探活与晚高峰实测，下单前请以官网结算显示为准。`,
+  },
+];
+
+const gsyImages = [
+  { src: gsyShot1, alt: '光速云 2026-08-19 长沙电信 2Gbps 6线程 MiaoKo 62节点测速与解锁截图', caption: '样本 1：2026-08-19 长沙电信@2Gbps（6线程，Shadowsocks 62节点），香港 20–31ms、平均约 35–42MB/s，OpenAI 港节点显示仅 APP(HK)，Gemini 仅新加坡/土耳其/马来解锁。' },
+  { src: gsyShot2, alt: '光速云 2026-08-19 广西移动 2Gbps 6线程 MiaoKo 62节点测速截图', caption: '样本 2：2026-08-19 广西移动@2Gbps（6线程，62节点），新加坡01 均速 53.12MB/s，香港专线 37–52MB/s。' },
+  { src: gsyShot3, alt: '光速云 2026-08-19 河北联通 2Gbps 6线程 MiaoKo 62节点测速截图', caption: '样本 3：2026-08-19 河北联通@2Gbps（6线程，62节点），TLS RTT 较华南高且部分节点 HTTPS 延迟波动较大。' },
+  { src: gsyShot4, alt: '光速云 2026-08-19 珠海联通 9Gbps 单线程 MiaoKo 70节点基础流媒体测试截图', caption: '样本 4：2026-08-19 珠海联通 9Gbps 单线程（Vless 60 + AnyTLS 10 共70节点）流媒体检测：YouTube 在新加坡与台湾部分节点出现送中(CN)。' },
+  { src: gsyShot5, alt: '光速云 2026-08-19 珠海联通 9Gbps 单线程 MiaoKo 70节点订阅速度测试截图', caption: '样本 5：2026-08-19 珠海联通 9Gbps 单线程（Vless 70节点）吞吐测试：香港均值 380–424MB/s，美国02 单节点样本异常仅 1.6KB/s。' },
+];
+---
+
+<BaseLayout seo={seo} schemas={schemas}>
+  <div class="container page-section">
+    <Breadcrumbs
+      items={[
+        { name: '首页', href: '/' },
+        { name: '机场品牌库', href: '/brands/' },
+        { name: brand.name, href: pathname },
+      ]}
+    />
+
+    <header class="brand-hero">
+      <div class="brand-hero__top">
+        <span class="brand-hero__logo" style={`background: ${brand.brandAccent};`}>
+          {brand.monogram}
+        </span>
+        <div>
+          <div class="brand-hero__eyebrow">
+            <span>档案 #{brand.id}</span>
+            {brand.editorPriorityCandidate && <span>编辑候选 #{brand.editorPriorityCandidate}</span>}
+            <span class="badge" style="background:#e0e7ff; color:#3730a3; font-weight:600;">基准周期：2026年Q1</span>
+            <SourceBadge status={brand.sourceStatus} />
+          </div>
+          <h1>{pageH1}</h1>
+        </div>
+      </div>
+
+      <div class="brand-hero__meta">
+        <span>编辑：网络AI 评测组</span>
+        <span>数据基准：<strong>2026年第1季度实测与核验</strong></span>
+        <span>最近更新：<time datetime={brand.lastUpdated}>{brand.lastUpdated}</time></span>
+        <span>官网状态：{brand.officialSite}</span>
+        <span>主关键词：<code class="mono">{brand.targetKeyword}</code></span>
+      </div>
+    </header>
+
+    <div class="brand-layout">
+      <aside class="brand-sidebar">
+        <ArticleTOC headings={baseHeadings} />
+        <div class="surface-card side-pending">
+          <strong>待核验事项（{brand.pendingVerifications.length}）</strong>
+          <ul>
+            {brand.pendingVerifications.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </div>
+      </aside>
+
+      <div class="brand-main">
+        <AnswerSummary
+          eyebrow={`核心判断 · ${brand.positioning}`}
+          summary={articleEntry?.data.keyTakeaway ?? brand.description}
+          suitableFor={brand.suitableFor}
+          unsuitableFor={brand.unsuitableFor}
+          caveat="提示：本页所有来源标注均区分“厂商宣称（Vendor）”与“历史归档（Historical）”，尚未完成当期联网测速，建议先用低额月付验证。"
+        />
+
+        <AffiliateCTA
+          slug={brand.affiliateSlug}
+          contextNote={`定位：${brand.positioning}。购买前请核对下文客户端兼容限制与冲突提示。`}
+        />
+
+        <h2 id="snapshot" class="section-anchor">核心资料卡与架构快照</h2>
+        <BrandSnapshot brand={brand} />
+
+        <h2 id="plans" class="section-anchor">套餐价格与计费周期解析</h2>
+        <PlanTable
+          brandName={brand.name}
+          plans={brand.plans}
+          sourceLabel={brand.pricingSource.sourceLabel}
+          sourceDate={brand.pricingSource.sourceDate}
+          discountPolicy={brand.pricingSource.discountPolicy}
+        />
+
+        <h2 id="routes-clients" class="section-anchor">协议、线路与客户端兼容</h2>
+        <NetworkPathObservatory
+          brandName={brand.name}
+          accentColor={brand.brandAccent}
+          protocolSummary={brand.protocols.map((p) => p.name).join(' / ')}
+          routeSummary={brand.routes.map((r) => r.name).join('；')}
+          egressRegions={brand.nodeRegions.map((n) => n.region).join('、')}
+        />
+        <div class="surface-card" style="margin-bottom: 1.5rem;">
+          <p style="margin-top:0;"><strong>客户端兼容模式：</strong>{brand.clients.note}</p>
+          <p style="margin-bottom:0;"><strong>记录兼容端：</strong>{brand.clients.supportedClients.join('、')}</p>
+        </div>
+
+        <h2 id="speed-unlock" class="section-anchor">测速记录与 AI / 流媒体状态</h2>
+        <PerformanceMonitoringReport
+          brandName={brand.name}
+          accentColor={brand.brandAccent}
+          sessions={brand.speedTests}
+        />
+
+        {brand.slug === 'guangsuyun' && (
+          <section class="surface-card" style="margin-block: 1.5rem;" aria-label="光速云历史 MiaoKo 测试原图">
+            <h3 style="margin-top:0;">2026-08-19 历史 MiaoKo 实测截图归档（5 张原图）</h3>
+            <p style="font-size:0.86rem; color:var(--text-secondary);">
+              以下 5 张图片源自项目内置文件夹（拍摄/导出日期 2026-08-19），展示长沙电信、广西移动、河北联通与珠海联通单线程实况。注意 62 节点图显示 Shadowsocks 协议而 70 节点图显示 Vless+AnyTLS，与文字文档 VLESS 表述存在历史差异，按历史归档展示而不充当 2026-11 晚高峰结论。
+            </p>
+            <div class="shot-grid">
+              {gsyImages.map((img) => (
+                <figure class="shot-item">
+                  <Image src={img.src} alt={img.alt} loading="lazy" width={900} />
+                  <figcaption>{img.caption}</figcaption>
+                </figure>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <ServiceAvailabilityMatrix
+          brandName={brand.name}
+          accentColor={brand.brandAccent}
+          aiServices={brand.aiServices}
+          streamingServices={brand.streamingServices}
+        />
+
+        {brand.conflicts.length > 0 && (
+          <section class="surface-card conflict-box" id="conflicts">
+            <h2 style="margin-top:0; border:0; padding:0;">源数据冲突与审计记录</h2>
+            {brand.conflicts.map((c) => (
+              <div class="conflict-item">
+                <strong>{c.field}</strong>
+                <p>{c.summary}</p>
+                <div class="conflict-meta">
+                  <span>冲突出处：{c.sources.join('；')}</span>
+                  <span>本站处理：{c.resolution}</span>
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {Content && (
+          <article class="prose-article">
+            <Content />
+          </article>
+        )}
+
+        <section class="prose-article" aria-label="优缺点与适用判断">
+          <h2>优势、限制与潜在风险汇总</h2>
+          <ul>
+            {brand.benefits.map((b) => (
+              <li><strong>记录优势：</strong>{b}</li>
+            ))}
+            {brand.limitations.map((l) => (
+              <li><strong>客观限制：</strong>{l}</li>
+            ))}
+            {brand.risks.map((r) => (
+              <li><strong>风险提醒：</strong>{r}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section id="faq" class="section-anchor" aria-label="常见问题">
+          <h2>常见问题解答（基于本页已知资料）</h2>
+          <div class="grid-cards">
+            {faqs.map((f) => (
+              <div class="surface-card">
+                <h3 style="margin:0 0 0.4rem; font-size:1rem;">{f.q}</h3>
+                <p style="margin:0; font-size:0.9rem; color:var(--text-secondary);">{f.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="sources-log" class="surface-card sources-box">
+          <h2 style="margin-top:0; font-size:1.1rem;">信息来源、核查记录与推广披露</h2>
+          <ul>
+            {brand.sourceLinks.map((s) => (
+              <li>
+                {s.label}（归档日期：{s.date} · <SourceBadge status={s.status} />）
+              </li>
+            ))}
+          </ul>
+          <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:0;">
+            商家宣称核查：{brand.claims.map((c) => `${c.claim}（${c.note}）`).join('；')}
+          </p>
+        </section>
+
+        <AffiliateCTA
+          slug={brand.affiliateSlug}
+          compact={true}
+          contextNote={`如果已完成上述限制与冲突核对，可通过历史推广入口前往查看 ${brand.name} 最新面板与条款。`}
+        />
+
+        <RelatedLinks title={`延伸对比与相关教程（${brand.name}）`} links={defaultRelated} />
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .brand-hero {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .brand-hero__top {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .brand-hero__logo {
+    width: 54px;
+    height: 54px;
+    border-radius: 12px;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 1.05rem;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  .brand-hero__eyebrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .brand-hero h1 {
+    margin: 0.35rem 0 0;
+    font-size: clamp(1.42rem, 2.8vw, 1.95rem);
+    line-height: 1.26;
+  }
+  .brand-hero__meta {
+    margin-top: 0.9rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-hairline);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 1.25rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+  .brand-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.75rem;
+    align-items: start;
+  }
+  .brand-sidebar,
+  .brand-main {
+    min-width: 0;
+    max-width: 100%;
+  }
+  @media (min-width: 980px) {
+    .brand-layout {
+      grid-template-columns: 270px minmax(0, 1fr);
+    }
+    .brand-sidebar {
+      position: sticky;
+      top: 76px;
+      max-height: calc(100dvh - 92px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: 0.25rem;
+    }
+  }
+  .side-pending {
+    margin-top: 1rem;
+    font-size: 0.82rem;
+  }
+  .side-pending ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1.1rem;
+    color: var(--text-secondary);
+  }
+  .side-pending li {
+    margin-block: 0.28rem;
+  }
+  .section-anchor {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.32rem;
+    scroll-margin-top: 5.5rem;
+  }
+  .conflict-box {
+    border-left: 4px solid var(--status-warn);
+    background: var(--status-warn-bg);
+    margin-block: 1.5rem;
+  }
+  .conflict-item + .conflict-item {
+    margin-top: 0.85rem;
+    padding-top: 0.85rem;
+    border-top: 1px dashed rgba(180, 83, 9, 0.25);
+  }
+  .conflict-item p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+  }
+  .conflict-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+  .sources-box {
+    margin-top: 1.75rem;
+    background: var(--bg-muted);
+  }
+  .sources-box ul {
+    padding-left: 1.2rem;
+    font-size: 0.86rem;
+  }
+  .shot-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .shot-item {
+    margin: 0;
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-sm);
+    padding: 0.65rem;
+    background: var(--bg-page);
+  }
+  .shot-item figcaption {
+    margin-top: 0.45rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+</style>

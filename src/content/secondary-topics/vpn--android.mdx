@@ -1,0 +1,238 @@
+---
+pillarId: "vpn"
+slug: "android"
+title: "安卓 VPN 与代理客户端安全选型指南：APK 校验、NekoBox 风险与国产系统保活｜网络AI"
+description: "详述 Android 端 Clash Meta、v2rayNG、sing-box 官方版与 FlClash 选型差异，强调防伪 SHA-256 校验并详解国产系统后台保活技巧。"
+h1: "安卓 VPN 与代理客户端选型、APK 安全校验与国产系统后台防杀全指南"
+intent: "安卓客户端安全选型与实操型"
+targetKeyword: "安卓 VPN 与代理客户端推荐"
+secondaryKeywords:
+  - "Clash Meta for Android 教程"
+  - "v2rayNG 和 sing-box 对比"
+  - "NekoBox Google Play 警告"
+  - "安卓 APK 架构 arm64-v8a 校验"
+  - "MIUI ColorOS OriginOS 后台保活"
+longTailKeywords:
+  - "NekoBox 在 Google Play 为什么不能下载"
+  - "小米澎湃 OS 和 OPPO ColorOS 锁屏断流怎么设置"
+  - "安卓手机开启私人 DNS 后代理分流失效怎么解决"
+  - "支持通用订阅和仅限专属安卓客户端的机场怎么区分"
+  - "安卓分应用代理黑白名单把微信支付宝设为直连"
+entities:
+  - "Clash Meta for Android"
+  - "v2rayNG"
+  - "sing-box"
+  - "NekoBox"
+  - "FlClash"
+  - "Hiddify"
+  - "Karing"
+  - "Clash Mi"
+  - "VpnService"
+  - "MIUI / HyperOS"
+  - "ColorOS"
+  - "OriginOS"
+  - "光速云"
+  - "飞猫云"
+  - "梯子云"
+  - "一翻云"
+keywordBoundary: "聚焦 Android 操作系统下的 VPN 与开源规则代理客户端选型、CPU 架构与 APK 签名哈希校验、NekoBox Google Play 仿冒预警、机场专属端与通用端对照、国产 ROM VpnService 保活及分应用代理；Windows/macOS/iOS 端配置分别归入 /clients/* 与 /guides/install/。"
+answerFirst: "Android 平台没有 iOS 那样的外区商店付费门槛，开源客户端生态极其丰富，但也正因支持侧载安装 APK，成为重打包木马与商店同名仿冒的高发区。日常推荐优先选用 v2rayNG（Xray 核心、极简轻量）、FlClash 或 Clash Meta for Android（Mihomo 核心、完整兼容 YAML 分流规则），以及 Hiddify / Karing（sing-box 核心、自动识别多订阅格式）；使用原生 sing-box 官方客户端 (SFA) 时须留意其不直接兼容 Clash YAML。特别安全警示：站内客户端台账明确记录 NekoBox for Android 维护资源有限，且官方特别警告切勿下载 Google Play 上已被第三方控制的同名应用。购买机场前还需区分纯专属端与通用订阅阵营，安装后配合国产系统电池无限制、多任务加锁、关闭冲突私人 DNS 与分应用绕过，即可解决绝大部分后台断流问题。"
+updatedDate: "2026-11-24"
+ctaHeading: "核对安卓客户端安装步骤与机场兼容名单"
+ctaActions:
+  - label: "Android 安装与架构识别实操"
+    href: "/guides/articles/android-clients-guide/"
+    style: "primary"
+  - label: "专属端 vs 通用订阅机场对照"
+    href: "/compare/dedicated-client-vs-universal-sub/"
+    style: "secondary"
+  - label: "查阅全平台客户端矩阵"
+    href: "/clients/"
+    style: "secondary"
+relatedLinks:
+  - title: "Android 客户端选型与架构指南"
+    href: "/guides/articles/android-clients-guide/"
+    category: "使用教程"
+    reason: "逐步对照 arm64-v8a 识别方法、VpnService 授权流程与基础连通性验证"
+  - title: "手机 VPN 与移动端系统限制"
+    href: "/vpn/mobile/"
+    category: "VPN 与加速器"
+    reason: "对比 Android 与 iOS 在功耗、后台调度、内存限制与购买门槛上的全面差异"
+  - title: "Clash Meta（Mihomo）生态"
+    href: "/clients/clash-meta/"
+    category: "客户端软件"
+    reason: "深入理解 Clash Meta for Android、FlClash 与 Clash Mi 共用的规则体系"
+  - title: "隐私与客户端安全审计边界"
+    href: "/risks/privacy/"
+    category: "风险与替代"
+    reason: "了解闭源专属 APK 权限审查原则与第三方重打包安全防范方法"
+faqs:
+  - q: "安卓手机上 v2rayNG、Clash Meta for Android 和 FlClash 应该优先选哪一个？"
+    a: "取决于机场提供的订阅格式与你的规则需求。如果机场主打通用 Base64 订阅或单节点链接，追求低内存占用与稳健连接，首选 v2rayNG；如果机场下发标准 Clash YAML 配置，且你需要按地区自动测速或把 ChatGPT/Gemini 分流到不同国家节点，选择 Clash Meta for Android 或界面更统一的 FlClash 更合适。"
+  - q: "为什么你们反复警告不要在 Google Play 下载 NekoBox？"
+    a: "根据站内客户端资料库核查记录，NekoBox for Android 官方开源项目目前维护资源有限，且项目资料特别发出安全警告，明确提示 Google Play 上出现的同名 NekoBox 应用已被第三方控制。在商店控制权不明的情况下安装运行，存在广告注入、订阅泄露或恶意流量劫持隐患，因此日常更建议优先选用 v2rayNG、FlClash、Hiddify 或 Karing。"
+  - q: "官网和开源仓库提供 arm64-v8a、armeabi-v7a、x86_64 和 universal 四个 APK，我该下哪个？"
+    a: "近七年来发布的绝大多数主流安卓手机与平板（包括高通骁龙、联发科天玑、华为麒麟主流芯片）均采用 64 位 ARM 架构，直接下载体积更精简且运行效率最高的 arm64-v8a 版本；只有极老旧的 32 位安卓手机或老式低配电视盒才需要 armeabi-v7a；x86_64 主要用于电脑端的安卓模拟器；实在无法确定硬件架构时才用体积较大的 universal 通用包兜底。"
+  - q: "为什么买了一翻云、光速云，用官方版 sing-box for Android (SFA) 导入订阅会失败？"
+    a: "因为 sing-box 官方客户端 (SFA) 原生只读取 JSON 格式的 sing-box 配置文件，并不直接兼容机场面板默认下发的 Clash YAML 订阅。如果你希望使用 sing-box 内核引擎，应当确认机场控制台是否单独提供了 sing-box 订阅入口，或者改用内置多订阅格式自动识别能力的 Hiddify 或 Karing。"
+  - q: "小米、OPPO、vivo 手机一锁屏代理就断线，必须 Root 手机才能解决吗？"
+    a: "完全不需要 Root。所有安卓开源客户端都通过系统原生的 VpnService 接口工作。锁屏断线几乎全部源于 MIUI/HyperOS、ColorOS 或 OriginOS 的激进省电策略杀掉了后台进程。只需依次完成「应用省电策略设为无限制」「开启允许自启动与后台弹出」「在最近任务界面锁定客户端卡片」三步设置，即可维持长期稳定连接。"
+  - q: "打开安卓手机系统的「私人 DNS」后，为什么客户端分流规则会失效或国外网站打不开？"
+    a: "Android 9 及以上系统内置的私人 DNS（基于 DNS-over-TLS）会在系统底层直接加密接管域名解析，绕过本地代理客户端内置的 DNS 监听端口，导致 Mihomo 或 sing-box 无法获取原始域名去匹配分流规则，甚至与 Fake-IP 机制冲突。日常使用代理客户端时，建议在系统网络设置中将私人 DNS 设为关闭或自动，把加密 DNS 解析交给代理客户端内部规则统一处理。"
+  - q: "飞猫云、隐形人、SOGO 云这些机场的安卓端能用 v2rayNG 或 Clash Meta 导入吗？"
+    a: "不能。飞猫云、隐形人、SOGO 云、灵猫网络、闪跃、全球云，以及 2026-10 后转向专属端的 Firefly 和无忧链接（存冲突待核实），均在资料中明确不提供第三方订阅链接，只能安装它们各自发布的专属安卓客户端。只有光速云、梯子云、一翻云、可信云、速界、唯兔云、星岛梦等开放通用订阅的品牌，才支持自由使用开源安卓工具。"
+---
+
+在所有移动与桌面操作系统中，Android 是代理工具自由度最高、开源生态最活跃、同时也是下载链路风险最复杂的平台。不同于 iOS 受限于 App Store 地区审核与 Network Extension 约 50MB 的严格内存天花板，Android 允许用户直接侧载安装来自开源仓库的免费客户端，还原生支持精细的「分应用代理（App Bypass）」，让社交与支付软件在底层完全绕开代理隧道。
+
+但高自由度往往伴随着三类高频踩坑：**第一，下载渠道被投毒或遇到商店李鬼**（典型案例便是官方明确预警的 Google Play 同名 NekoBox 第三方接管风险）；**第二，选错内核与订阅格式**，导致 VLESS-Reality 或 Hysteria 2 节点无法导入；**第三，国产定制安卓系统（MIUI / HyperOS、ColorOS、OriginOS）的激进内存查杀与系统私人 DNS 冲突**，造成锁屏十几分钟即断流或规则失效。本文将结合站内客户端安全台账与 31 家品牌兼容性档案，系统梳理安卓端选型、校验、品牌对照与系统调优全流程。
+
+---
+
+## 一、安卓端核心机制与主流开源客户端全景选型
+
+在安卓系统上，无论是传统三层加密 VPN（如 WireGuard、OpenVPN），还是现代规则代理软件（如 Clash Meta for Android、v2rayNG、sing-box），只要不涉及 Root 透明网关模式，全部都依赖 Android SDK 提供的标准 **`VpnService`** 接口运行。开启连接时，操作系统会创建一个虚拟 TUN 网卡并接管选定应用的 IP 数据包，这也是为什么连接任意代理客户端后，手机顶部状态栏都会统一出现「VPN」小钥匙或标识图标。
+
+需要牢记一条硬性系统约束：**同一时刻 Android 系统仅允许一个应用持有 `VpnService` 控制权**。如果手机上已经开启了公司内网 VPN、抓包调试工具或局部广告拦截 VPN，再启动代理客户端时，系统会强制断开前者并顶替激活后者。
+
+基于站内 [全平台代理客户端数据库](/clients/) 的维护记录，当前 Android 生态的主力开源及主流工具可根据底层引擎划分为三大阵营：
+
+| 客户端名称 | 底层核心引擎 | 原生支持协议范围 | 默认订阅与配置格式 | 定价与开源状态 | 核心定位与选型建议 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Clash Meta for Android** | Mihomo (Clash.Meta) | VLESS-Reality、Hysteria 2、Trojan、SS、VMess | 标准 Clash YAML 订阅 | 免费开源 | 规则分流生态最完整，适合与桌面端共用策略组与覆写规则 |
+| **FlClash** | Mihomo | VLESS-Reality、Hysteria 2、Trojan、SS、VMess | 标准 Clash YAML 订阅 | 免费开源 | 界面现代简洁，跨 Windows/macOS/Android 体验一致 |
+| **Clash Mi** | Mihomo | 同 Mihomo 全系现代协议 | Clash YAML 配置 | 待核实 | 适合希望与 iOS/桌面端保持一致图形操作逻辑的用户 |
+| **v2rayNG** | Xray（及扩展支持） | VLESS-Reality、VMess、Trojan、SS、WireGuard 等 | 节点分享链接、Base64 订阅 | 免费开源 | 经典轻量标杆，内存占用极低，擅长管理单节点链接与快速测延迟 |
+| **sing-box 官方版 (SFA)** | sing-box 原生 | 全系现代协议、原生理顺 UDP 与混合路由 | **仅限原生 sing-box JSON** | 免费开源 | 高性能原生转发，**不直接兼容 Clash YAML**，适合进阶玩家 |
+| **Hiddify** | sing-box | VLESS-Reality、Hysteria 2、Trojan、SS、SSH 等 | Base64 / Clash / sing-box 多格式自动识别 | 免费开源 | 新手友好型全能端，省去手工转换订阅格式的步骤 |
+| **Karing** | sing-box | 多协议全覆盖 | 多格式订阅自动适配 | 待核实 | 向导式规则管理，适合跨 Android 与 iOS 统一操作习惯 |
+| **NekoBox for Android** | sing-box | 多协议与进阶路由定制 | 多格式支持 | 免费开源 | **高风险预警：维护资源有限，严禁下载 Google Play 同名应用** |
+
+### 1. Clash Meta for Android 与 FlClash：Mihomo 规则阵营的主力
+
+由于早期原版 Clash 核心停止演进且无法支持 `VLESS-Reality` 与 `Hysteria 2` 等现代传输协议，当前绝大多数开放通用订阅的机场（例如明确标注 VLESS 的 [光速云](/brands/guangsuyun/)、[梯子云](/brands/tiziyun/)、[可信云](/brands/kexin/)、[速界](/brands/sujie/)，以及支持 Hysteria 2 / VLESS-Reality / SS 三协议切换的 [一翻云](/brands/yifan/)）均需要依赖 **Mihomo（原 Clash Meta）** 或 **sing-box** 生态客户端来完整解析节点。详见 [Clash Meta（Mihomo）生态专题](/clients/clash-meta/)。
+
+- **Clash Meta for Android** 保留了与桌面端高度一致的策略组视图（`select` 手动切换、`url-test` 自动测速、`fallback` 故障转移），适合需要把香港节点留作日常浏览、同时单独把 ChatGPT、Claude 或新加坡区 Gemini 拆进不同策略组的精细化用户。
+- **FlClash** 同样基于 Mihomo 内核，但采用了全新的跨平台统一界面设计。对于在电脑端已经用惯现代卡片交互、希望手机端配置逻辑尽量统一且减少繁琐参数菜单的用户，FlClash 的上手阻力比老牌界面更低。
+
+### 2. v2rayNG：Xray 生态的轻量常青树
+
+如果说 Mihomo 系擅长“整套规则模板托管”，那么基于 Xray 内核的 **v2rayNG** 则是“极简与多节点直管”的代表。对于只提供传统 Base64 通用订阅或零散单节点分享链接的服务，或者内存仅 4GB–6GB 的老旧中低端安卓设备，v2rayNG 的常驻后台体积与待机功耗优势非常明显。
+
+在日常配置中，v2rayNG 不需要面对复杂的 YAML 缩进语法：用户通过「订阅分组设置」填入订阅链接并刷新后，即可直接进行批量真连接测试；随后在设置中将路由模式切换为「绕过局域网及中国大陆地址」，即可兼顾基础的国内直连与海外节点访问。不过，若需要将不同 AI 平台精密拆送到不同国家出口，v2rayNG 的自定义路由规则编写门槛会高于现成的 Clash 规则集。
+
+### 3. sing-box 官方客户端 (SFA) 与 Hiddify / Karing 的分化
+
+很多新手在听说 sing-box 性能优异后，会直接去安装官方出品的 **SFA（sing-box for Android）**，结果将机场后台复制的 Clash 订阅链接贴进去后直接报错解析失败。这里必须划清一条硬性边界：**官方原生 SFA 只读取 sing-box 原生 JSON 格式配置，并不直接兼容 Clash YAML 文件**。关于该引擎的完整跨平台特性，可参阅 [sing-box 生态专题](/clients/sing-box/)。
+
+解决这一格式鸿沟通常有三条路径：
+1. 确认所购机场控制台是否已经单独提供 `sing-box` 专用订阅格式出口；
+2. 改用同样以 sing-box 为核心、但前端内置了多格式订阅自动识别与转换引擎的 **Hiddify** 或 **Karing**；
+3. 由进阶用户自行维护可信的 JSON 配置生成流程后再导入 SFA。
+
+---
+
+## 二、重点安全警告：NekoBox 风险、开源直链校验与 APK 架构识别
+
+Android 开放侧载特性是一把双刃剑。在中文搜索引擎中检索开源客户端名称时，排在前列的往往不是官方开源项目主页，而是各类第三方下载站、网盘搬运贴甚至伪装成“中文官方优化版”的推广站。在站内安全规范与 [隐私和安全边界](/risks/privacy/) 中，安卓端装机必须严守以下三条安全铁律。
+
+### 1. NekoBox for Android 的严正安全预警
+
+在早期 sing-box 生态尚未成熟时，NekoBox for Android 曾是许多极客用户的常用工具。但根据本站 `clients.ts` 客户端台账的明确记录，当前必须向所有安卓用户发出两项事实提示：
+
+- **官方维护资源有限**：原开源项目长期面临维护人力与精力受限的状态，新协议特性跟随与底层漏洞修补的连续性远不如活跃度更高的 `v2rayNG`、`FlClash`、`Hiddify` 与官方 `SFA`。
+- **严禁下载 Google Play 上的同名 NekoBox 应用**：官方资料中特别发出安全警告，明确指出 **Google Play 应用商店上出现的同名 NekoBox 已被第三方控制**。很多习惯直接在 Play 商店搜索下载的海外或外区用户极易误装该同名包，进而将自己的全部节点订阅地址、明文请求或设备信息暴露在不可信第三方控制之下。
+
+基于风险控制最小化原则，除非你确切掌握原开源仓库的发布验证能力，否则**不建议普通用户再继续寻找或安装 NekoBox**，直接迁移至 `v2rayNG`、`FlClash`、`Hiddify` 或 `Karing` 是当前更安全、更省心的选择。
+
+### 2. 拒绝“空链接”与第三方重打包 APK，坚守开源直链校验原则
+
+本站编辑与安全核查准则中有一条刚性规定：**绝不在未联网核验官方最新 Release 路径前，随意把“GitHub”三个字做成虚假跳转链接，也绝不提供来源不明的网盘搬运安装包**。用户在自行前往开源项目官方代码托管仓库或官方应用商店获取安装包时，应逐项完成以下校验：
+
+1. **核对仓库所有者与发布历史**：确认项目仓库拥有持续的源码提交记录、正常的 Issue 讨论与签名发布流程，警惕名称只差一个字母或横杠的李鬼克隆仓库（Typosquatting）。
+2. **比对 SHA-256 校验值**：官方 Release 页面通常会随 `.apk` 文件一同公布 `sha256` 校验字符串。若通过电脑下载后再传到手机，可在 Windows PowerShell 中使用 `Get-FileHash` 或在 Linux/macOS 终端运行 `sha256sum` 核对文件指纹是否与官方页面逐字一致，只要相差一位字符即代表文件已损坏或被第三方重打包（Repack）注入了未知代码。
+3. **警惕过度权限与弹窗索要密码**：一个正常的开源代理客户端只需要基础的网络访问权限、`VpnService` 权限以及可选的相机扫码权限（用于扫描订阅二维码）。如果安装时弹出要求读取通讯录、短信验证码、无障碍全局点击权限或安装时要求输入解压密码并关闭手机安全扫描，请立刻中止安装并删除安装包。
+
+### 3. 四大 APK 文件后缀与 CPU 架构（ABI）快速对照
+
+在官方 Release 页面下载 APK 时，通常会出现多个文件名后缀版本。选错架构轻则提示「应用未安装」，重则无法启动内核或额外浪费存储空间：
+
+- **`arm64-v8a`（绝大多数现代手机首选）**：对应 64 位 ARM 处理器架构。近七年来发布的绝大多数主流安卓手机与平板（高通骁龙、联发科天玑、麒麟、Exynos 芯片）均属于此列，安装包体积精简、运行效率最高。
+- **`armeabi-v7a`（老旧 32 位设备专用）**：仅适用于多年前发布的 32 位入门安卓手机、老式工业手持设备或部分低端 32 位安卓电视盒。
+- **`x86` / `x86_64`（模拟器与少见平板）**：主要用于电脑端运行安卓模拟器（如 WSA、MuMu、雷电等）或极少数基于 Intel 移动处理器的安卓平板。
+- **`universal`（全架构合并包）**：将上述多个架构的底层核心同时打包进一个 APK，体积通常是单一架构版的 2 至 3 倍，仅在完全无法判断老设备 CPU 架构时作为兜底选择。
+
+如果你身边有电脑连接 ADB 或在手机安装了轻量终端，只需运行 `getprop ro.product.cpu.abi` 即可立刻读取本机真实架构字符串，更详细图文步骤见 [Android 客户端安装与架构识别指南](/guides/articles/android-clients-guide/)。
+
+---
+
+## 三、品牌专属安卓端 vs 通用订阅阵营对照（基于 31 家品牌档案）
+
+选定了安卓客户端之后，下一步决定你能否顺利导入订阅的，是机场服务商本身的客户端策略。纵观全站 31 家品牌档案，安卓端接入方式已经明显分化为「纯专属安卓客户端」「双端兼容（自研端 + 通用订阅）」与「传统开放订阅」三类。如果在购买前没看清分类，就会发生“刚买完年付却发现面板里找不到任何 Clash/v2rayNG 订阅按钮”的窘境（深入分析见 [专属端 vs 通用订阅对照](/compare/dedicated-client-vs-universal-sub/)）。
+
+| 接入阵营 | 站内代表品牌档案 | 安卓端实际使用方式 | 核心优势 | 不可忽视的局限与风险 |
+| :--- | :--- | :--- | :--- | :--- |
+| **纯专属客户端阵营**（不提供通用订阅） | [飞猫云](/brands/feimao/)、[隐形人](/brands/yinxingren/)、[SOGO 云](/brands/sogo/)、[灵猫网络](/brands/lingmao/)、[闪跃](/brands/shanyue/)、[全球云](/brands/quanqiu/)、以及 2026-10 起转向专属端的 [Firefly](/brands/firefly/) 与 [无忧链接](/brands/wuyou/)（存冲突待核实） | 必须从官网后台下载安装品牌自研的专属 Android APK，输入账号密码登录即用 | 彻底免去理解订阅链接、YAML 规则与格式转换的门槛，适合完全不想学软件操作的新手 | **无法导入 v2rayNG / FlClash / Clash Meta**；闭源 APK 权限与内部逻辑无法审计；遇局部网站规则不准或节点送中时难以自行编写分流规则；部分旧机型兼容受限于厂商更新节奏 |
+| **双端兼容阵营**（自研端 + 通用订阅） | [光速云](/brands/guangsuyun/)、[梯子云](/brands/tiziyun/)、[极连云](/brands/jilian/)、[光年梯](/brands/guangnian/)、[速界](/brands/sujie/)、[大佬云](/brands/dalaoyun/)、[闪电鼠](/brands/shandianshu/)、[云界线](/brands/yunjiexian/)、[榴莲云](/brands/liulianyun/)、[环球梯](/brands/huanqiuti/)、[神行加速](/brands/shenxing/) | 既可先装自研安卓端快速上手，也可随时在面板复制链接导入 Clash Meta / v2rayNG / Hiddify | 兼顾零门槛过渡与长期高自由度；发现自研端耗电或分流太粗糙时，可无缝迁移到开源客户端 | 需注意部分 ¥5.6 档种子品牌（如榴莲云未明确协议、云界线/环球梯链接格式异常）本身资料缺口较大，接入前宜先核实协议 |
+| **标准通用订阅或兼容型** | [一翻云](/brands/yifan/)、[可信云](/brands/kexin/)、[星岛梦](/brands/xingdaomeng/)、[唯兔云](/brands/weitu/)、[二猫云](/brands/ermao/)（配备定制端，通用订阅待核实）、[微风网络](/brands/weifeng/)（待核实） | 通过开源客户端（Clash Meta / FlClash / v2rayNG / Hiddify）导入订阅使用 | 如一翻云支持 Hy2 / VLESS-Reality / SS 三协议切换，可在弱网下用 Hiddify 或 Clash Meta 发挥极强抗丢包优势 | 对纯新手存在最初 10 分钟的学习曲线；若订阅被 UA 拦截返回空白，需在客户端调整请求 User-Agent |
+
+**安卓端品牌挑选实战提示**：
+- 如果你追求“先求稳、不被封闭客户端锁死”，优先考虑明确支持第三方通用订阅且协议清晰的品牌（例如同时支持 Hy2/VLESS-Reality/SS 的 [一翻云](/brands/yifan/)，或兼顾双端且历史资料较完整的 [光速云](/brands/guangsuyun/)、支持 VLESS 的 [梯子云](/brands/tiziyun/)）。
+- 如果只是给完全不懂网络技术的家里长辈手机使用，且明确只需单机一键开关，可以考虑专属端品牌（如 [飞猫云](/brands/feimao/)）或双端品牌提供的自研 App，但**切勿在存有重要网银、工作机密或主力社交账号的设备上安装来源未明或权限索要过宽的闭源 APK**。
+- 无论选择哪个品牌，导入通用订阅时如果遇到「HTTP 200 OK 但节点数量为 0」或拉取失败，切勿反复重装软件，先参照 [订阅更新失败与 200 OK 空内容排查](/guides/articles/subscription-and-200ok-empty-fix/) 核对客户端 `User-Agent` 或通过可用节点代理更新。
+
+---
+
+## 四、国产定制 ROM（MIUI/HyperOS、ColorOS、OriginOS）保活、私有 DNS 冲突与分应用代理
+
+把客户端装好并成功连上节点，只是安卓配置的完成一半。许多用户都会遇到同一类诡异现象：**亮屏测试一切正常，把手机放进口袋锁屏 15 分钟后再拿出来，顶部 VPN 图标还在或者已经消失，外网全部转圈超时，或者微信消息突然延迟几十秒才收到**。这背后的根源，几乎全部落在国产 ROM 的后台调度、系统私有 DNS 抢占以及未启用分应用绕过三大机制上。
+
+### 1. 国产 ROM 的 `VpnService` 后台防杀设置
+
+为了追求极限待机续航，国产手机系统会对长时间维持网络长连接与高频内存唤醒的后台服务实施严格冻结或强杀。虽然 `VpnService` 具备一定的前台服务通知优先级，但在锁屏进入深度睡眠（Doze 模式）或触发系统一键清理后仍极易被终止。针对三大主流国产系统（以及同类调度逻辑的 HarmonyOS），推荐按以下标准完成「保活四件套」：
+
+- **小米 MIUI / 澎湃 HyperOS**：
+  1. 长按客户端图标进入「应用信息」→「省电策略」，从默认的「智能限制」或「MIUI 省电优化」改为 **「无限制」**。
+  2. 在同一应用信息页打开 **「自启动」** 开关，防止切换网络或内存回收后服务无法自动拉起。
+  3. 从屏幕底部上滑进入「最近任务」卡片视图，长按代理客户端卡片并点击小锁图标进行 **「后台锁定」**。
+  4. 进入「电池」设置中关闭“锁屏后断开数据/清理内存”类的自动定时清理策略。
+- **OPPO / 一加 ColorOS（含 Realme UI）**：
+  1. 进入「应用信息」→「耗电管理」，同时开启 **「允许完全后台行为」** 与 **「允许应用自启动」**（部分版本在「应用后台管理」中体现为允许后台运行与关联启动）。
+  2. 避免开启系统全局「超级省电模式」，该模式会直接切断非白名单的第三方后台网络扩展。
+  3. 在多任务界面点击客户端卡片右上角菜单选择 **「锁定」**，同时在状态栏权限管理中允许其显示常驻通知（防止通知栏被折叠清理连带降权）。
+- **vivo / iQOO OriginOS**：
+  1. 进入「设置」→「应用」→「应用管理」→ 选择对应客户端 →「电池/耗电管理」，将后台耗电管理调整为 **「允许后台高耗电」**（仅勾选普通允许后台往往不足以防止锁屏深睡断流）。
+  2. 在「权限管理」或 i 管家 →「应用管理」→「自启动」中开启对应客户端的自启动权限。
+  3. 在系统后台多任务界面下拉应用卡片完成 **「加锁」**。
+
+完成上述设置后，在代理客户端内部设置中开启「常驻通知栏显示流量/状态」并启用「网络变化自动重连」（若客户端提供该选项），可以大幅改善从家里 Wi-Fi 出门切换到 5G 移动数据时的短时断流。若切换网络后节点持续全部报错超时，请检查设备是否开启了自动网络时间同步，详见 [时间漂移与节点超时排查指南](/guides/articles/time-drift-timeout-troubleshooting/)。
+
+### 2. 安卓「私人 DNS（DoT）」与本地代理 DNS 冲突排查
+
+Android 9 及以上版本在「网络和互联网 / 更多连接设置」中普遍内置了 **「私人 DNS（Private DNS）」** 功能，使用基于 TLS 的加密域名解析（DNS-over-TLS，简称 DoT）。在直连网络下，开启私人 DNS（例如填入公共 DoT 服务器地址）可以防止运营商明文劫持；但**一旦你同时开启了 Clash Meta、FlClash、Hiddify 或 v2rayNG 等本地代理客户端，系统的私人 DNS 往往会变成导致网络打不开的罪魁祸首**。
+
+冲突原因在于解析路径绕过与 Fake-IP 冲突：
+- 当系统私人 DNS 处于手动指定模式时，系统网络框架会试图绕过 `VpnService` 捕获的常规 53 端口 DNS 请求，直接向外建立 DoT 连接；一方面海外 DoT 服务器在未走代理前直连极易超时，另一方面代理客户端因为没拦截到域名查询请求，**看不到目标域名本身，从而无法触发基于域名的 `DOMAIN` / `RULE-SET` 分流规则**。
+- 如果客户端同时启用了 **Fake-IP（返回 `198.18.0.0/16` 保留地址）**，而系统底层却同时保留着私人 DNS 缓存的真实 IP 或被拦截的解析结果，浏览器就会出现反复转圈、海外站点与国内站点同时打不开的假死状态（更多机理见 [DNS 错误排查专题](/troubleshooting/dns/) 与 [TUN 与系统代理 DNS 解析指南](/guides/articles/tun-vs-system-proxy-dns/)）。
+
+**标准解决操作**：使用手机代理客户端期间，进入手机「设置」→「更多连接 / 网络和互联网」→「私人 DNS」，将其切换为 **「关闭」**（或确认「自动」模式下未强制劫持到不可达上游），让国内直连域名（如阿里/腾讯 DoH）与海外代理域名（经代理隧道远端安全解析）完全交由客户端内部的规则引擎统一调度。
+
+### 3. 分应用代理（App Bypass / 黑白名单）：安卓独有的省流防风控利器
+
+相比桌面端与 iOS 端主要依靠域名和 IP 规则库分流，Android 系统的 `VpnService` 允许软件在发起隧道接管时，直接通过 `addDisallowedApplication` 或 `addAllowedApplication` API 按**应用包名（App Package）**决定流量是否进入代理隧道。这是移动端降低发热、节省宝贵流量配额以及避免国内服务误触发异地登录风控的最有效手段：
+
+- **白名单模式（仅允许列表内应用走代理）**：只勾选需要跨境访问的工具，例如 Chrome / Firefox 浏览器、ChatGPT、Claude、Google Play、GitHub 客户端、流媒体 App 等。其余手机上百款国产应用（微信、支付宝、手机银行、淘宝、抖音、高德地图、外卖软件及系统升级服务）全部在操作系统最底层**彻底物理绕过虚拟网卡**，不经过任何正则匹配与加密开销，延迟零增加、网银风控零触发、也不会在后台偷跑你的机场月度或一次性流量包。
+- **黑名单模式（绕过列表内应用，其余全走代理）**：适合日常高频使用大量冷门海外 App、不想每装一个新海外应用就手动勾选一次的用户。只需把微信、支付宝、各家银行客户端、国内视频/音乐 App（如 B站、网易云、腾讯视频，否则大量音视频缓存可能耗尽 40–60GB 小包配额）、外卖出行和局域网智能家居 App 加入绕过名单，剩余海外 App 自动按配置文件内的 `RULE-SET` 规则分流。
+- **常见误区提示**：如果在分应用代理中把某款浏览器设为绕过，却又想在这个浏览器里访问海外页面，肯定无法连通；此外，部分国内软件内置了调用海外 CDN 的组件，若被设为绕过且本地无法直连则会加载失败，此时只需将其移出绕过名单，交由客户端内部的国内外规则自动判断即可。
+
+---
+
+## 五、安卓端日常配置与避坑核查五步清单
+
+在安卓手机或平板上完成从软件选型到稳定日常使用的闭环，可遵循以下五步核查标准：
+
+1. **先确认机场支持形式**：检查所选品牌是否开放第三方通用订阅（或按需求选择双端兼容品牌），避开误买纯专属端却想导进 `Clash Meta` 或 `v2rayNG` 的窘境。
+2. **仅从可信官方开源仓库校验下载**：坚决避开 Google Play 同名 `NekoBox` 与搜索引擎不明重打包 APK；匹配手机 `arm64-v8a` 架构并核查 SHA-256 哈希指纹与权限清单。
+3. **匹配正确的客户端与订阅格式**：Xray/Base64 轻量链路选 `v2rayNG`；Clash YAML 精细 AI/流媒体分流选 `Clash Meta for Android` 或 `FlClash`；多格式懒人自动适配选 `Hiddify` / `Karing`；使用官方 `SFA` 前先确认机场提供原生 `sing-box JSON` 订阅。
+4. **落地系统保活与关闭私人 DNS**：完成电池「无限制/允许高耗电」、允许自启动与多任务加锁，并将系统「私人 DNS」设为关闭，避免与代理核心 DNS 接管打架。
+5. **启用分应用代理并做好月付验证**：把国内即时通讯、网银与大流量影音 App 加入绕过名单，首次测试新机场优先选用低风险月付档在晚高峰验证连通率与延迟表现（参考 [月付机场试错清单](/pricing/monthly/) 与 [稳定机场晚高峰测试逻辑](/recommend/stable/)），确认无误后再考虑长期规划。

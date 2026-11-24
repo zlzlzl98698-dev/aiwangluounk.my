@@ -1,0 +1,136 @@
+---
+slug: "ios-macos-clients-guide"
+title: "iOS/iPadOS 与 macOS 苹果生态代理客户端选型指南：外区付费应用与架构差异"
+description: "全面梳理苹果生态 Shadowrocket、Stash、Quantumult X、Surge 5/Surge Mac 的付费区提示，以及 Karing、Clash Mi、Hiddify、Clash Verge Rev 在 Apple Silicon 与 Intel Mac 上的架构选型。"
+h1: "iOS/iPadOS 与 macOS 代理客户端全攻略：外区付费提示与芯片架构对照"
+pillar: "clients"
+categoryLabel: "Apple 生态客户端"
+targetKeyword: "iOS macOS 代理客户端推荐"
+secondaryKeywords:
+  - "Shadowrocket 小火箭"
+  - "Stash Quantumult X Surge"
+  - "Apple Silicon vs Intel"
+  - "Karing Clash Mi"
+appliesTo: "iOS / iPadOS 15+ 与 macOS (Apple Silicon M 系列 / Intel)"
+prerequisites:
+  - "iPhone/iPad 下载外区 App Store 应用需准备对应地区（如美区）Apple ID"
+  - "购入付费客户端前务必通过所在区 App Store 实时核实当前售价"
+  - "确认 Mac 设备的处理器类型（Apple Silicon 或 Intel）"
+pubDate: "2026-11-23"
+updatedDate: "2026-11-23"
+answerSummary: "iOS 与 iPadOS 端由于系统沙盒限制，正规第三方代理工具几乎全部依赖外区 App Store 分发：付费买断阵营以 Shadowrocket（泛用性高）、Stash（Clash 规则原生兼容）、Quantumult X（脚本与重写强）和 Surge（专业抓包调试）为主，均需在美区等外区核实实时售价后购买；免费或跨端入门可选 Karing、Clash Mi、Hiddify 或官方 SFI。macOS 端桌面首选 Clash Verge Rev 或 v2rayN，下载时务必严格区分 Apple Silicon（arm64）与 Intel（x86_64）安装包。"
+faqs:
+  - q: "Shadowrocket、Stash 和 Quantumult X 应该买哪一个？"
+    a: "如果预算有限且追求极高兼容度，选 Shadowrocket（小火箭），几乎所有支持第三方订阅的机场都直接适配；如果你习惯 Clash YAML 的策略组与规则文件体系，选 Stash 可直接复用电脑端配置；如果你喜欢折腾 HTTP 请求重写与去广告脚本，选 Quantumult X，但需留意机场仅提供 Clash 格式时导入常需额外规则转换。"
+  - q: "国区 App Store 搜不到这些应用怎么办？"
+    a: "由于上架地区政策限制，Shadowrocket、Stash、Quantumult X、Surge 等均不在中国大陆区 App Store 供应。需要切换至美区、港区或日区等外区 Apple ID 登录 App Store 下载，切勿使用来路不明的共享账号登录 iCloud 设置（仅可在 App Store 内登录），以免锁机风险。"
+  - q: "Mac 装 Clash Verge Rev 怎么选 arm64 和 x64？"
+    a: "2020 年底之后搭载 M1/M2/M3/M4 系列芯片的 Mac（Apple Silicon）必须选 arm64 或 aarch64 版本；早期搭载 Intel 处理器的老款 Mac 选 x64（或 x86_64）。虽然 Rosetta 2 可以转译部分 Intel 应用，但网络代理核心与 TUN 虚拟网卡涉及系统底层扩展，强烈建议安装原生对应架构包。"
+relatedLinks:
+  - title: "Shadowrocket 专题参考"
+    href: "/clients/shadowrocket/"
+    note: "查看苹果端规则代理核心特性与定价提示"
+  - title: "Clash Verge Rev 专题参考"
+    href: "/clients/clash-verge-rev/"
+    note: "macOS 桌面端配置与 TUN 模式说明"
+  - title: "订阅导入与 UA 拦截排查"
+    href: "/guides/articles/subscription-and-200ok-empty-fix/"
+    note: "解决苹果端导入订阅失败或返回空白配置问题"
+  - title: "专属客户端 vs 通用订阅对比"
+    href: "/compare/dedicated-client-vs-universal-sub/"
+    note: "确认部分机场为何不提供小火箭订阅链接"
+---
+
+## 苹果生态客户端分布全景
+
+与 Windows 和 Android 允许自由安装安装包不同，iOS 与 iPadOS 对网络扩展（`NetworkExtension`）实行严格的 App Store 签名管控；而 macOS 虽允许独立安装 `.dmg` 应用，但也存在 **Apple Silicon（M 系列芯片）** 与 **Intel 芯片** 两套硬件架构分化。
+
+| 客户端名称 | 覆盖苹果平台 | 定价与分发渠道 | 规则/协议特点 | 选型定位与注意事项 |
+| :--- | :--- | :--- | :--- | :--- |
+| **Shadowrocket（小火箭）** | iOS / iPadOS | 外区 App Store 付费买断 | 支持 SS/VMess/VLESS/Trojan/Hy2 等多种协议 | 通用性最强，新手与多协议机场首选 |
+| **Stash** | iOS / iPadOS | 外区 App Store 付费买断 | Clash 规则兼容引擎，支持配置覆写 | 适合桌面已习惯 Clash YAML 体系的用户 |
+| **Quantumult X（圈 X）** | iOS / iPadOS | 外区 App Store 付费买断 | 自定义规则、HTTP 请求重写与脚本引擎 | 进阶玩家专用，纯 Clash 订阅导入前常需规则适配 |
+| **Surge 5 / Surge Mac** | iOS / iPadOS / macOS | 外区商店免费下载 + 内购/授权 | 精细抓包、模块覆写与企业级调试 | 价格门槛较高，适合重度网络开发者 |
+| **Karing** | iOS / iPadOS / macOS | App Store 分发（桌面另有发布） | 基于 sing-box，跨平台统一配置 | 新手友好，支持多种订阅格式自动识别 |
+| **Clash Mi** | iOS / iPadOS / macOS | App Store 分发（桌面另有发布） | 基于 Mihomo，规则体系一致 | 适合轻量使用 Clash 配置的苹果多端用户 |
+| **Hiddify** | iOS / iPadOS / macOS | App Store 与官方跨端发布 | 基于 sing-box，自动识别订阅与选点 | 界面简洁，跨全平台体验一致 |
+| **SFI / SFM** | iOS / iPadOS / macOS | App Store 与官方文档渠道 | 原生 sing-box JSON 配置 | 高性能但学习曲线陡峭，不兼容 Clash YAML |
+| **Clash Verge Rev / v2rayN / FlClash** | macOS | 官方桌面 `.dmg` 安装包 | Mihomo / Xray / sing-box | macOS 桌面端主力，须区分 M 芯片与 Intel |
+
+## iOS / iPadOS 端选型详解与外区付费提示
+
+### 1. 外区付费应用：买断制与商店核实原则
+
+`Shadowrocket`、`Stash`、`Quantumult X` 与 `Surge` 在美区、港区等外区 App Store 上架。站内遵循严格的价格实效原则：**不固定写死历史美元价格**，应用实际售价、买断范围及内购档位请以你登录所在地区 App Store 商店页实时显示为准。
+
+选购建议按需求直接对号入座：
+
+- **Shadowrocket（小火箭）**：国内机场教程覆盖率最高的 iOS 工具。几乎所有支持第三方订阅的品牌（如 [光速云](/brands/guangsuyun/)、[一翻云](/brands/yifan/)、[极连云](/brands/jilian/) 等）都会在后台直接提供「一键导入 Shadowrocket」按钮。如果只是稳定连接、切换节点、看流媒体与用 AI 工具，小火箭最省心。
+- **Stash**：内核完整兼容 Clash 规则语法（YAML），支持直接导入机场的 Clash 订阅地址并使用远程规则集（Rule Providers）和配置覆写（Overrides）。如果你在电脑上已经写好了 Clash Verge Rev 分流模板，手机端买 Stash 可以几乎原样迁移。
+- **Quantumult X（圈 X）**：强项在于 MITM（中间人解密）、HTTP 请求重写和自定义 JS 脚本（如去广告、签到、精细策略控制）。但要注意：**若机场后台仅提供 Clash 格式订阅，直接粘贴到圈 X 通常无法识别策略组，必须通过带规则适配的转换逻辑或分流模板进行转换**，新手上手时间明显长于小火箭。
+- **Surge 5 / Surge Mac**：定位专业网络工具与开发者调试器，包含深度的请求抓包、Ponte 组网和模块覆写能力，采用软件内购或独立授权订阅制，投入成本远高于前三者，非重度抓包或远程调试需求不必盲目跟风购入。
+
+### 2. 免费/跨端与开源生态备选：Karing、Clash Mi、Hiddify 与 SFI
+
+如果你暂时不打算购买外区付费应用，或希望 iPhone 与 Windows/Android 使用完全一致的界面逻辑：
+
+- **Karing / Clash Mi / Hiddify**：均在合规外区 App Store 提供了移动客户端，无需复杂付费门槛即可导入主流机场订阅，其中 Hiddify 与 Karing 基于 sing-box 内核，Clash Mi 基于 Mihomo 内核。
+- **SFI (sing-box for iOS)**：官方原生客户端，性能优异、内存占用低，但只读取原生 JSON 配置文件。如果机场没有现成的 sing-box 订阅出口，普通用户折腾配置会比较吃力。
+
+### 3. 苹果账号安全操作守则（重要）
+
+使用外区 Apple ID 下载代理软件时，有一条铁律务必遵守：
+
+- **只在「App Store」内切换账号，绝对不要在手机「系统设置顶部」退出或登录他人的 iCloud 账号！**
+- 从不明渠道借用或购买的共享 Apple ID 一旦在系统设置中登录 iCloud，对方可能通过「查找我的 iPhone」远程锁定设备；即使在 App Store 单独登录，也建议尽量自己注册专属外区 Apple ID 并通过正规礼品卡充值购买付费软件，避免后续应用更新时弹窗索要他人密码。
+
+## macOS 桌面端：Apple Silicon vs Intel 架构辨析
+
+macOS 环境下既可以从 App Store 安装 `Karing`、`Clash Mi`、`Hiddify`、`SFM` 或 `Surge Mac`，也可以像桌面开发者一样安装开源的 `Clash Verge Rev`、`v2rayN`、`FlClash` 或 `Clash Nyanpasu`。
+
+### 如何查看 Mac 芯片架构
+
+点击屏幕左上角苹果图标 —「关于本机」，查看「芯片」或「处理器」一栏：
+
+- 显示 **Apple M1 / M2 / M3 / M4**（含 Pro / Max / Ultra）：属于 **Apple Silicon** 架构，下载安装包时必须选后缀包含 `aarch64` 或 `arm64` 的版本。
+- 显示 **Intel Core i5 / i7 / i9**：属于 **Intel x64** 架构，下载安装包时选择 `x64` 或 `x86_64` 版本。
+
+也可以使用 macOS 终端一条命令确认：
+
+```bash
+uname -m
+```
+
+- 输出 `arm64`：对应 Apple Silicon 安装包。
+- 输出 `x86_64`：对应 Intel 安装包。
+
+### macOS 初次打开未签名应用的权限放行
+
+部分开源桌面客户端（如跨平台构建测试版）在首次打开时，macOS Gatekeeper 可能会提示「无法打开，因为无法验证开发者」或「已损坏，无法打开」。
+
+在**确认安装包来自官方发布渠道并完成校验**的前提下，可通过以下方式安全放行（切勿盲目彻底关闭系统 SIP）：
+
+1. 打开「系统设置」—「隐私与安全性」，向下滚动找到被拦截的应用提示，点击「仍要打开」。
+2. 若出现「已损坏」提示，通常是因为下载文件被标记了隔离属性（Quarantine）。先核对 SHA-256 哈希确保文件完整且来源可信，再执行：
+
+```bash
+shasum -a 256 ~/Downloads/YourClient.dmg
+# 核对哈希无误并拖入 /Applications 后，仅针对该单应用移除隔离标记：
+xattr -cr /Applications/YourClient.app
+```
+
+## 苹果设备系统代理与增强模式（TUN）说明
+
+- **iOS/iPadOS**：通过 `NetworkExtension` 运行时即工作在全局虚拟网卡模式下，所有 App（包括命令行工具与第三方客户端）都会经过分流引擎。需注意在路由器上同时开启全局代理时，手机不要重复开启小火箭，否则会出现双层代理延迟翻倍或无法解析局域网域名。
+- **macOS**：默认仅开启「系统代理」（只接管浏览器和读取系统环境变量的 GUI 应用）。如果你在 Mac 终端使用 `brew`、`git`、`curl`、`claude-code` 或 Docker 拉取镜像发现依然直连超时，可在 Clash Verge Rev 等客户端内开启 **TUN 模式**（首次启用需输入开机密码授权安装虚拟网卡助手），或者在终端临时导出代理环境变量：
+
+```bash
+export https_proxy=http://127.0.0.1:7897 http_proxy=http://127.0.0.1:7897 all_proxy=socks5://127.0.0.1:7897
+```
+
+（端口号请以客户端设置面板中实际显示的混合端口或 HTTP/SOCKS5 端口为准，勿直接照抄 `7897`。）
+
+## 下一步配置与故障自检
+
+- 若机场订阅导入 Shadowrocket 或 Stash 后显示为空或报错 `200 OK`，请参阅 [订阅导入与 200 OK 空内容排查](/guides/articles/subscription-and-200ok-empty-fix/)。
+- 若启用 Mac TUN 模式后遇到本地局域网地址或 Docker 容器访问异常，请参阅 [系统代理与 TUN 虚拟网卡、DNS 与安全回退指南](/guides/articles/tun-vs-system-proxy-dns/)。

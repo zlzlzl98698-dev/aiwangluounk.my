@@ -1,0 +1,479 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BrandCard from '../components/BrandCard.astro';
+import { ALL_BRANDS, getPriorityBrands } from '../data/brands';
+import { NAV_PILLARS } from '../data/navigation';
+import { buildWebSiteSchema, buildOrganizationSchema } from '../lib/schema';
+import { toBrandPath, toGuidePath, toComparePath } from '../lib/slug';
+
+const priorityBrands = getPriorityBrands().slice(0, 6);
+const guides = await getCollection('guides');
+const comparisons = await getCollection('comparisons');
+
+const seo = {
+  title: '网络AI｜中文网络服务与代理工具知识库、31 家机场品牌评测数据库',
+  description:
+    '网络AI（aiwangluounk.my）提供 31 家机场品牌结构化评测数据库、第三方代理客户端全平台指南、协议线路解析与客观购买决策参考，严格区分厂商宣称、历史档案与独立实测。',
+  pathname: '/',
+  type: 'website' as const,
+};
+
+const featuredGuides = [
+  ...guides.slice(0, 5).map((g) => ({
+    title: g.data.h1,
+    href: toGuidePath(g.data.slug),
+    tag: g.data.categoryLabel,
+    summary: g.data.answerSummary,
+    date: g.data.updatedDate,
+  })),
+  ...comparisons.slice(0, 3).map((c) => ({
+    title: c.data.h1,
+    href: toComparePath(c.data.slug),
+    tag: '横向对比评测',
+    summary: c.data.answerSummary,
+    date: c.data.updatedDate,
+  })),
+];
+---
+
+<BaseLayout seo={seo} schemas={[buildWebSiteSchema(), buildOrganizationSchema()]}>
+  <section class="hero">
+    <div class="container hero__grid">
+      <div class="hero__copy">
+        <div class="hero__eyebrow mono">AIWANGLUOUNK.MY · 研究型中文网络服务资料库</div>
+        <h1>看清线路、价格与证据边界，再做代理与机场选择</h1>
+        <p class="hero__desc">
+          收录 <strong>{ALL_BRANDS.length} 家唯一机场品牌</strong> 档案与六大系统开源客户端指南，坚持把「厂商宣称」「历史数据」与「独立实测」清楚拆开，不造假速度榜单，不隐藏来源冲突。
+        </p>
+
+        <div class="hero__search">
+          <button type="button" id="hero-search-trigger" class="hero-search-btn">
+            <span>检索全站品牌、客户端教程与故障排查（如：光速云、TUN、200 OK）</span>
+            <strong class="mono">搜索</strong>
+          </button>
+        </div>
+
+        <div class="hero__quick" aria-label="快捷主题入口">
+          <a href="/brands/" class="quick-pill">31 家品牌数据库</a>
+          <a href="/brands/guangsuyun/" class="quick-pill">光速云基准评测</a>
+          <a href="/pricing/monthly/" class="quick-pill">月付试错清单</a>
+          <a href="/pricing/non-expiring/" class="quick-pill">不限时流量包</a>
+          <a href="/clients/" class="quick-pill">六平台客户端</a>
+          <a href="/troubleshooting/subscription-failed/" class="quick-pill">订阅失败排障</a>
+        </div>
+      </div>
+
+      <aside class="hero__visual obs-panel" aria-label="全站数据审计状态概览">
+        <div class="obs-panel__head">
+          <div>
+            <div class="obs-panel__eyebrow">DATABASE AUDIT · 2026-11-23</div>
+            <h2 class="obs-panel__title">全库信息完整度与证据状态</h2>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="obs-subcard">
+            <span class="mono">31</span>
+            <small>唯一品牌实体（已合并重复 Firefly）</small>
+          </div>
+          <div class="obs-subcard">
+            <span class="mono">10 + 60</span>
+            <small>一级专题与二级落地页全连通</small>
+          </div>
+          <div class="obs-subcard">
+            <span class="mono">6 大平台</span>
+            <small>Win / Android / iOS / Mac / Linux / OpenWrt</small>
+          </div>
+          <div class="obs-subcard">
+            <span class="mono">0 编造</span>
+            <small>未核实与冲突字段全部亮灯标注</small>
+          </div>
+        </div>
+        <p class="obs-note">
+          编辑原则：站内编辑顺位（光速云等前 11 候选）仅代表资料核查与编辑优先级，绝不冒充统一环境晚高峰性能排行榜。
+        </p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2>最近更新的深度评测与实操教程</h2>
+          <p class="section-subtitle">精选原创指南、横向对比与故障排查文章，先给结论后展开证据步骤</p>
+        </div>
+        <a href="/guides/" class="btn btn-secondary">全部教程入口</a>
+      </div>
+
+      <div class="grid-cards grid-cards--3">
+        <article class="surface-card article-card article-card--featured">
+          <span class="article-card__tag">旗舰基准评测</span>
+          <h3><a href="/brands/guangsuyun/">光速云深度评测：套餐、59/69GB 冲突与 08-19 实测截图拆解</a></h3>
+          <p>完整整合 7 档套餐、2026-08-19 五张 MiaoKo 三网测速与流媒体截图，以及香港节点 ChatGPT 仅限 App 的实测观察。</p>
+          <div class="article-card__meta mono">更新：2026-11-23</div>
+        </article>
+
+        {featuredGuides.map((item) => (
+          <article class="surface-card article-card">
+            <span class="article-card__tag">{item.tag}</span>
+            <h3><a href={item.href}>{item.title}</a></h3>
+            <p>{item.summary}</p>
+            <div class="article-card__meta mono">更新：{item.date}</div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section band-muted">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2>按问题快速找答案</h2>
+          <p class="section-subtitle">覆盖购买前顾虑、配置阻断与日常使用高频报错</p>
+        </div>
+        <a href="/troubleshooting/" class="btn btn-secondary">全部排查树</a>
+      </div>
+      <div class="grid-cards grid-cards--3">
+        <a href="/troubleshooting/subscription-failed/" class="surface-card qa-box">
+          <strong>订阅返回 200 OK 但 0 字节 / 拉取空节点</strong>
+          <span>排查客户端 User-Agent 拦截、错贴官网登录页与代理更新设置。</span>
+        </a>
+        <a href="/troubleshooting/timeout/" class="surface-card qa-box">
+          <strong>节点测速全红 Timeout，刚买就连不上</strong>
+          <span>先核对系统时间漂移（>60秒）、套餐到期状态与手机热点交叉验证。</span>
+        </a>
+        <a href="/ai-media/chatgpt/" class="surface-card qa-box">
+          <strong>香港节点极快但 ChatGPT / Gemini 打不开</strong>
+          <span>结合 08-19 实测图解释仅 APP(HK) 与新加坡/日本分流规则写法。</span>
+        </a>
+        <a href="/guides/tun/" class="surface-card qa-box">
+          <strong>命令行 / 客户端工具不走系统代理</strong>
+          <span>开启 TUN 虚拟网卡模式、服务模式权限及与 WSL/Docker 路由避让。</span>
+        </a>
+        <a href="/pricing/non-expiring/" class="surface-card qa-box">
+          <strong>偶尔才用一次，不想每月浪费月费</strong>
+          <span>核对 12 家品牌一次性不过期流量包总价、单 GB 成本与防偷跑设置。</span>
+        </a>
+        <a href="/brands/official-sites/" class="surface-card qa-box">
+          <strong>搜机场名字怕点进高仿钓鱼站或死链</strong>
+          <span>查看 31 家原始推广入口、URL 特殊格式提醒与防仿冒核查方法。</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2>按价格与计费方式理性选择</h2>
+          <p class="section-subtitle">严格分离“年付折算月均价”“常规月付”与“一次性不限时流量包”</p>
+        </div>
+        <a href="/pricing/" class="btn btn-secondary">查看全部价格专题</a>
+      </div>
+      <div class="grid-cards grid-cards--3">
+        <a href="/pricing/cheap/" class="surface-card price-box">
+          <div class="mono price-box__num">¥5.6 – ¥9.9 / 月折算</div>
+          <strong>超低入门与年付小包</strong>
+          <p>涵盖 5.6 元同系五家及 ¥79–¥99 年付小包，提示“一次性年付总额”与低月流量限制。</p>
+        </a>
+        <a href="/pricing/monthly/" class="surface-card price-box">
+          <div class="mono price-box__num">¥14.9 – ¥30 / 月付</div>
+          <strong>主流单月灵活试错档</strong>
+          <p>适合新接触品牌先做 30 天晚高峰验收，涵盖边缘节点、极连云、光年梯、光速云等。</p>
+        </a>
+        <a href="/pricing/non-expiring/" class="surface-card price-box">
+          <div class="mono price-box__num">¥99 – ¥1199 一次性</div>
+          <strong>不过期一次性备用流量包</strong>
+          <p>光速云 ¥147/247GB、二猫云 ¥99/100GB、星岛梦三档等，明确区分非无限容量。</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section band-muted">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2>机场品牌目录预览（全库共 {ALL_BRANDS.length} 家唯一实体）</h2>
+          <p class="section-subtitle">优先展示站内编辑候选前 6 家，点击查看完整档案与全部 31 家筛选</p>
+        </div>
+        <a href="/brands/" class="btn btn-primary">浏览与筛选全部 31 家品牌</a>
+      </div>
+      <div class="grid-cards grid-cards--3">
+        {priorityBrands.map((brand) => (
+          <BrandCard brand={brand} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2>十大核心知识专题体系</h2>
+          <p class="section-subtitle">覆盖推荐评估、价格核算、品牌库、客户端、AI 与流媒体、线路、教程、排障与风险审计</p>
+        </div>
+      </div>
+      <div class="grid-cards grid-cards--2">
+        {NAV_PILLARS.map((pillar) => (
+          <div class="surface-card pillar-box">
+            <div class="pillar-box__top">
+              <span class="mono">{pillar.code}</span>
+              <h3><a href={pillar.href}>{pillar.title}</a></h3>
+            </div>
+            <p>{pillar.summary}</p>
+            <div class="pillar-box__subs">
+              {pillar.children.map((sub) => (
+                <a href={sub.href}>{sub.title}</a>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section band-muted">
+    <div class="container">
+      <div class="grid-cards grid-cards--2">
+        <div class="surface-card">
+          <h2 style="margin-top:0; font-size:1.2rem;">编辑方法论与事实核查边界</h2>
+          <p style="font-size:0.9rem; color:var(--text-secondary);">
+            我们反对把未经测试的商家口号包装成客观实测。全站对每项参数统一标注 <strong>Vendor（厂商宣称）</strong>、<strong>Historical（历史归档）</strong> 与 <strong>Measured（实测）</strong>。光速云等 2026-10-19 非晚高峰表、灵动云 2026-07-20 珠海联通测试及样式文档 2026-06-01 样例均作严格隔离处理。
+          </p>
+          <p style="margin-bottom:0; font-size:0.88rem;">
+            <a href="/fact-checking/">阅读事实核查办法 →</a> · <a href="/disclosure/">查看推广披露说明 →</a>
+          </p>
+        </div>
+        <div class="surface-card">
+          <h2 style="margin-top:0; font-size:1.2rem;">横向深度对比与核心推荐</h2>
+          <ul style="margin:0.5rem 0 0; padding-left:1.2rem; font-size:0.9rem;">
+            {comparisons.map((c) => (
+              <li style="margin-block:0.35rem;">
+                <a href={toComparePath(c.data.slug)}>{c.data.title}</a>
+              </li>
+            ))}
+            <li style="margin-block:0.35rem;"><a href={toBrandPath('guangsuyun')}>光速云完整基准档案（8000+ 字深度解析）</a></li>
+            <li style="margin-block:0.35rem;"><a href="/risks/updates/">查看全站 31 品牌冲突与待核验审计列表</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-hairline);
+    padding-block: 2.25rem 2.75rem;
+  }
+  .hero__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+    align-items: center;
+  }
+  @media (min-width: 960px) {
+    .hero__grid {
+      grid-template-columns: 1.25fr 1fr;
+    }
+  }
+  .hero__eyebrow {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--brand-cyan);
+    letter-spacing: 0.04em;
+  }
+  .hero__copy h1 {
+    margin: 0.45rem 0 0.75rem;
+    font-size: clamp(1.7rem, 3.6vw, 2.45rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+  .hero__desc {
+    margin: 0 0 1.25rem;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    max-width: 58ch;
+  }
+  .hero-search-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-page);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-align: left;
+  }
+  .hero-search-btn:hover {
+    border-color: var(--brand-primary);
+    color: var(--text-primary);
+  }
+  .hero-search-btn strong {
+    background: var(--brand-primary);
+    color: #fff;
+    padding: 0.25rem 0.65rem;
+    border-radius: 5px;
+    font-size: 0.78rem;
+    flex-shrink: 0;
+  }
+  .hero__quick {
+    margin-top: 0.95rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+  .quick-pill {
+    padding: 0.28rem 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: var(--bg-muted);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-hairline);
+    border-radius: 999px;
+    text-decoration: none;
+  }
+  .quick-pill:hover {
+    background: var(--bg-subtle);
+    color: var(--brand-primary);
+    border-color: rgba(29, 78, 216, 0.3);
+  }
+  .hero__visual {
+    margin-block: 0;
+  }
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  .hero-stats span {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #93c5fd;
+  }
+  .hero-stats small {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.76rem;
+    color: var(--obs-text-muted);
+    line-height: 1.4;
+  }
+  .band-muted {
+    background: var(--bg-muted);
+    border-block: 1px solid var(--border-hairline);
+  }
+  .article-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .article-card--featured {
+    border-top: 3px solid var(--brand-primary);
+  }
+  .article-card__tag {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--brand-cyan);
+  }
+  .article-card h3 {
+    margin: 0;
+    font-size: 1.02rem;
+    line-height: 1.38;
+  }
+  .article-card h3 a {
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .article-card h3 a:hover {
+    color: var(--brand-primary);
+    text-decoration: underline;
+  }
+  .article-card p {
+    margin: 0;
+    font-size: 0.86rem;
+    color: var(--text-secondary);
+  }
+  .article-card__meta {
+    margin-top: auto;
+    padding-top: 0.45rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  .qa-box,
+  .price-box {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .qa-box strong,
+  .price-box strong {
+    color: var(--text-primary);
+    font-size: 0.96rem;
+  }
+  .qa-box span,
+  .price-box p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+  .price-box__num {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--brand-primary);
+  }
+  .pillar-box__top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .pillar-box__top span {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--brand-cyan);
+  }
+  .pillar-box__top h3 {
+    margin: 0;
+    font-size: 1.08rem;
+  }
+  .pillar-box__top a {
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .pillar-box p {
+    margin: 0.4rem 0 0.75rem;
+    font-size: 0.86rem;
+    color: var(--text-secondary);
+  }
+  .pillar-box__subs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .pillar-box__subs a {
+    padding: 0.22rem 0.58rem;
+    font-size: 0.78rem;
+    background: var(--bg-muted);
+    color: var(--text-secondary);
+    border-radius: 4px;
+    text-decoration: none;
+  }
+  .pillar-box__subs a:hover {
+    background: var(--bg-subtle);
+    color: var(--brand-primary);
+  }
+</style>

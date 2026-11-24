@@ -1,0 +1,85 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import SourceStatusLegend from '../components/SourceStatusLegend.astro';
+import { buildBreadcrumbSchema } from '../lib/schema';
+
+const seo = {
+  title: '事实核查与证据分级办法｜网络AI',
+  description: '说明网络AI 如何对品牌宣称（Vendor）、历史归档（Historical）与独立实测（Measured）进行严格分级标注、冲突审计与纠偏流程。',
+  pathname: '/fact-checking/',
+};
+const schemas = [buildBreadcrumbSchema([{ name: '首页', href: '/' }, { name: '事实核查办法', href: '/fact-checking/' }])];
+---
+
+<BaseLayout seo={seo} schemas={schemas}>
+  <div class="container page-section prose-article">
+    <Breadcrumbs items={[{ name: '首页', href: '/' }, { name: '事实核查办法', href: '/fact-checking/' }]} />
+    <h1>事实核查与证据分级办法</h1>
+    <p>
+      为了防止将商家宣传文案包装成客观技术实测、并避免过时评测误导当前消费决策，<strong>网络AI</strong> 在全站数据库与技术文章中实施严格的<strong>证据溯源与三级分层审计标准</strong>。
+    </p>
+
+    <h2>证据状态三级标识体系</h2>
+    <SourceStatusLegend />
+
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>证据等级</th>
+            <th>适用数据范围</th>
+            <th>采信与展现规范</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Vendor（品牌宣称）</strong></td>
+            <td>“全专线 IPLC/IEPL”、“10Gbps 不限速”、“承诺 99.9% 在线率”、“全流媒体解锁”等来自官方文案的承诺。</td>
+            <td>强制标注“商家资料称”，在未取得抓包或网络拓扑探测实证前，绝不直接作为事实陈述写入综合结论。</td>
+          </tr>
+          <tr>
+            <td><strong>Historical（历史归档）</strong></td>
+            <td>过去特定时间段由第三方跑测的 MiaoKo 测速图、特定时段的非晚高峰简表（如 2026-10-19 记录）。</td>
+            <td>强制保留原测量日期、测试时段与所属宽带，明确提醒读者“历史表现仅供参考，网络状况可能已随架构调整而变化”。</td>
+          </tr>
+          <tr>
+            <td><strong>Measured（独立实测）</strong></td>
+            <td>由本站实验室在上海电信、广东移动等真实环境中完成的抓包验证、丢包率连续监测与解锁探测。</td>
+            <td>必须完整记录测试工具版本、样本量大小、时延与抖动标准差，供社区交叉核验。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>源数据冲突审计准则（双版本保留原则）</h2>
+    <p>
+      在长期收集网络服务商公开资料的过程中，文档矛盾与宣传偏差屡见不鲜。我们的处理原则是：<strong>绝不主观猜测，如实保留双版本并公开留痕</strong>。
+    </p>
+    <ul>
+      <li><strong>套餐规格冲突</strong>：例如光速云历史轻量年付套餐在不同渠道分别出现“59GB/月”与“69GB/月”描述，本站档案同时记录两组数字，并向用户提示购买前核对结账页实际配额；</li>
+      <li><strong>推广码冲突</strong>：例如 Firefly（萤火虫）与云界线各自存在两组有效推广追踪码，本站均予以收录并在备用 URL 中予以审计；</li>
+      <li><strong>协议支持矛盾</strong>：部分服务商官网宣称支持全协议，但用户订阅节点仅包含 Shadowsocks。遇此情形，本站将实际订阅抓包结果列为“实测现状”，并将官网承诺标注为“宣称差异”。</li>
+    </ul>
+
+    <h2>测试数据隐私与敏感信息脱敏流程</h2>
+    <p>
+      在公布任何实测跑分、节点日志或配置示例时，技术组严格执行以下脱敏规范：
+    </p>
+    <ol>
+      <li><strong>彻底抹除鉴权 Token</strong>：订阅链接中的 <code>?token=</code> 参数、用户信息 ID 强制替换为 <code>xxxxxx</code>；</li>
+      <li><strong>脱敏本地物理 IP</strong>：测试网络环境的公网 IPv4/IPv6 前缀完全隐藏，仅保留运营商归属（如“上海电信”）；</li>
+      <li><strong>保护中转入口 IP</strong>：不公开中转机房的精确反代节点 IP，防止恶意攻击干扰正常用户使用。</li>
+    </ol>
+
+    <h2>纠偏流程与争议仲裁</h2>
+    <p>
+      如果您是相关品牌的运营方或使用该服务的终端读者，发现本站展示的参数与当前实际状况不符，请提供以下可验证材料并联系技术团队：
+    </p>
+    <ul>
+      <li>当前官网后台“我的套餐 / 节点列表”完整脱敏截图；</li>
+      <li>带有时间戳与网络运营商水印的测速记录或工单回复；</li>
+      <li>技术组核实材料无误后，将在 72 小时内完成数据库更新并在全站同步重新构建。</li>
+    </ul>
+  </div>
+</BaseLayout>

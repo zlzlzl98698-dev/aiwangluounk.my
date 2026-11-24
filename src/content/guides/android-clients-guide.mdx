@@ -1,0 +1,131 @@
+---
+slug: "android-clients-guide"
+title: "Android 代理客户端安装指南：CPU 架构识别与 NekoBox Play 商店仿冒警告"
+description: "详述 Android 平台 v2rayNG、FlClash、Clash Meta for Android、Hiddify、Karing 与 sing-box 官方客户端 (SFA) 的选型、ARM64/ARMv7 APK 架构识别及 Google Play NekoBox 仿冒防踩坑。"
+h1: "Android 客户端选型、APK 架构识别与仿冒风险警示"
+pillar: "clients"
+categoryLabel: "Android 客户端指南"
+targetKeyword: "Android 代理客户端推荐"
+secondaryKeywords:
+  - "v2rayNG"
+  - "Clash Meta for Android"
+  - "NekoBox Play 仿冒警告"
+  - "SFA sing-box"
+appliesTo: "Android 8.0 及以上手机与平板设备"
+prerequisites:
+  - "确认设备已允许安装经过校验的本地 APK（侧载安装权限）"
+  - "了解自己手机的 CPU ABI 架构（arm64-v8a 或 armeabi-v7a）"
+  - "确保机场套餐支持第三方通用订阅或对应协议链接"
+pubDate: "2026-11-23"
+updatedDate: "2026-11-23"
+answerSummary: "Android 端通用规则订阅首选 Clash Meta for Android 或 FlClash；需要轻量单节点与 Xray 协议兼容选 v2rayNG；多协议自动识别或原生 sing-box 配置可选 Hiddify、Karing 或官方 SFA。特别安全警示：切勿在 Google Play 商店下载同名的 NekoBox 应用，站内资料明确警告该商店同名应用已被第三方控制，存在安全风险；所有 APK 安装前须核对架构与发布者签名。"
+faqs:
+  - q: "为什么特别警告不要在 Google Play 下载 NekoBox？"
+    a: "根据站内客户端安全台账记录，NekoBox for Android 原始开源项目维护资源有限，且官方资料特别警告切勿下载 Google Play 上已被第三方控制的同名应用。如需使用开源版本，务必避开商店内的可疑同名上架包，并优先考虑维护状态更清晰的 FlClash、Clash Meta for Android 或 v2rayNG。"
+  - q: "Android 下载 APK 时看到 arm64-v8a、armeabi-v7a、universal 怎么选？"
+    a: "近七年来发布的绝大多数中高端与主流安卓手机均为 64 位 ARM 架构，对应选择 arm64-v8a（体积更小且性能最佳）；极老旧的 32 位安卓设备才选 armeabi-v7a；若确实无法确定硬件架构，可临时选择包含多架构的 universal 通用包。"
+  - q: "Android 手机连接代理后为什么切换后台经常断线？"
+    a: "国产定制安卓系统（如 MIUI/HyperOS、ColorOS、HarmonyOS、OriginOS）默认对后台 VPN 服务进行省电清理。需要在系统设置中将代理客户端设为「无限制后台耗电」「允许自启动」，并在最近任务界面锁定该应用卡片。"
+relatedLinks:
+  - title: "安卓客户端安全专题"
+    href: "/vpn/android/"
+    note: "查看安卓端 APK 签名核验与防仿冒清单"
+  - title: "Clash Meta 生态介绍"
+    href: "/clients/clash-meta/"
+    note: "了解 Mihomo / Clash.Meta 在移动端的规则体系"
+  - title: "sing-box 官方生态"
+    href: "/clients/sing-box/"
+    note: "查看 SFA 原生 JSON 配置与订阅转换说明"
+  - title: "手机端节点全超时排查"
+    href: "/guides/articles/time-drift-timeout-troubleshooting/"
+    note: "定位移动网络切换、时间漂移与本地日志异常"
+---
+
+## Android 主流客户端矩阵对比
+
+Android 系统的代理客户端全部通过系统内置的 `VpnService` 接口建立本地虚拟网卡来接管流量（无需 Root 权限）。选型时需重点关注**内核支持协议**、**规则兼容度**以及**发布渠道安全性**。
+
+| 客户端名称 | 核心引擎 | 适用场景与特点 | 订阅格式兼容性 | 安全与维护备注 |
+| :--- | :--- | :--- | :--- | :--- |
+| **v2rayNG** | Xray | 经典轻量工具，支持单节点链接与订阅批量导入 | 节点链接、Base64 订阅 | 安装 APK 时须核对发布者签名，警惕第三方 repack 包 |
+| **Clash Meta for Android** | Mihomo (Clash.Meta) | 完整兼容 Clash 规则集与策略组分流 | 标准 Clash YAML 订阅 | 需匹配 `arm64-v8a` 或 `armeabi-v7a` 架构 |
+| **FlClash** | Mihomo | 界面现代简洁，桌面与移动端操作统一 | Clash YAML 订阅 | 适合追求低学习成本与跨设备统一体验的用户 |
+| **Hiddify** | sing-box | 自动识别多种订阅格式，支持自动选点 | Base64 / Clash / sing-box 等 | 适合新手与多协议混合机场 |
+| **Karing** | sing-box | 规则与分流向导对新手友好 | 多格式订阅自动适配 | 适合跨 iOS 与 Android 统一使用习惯 |
+| **SFA (sing-box 官方版)** | sing-box 原生 | 高性能原生转发与精细路由控制 | 仅原生 sing-box JSON | 不直接兼容 Clash YAML，需机场支持或手动转换 |
+| **NekoBox for Android** | sing-box | 进阶路由定制与多协议支持 | 多格式支持 | **高危警告：维护资源有限，严禁下载 Play 商店同名包** |
+
+## 重点风险警示：NekoBox Play 商店仿冒与第三方 repack 包
+
+在 Android 生态中，由于部分开源代理软件未在 Google Play 官方商店维持上架或原始作者维护资源有限，应用商店与中文搜索结果中存在大量「借壳」「仿冒」或「二次打包（repack）」应用：
+
+1. **Google Play 同名 NekoBox 风险**：站内客户端台账明确记录，NekoBox for Android 官方维护资源有限，且官方资料特别警告**切勿下载 Google Play 上已被第三方控制的同名应用**。该同名包与原开源项目之间存在控制权变更风险，可能夹带广告 SDK 或未知网络请求。
+2. **国内搜索引擎「破解版/汉化加速版」APK**：v2rayNG 与 Clash 系列在第三方下载站常出现名称相似的修改版 APK。即使功能表面正常，篡改签名后的安装包也可能窃取你的订阅链接（相当于泄露全部节点流量配额与服务器入口）。
+3. **验证原则**：所有在站内未标注已核实直链的开源客户端，用户应自行通过官方开源发布渠道或项目官方网站获取，安装前核对 APK 签名指纹或 SHA-256 哈希，拒绝来路不明的网盘转发包。
+
+## 如何准确识别 Android 设备的 CPU 架构（ABI）
+
+下载 APK 前最常遇到的问题是面对一排文件后缀不知如何选择。选错架构会导致「安装失败：应用未安装」或「安装后闪退」。
+
+### 常见文件名后缀对照表
+
+- `arm64-v8a`：64 位 ARM 处理器。**2017 年以后发布的主流安卓手机与平板（骁龙、天玑、麒麟、Exynos）几乎全部属于此架构**，日常首选。
+- `armeabi-v7a`：旧款 32 位 ARM 处理器或极低端入门机型/旧款电视盒子使用。
+- `x86` / `x86_64`：极少数搭载 Intel 芯片的安卓平板，以及电脑端安卓模拟器（如 WSA、MuMu、BlueStacks 的 x86 实例）。
+- `universal`（或无架构后缀）：合并了多个 CPU 架构的通用安装包，文件体积通常是单一架构的两到三倍，仅在无法确认设备型号时作为兜底选择。
+
+### 快速确认设备架构的方法
+
+如果手头安装了轻量终端（如 Termux）或通过电脑连接了 ADB 调试，可执行一条命令直接读取系统属性：
+
+```bash
+getprop ro.product.cpu.abi
+```
+
+- 输出 `arm64-v8a`：下载 `arm64-v8a` 版本 APK。
+- 输出 `armeabi-v7a`：下载 `armeabi-v7a` 版本 APK。
+
+若无命令行环境，通常只需确认手机上市年份：只要是近 6 至 7 年内的常规安卓手机，直接选 `arm64-v8a` 即可。
+
+## 各客户端导入订阅与日常配置要点
+
+### 1. Clash Meta for Android 与 FlClash（Clash YAML 订阅）
+
+拿到机场提供的 Clash 订阅链接后，操作流程高度相似：
+
+1. 在机场控制台复制「Clash 订阅地址」（注意确认不是飞猫云、隐形人等仅支持专属 App 的服务）。
+2. 打开客户端，进入「配置（Profiles）」页面，选择「从 URL 导入」。
+3. 粘贴链接并设置自动更新间隔（建议 `1440` 分钟即每 24 小时更新一次，避免频繁拉取触发机场频率限制）。
+4. 选中导入好的配置档案，返回主界面点击启动开关，首次开启时在系统弹窗中点击「确定」授予 `VpnService` 网络连接请求。
+5. 若发现导入后节点为空或报错，参阅 [订阅导入与 200 OK 空内容排查](/guides/articles/subscription-and-200ok-empty-fix/) 检查 User-Agent 拦截或网址格式。
+
+### 2. v2rayNG（节点链接与 Base64 订阅）
+
+`v2rayNG` 更擅长处理标准节点链接与通用订阅：
+
+- **订阅分组设置**：点击左上角菜单进入「订阅分组设置」，新增分组并填入订阅 URL。如果订阅未直接返回节点，可尝试检查代理软件内「开启自定义 User-Agent」或切换协议支持。
+- **路由模式设置**：在「设置」中确认路由模式为「绕过局域网及中国大陆地址」，避免国内微信、支付宝、银行 App 全部绕道海外节点导致卡顿或风控提示。
+
+### 3. sing-box 官方客户端 (SFA)
+
+`SFA`（sing-box for Android）适合对性能和路由精度有较高要求的进阶用户，但有一个**关键前置限制**：
+
+- **原生格式不直接兼容 Clash YAML**。如果机场后台仅提供 Clash 配置文件而未提供 sing-box JSON 订阅，直接将 Clash 链接填入 SFA 会报错解析失败。
+- 解决方法是先确认机场是否直接提供 `sing-box` 专用订阅入口，或使用可信的订阅转换服务生成 JSON 配置，亦或改用内置自动转换逻辑的 `Hiddify` / `Karing`。
+
+## 国产安卓系统后台保活与耗电优化
+
+Android 客户端本身在空闲状态下耗电极低，但用户常遇到「锁屏几分钟后断网」「微信消息延迟」的问题，本质上是系统省电策略杀掉了后台代理进程：
+
+1. **关闭电池优化**：进入手机「设置」—「应用管理」— 找到对应客户端 —「耗电管理 / 电池」，选择「无限制」或「允许完全后台行为」。
+2. **开启自启动与关联启动**：在安全中心或权限管理中允许该客户端后台弹出与自启动，确保切换 Wi-Fi 与 5G 移动数据时服务能自动重建隧道。
+3. **近期任务卡片加锁**：在多任务切换界面下拉或长按客户端卡片，点击「锁定」图标，防止一键清理内存时顺带关闭代理开关。
+4. **避免双开 VPN 冲突**：Android 系统同一时刻只允许一个应用占用 `VpnService` 通道。若手机同时开启了公司内网 VPN、抓包工具或广告拦截 VPN，启动代理客户端时会直接顶掉前者。
+
+## 安装后连通性自检流程
+
+首次配置完成后，建议用 30 秒做以下验证：
+
+- 在客户端内对节点执行一次「真连接延迟测试（URL Test）」，确认返回具体毫秒数而非 `-1` 或 `Timeout`。
+- 打开浏览器访问国内常用网站确认直连正常，再访问目标海外服务确认分流生效。
+- 若遇到 AI 工具提示地区不支持或 YouTube 视频推荐变成国内内容，请结合 [AI 与流媒体 GeoIP 分流规则](/guides/articles/ai-streaming-geoip-routing/) 调整节点地区与规则集。

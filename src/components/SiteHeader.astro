@@ -1,0 +1,229 @@
+---
+import { Image } from 'astro:assets';
+import avatarImg from '../assets/avatar.webp';
+import { NAV_PILLARS } from '../data/navigation';
+import MegaMenu from './MegaMenu.astro';
+import MobileNav from './MobileNav.astro';
+
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <div class="site-header__brand">
+      <a href="/" class="brand-logo" aria-label="网络AI 首页">
+        <Image src={avatarImg} alt="网络AI 头像" width={36} height={36} class="brand-logo__avatar" loading="eager" />
+        <span>
+          <strong>网络AI</strong>
+          <small>aiwangluounk.my</small>
+        </span>
+      </a>
+    </div>
+
+    <nav class="desktop-nav" aria-label="主导航栏">
+      <ul class="desktop-nav__list">
+        {NAV_PILLARS.map((pillar, idx) => {
+          const isActive = currentPath.startsWith(pillar.href);
+          const alignRight = idx >= 6;
+          return (
+            <li class={`nav-item ${isActive ? 'is-active' : ''} ${alignRight ? 'nav-item--right' : ''}`}>
+              <div class="nav-item__control">
+                <a href={pillar.href} class="nav-link" aria-current={isActive ? 'page' : undefined}>
+                  {pillar.title}
+                </a>
+                <button
+                  type="button"
+                  class="nav-caret"
+                  aria-expanded="false"
+                  aria-controls={`menu-${pillar.id}`}
+                  aria-label={`展开 ${pillar.title} 下拉菜单`}
+                >
+                  ▾
+                </button>
+              </div>
+              <MegaMenu pillar={pillar} />
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+
+    <div class="site-header__actions">
+      <button type="button" id="open-search-btn" class="btn btn-secondary header-btn" aria-label="打开站内搜索">
+        搜索
+      </button>
+      <button
+        type="button"
+        id="mobile-nav-open"
+        class="btn btn-primary header-btn mobile-only"
+        aria-expanded="false"
+        aria-controls="mobile-nav-drawer"
+      >
+        导航菜单
+      </button>
+    </div>
+  </div>
+</header>
+
+<MobileNav />
+
+<script>
+  const navItems = Array.from(document.querySelectorAll<HTMLLIElement>('.desktop-nav .nav-item'));
+
+  function closeAllMenus() {
+    for (const item of navItems) {
+      item.classList.remove('is-open');
+      item.querySelector('.nav-caret')?.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  for (const item of navItems) {
+    const btn = item.querySelector<HTMLButtonElement>('.nav-caret');
+    btn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const willOpen = !item.classList.contains('is-open');
+      closeAllMenus();
+      if (willOpen) {
+        item.classList.add('is-open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement | null;
+    if (!target?.closest('.desktop-nav')) closeAllMenus();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAllMenus();
+  });
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border-hairline);
+  }
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 60px;
+    max-width: 1360px;
+    flex-wrap: nowrap;
+  }
+  .brand-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    flex-shrink: 0;
+  }
+  .brand-logo__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    object-fit: cover;
+    border: 1px solid var(--border-strong);
+    flex-shrink: 0;
+  }
+  .brand-logo strong {
+    display: block;
+    font-size: 0.96rem;
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+  .brand-logo small {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    line-height: 1.1;
+  }
+  .desktop-nav {
+    display: none;
+  }
+  @media (min-width: 1180px) {
+    .desktop-nav {
+      display: block;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .mobile-only {
+      display: none;
+    }
+  }
+  .desktop-nav__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.08rem;
+  }
+  .nav-item {
+    position: relative;
+    flex-shrink: 0;
+  }
+  .nav-item--right :global(.mega-panel) {
+    left: auto;
+    right: 0;
+  }
+  .nav-item__control {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+  }
+  .nav-link {
+    padding: 0.36rem 0.28rem;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+    border-radius: var(--radius-sm);
+  }
+  .nav-item.is-active .nav-link,
+  .nav-link:hover {
+    color: var(--brand-primary);
+    background: var(--bg-subtle);
+  }
+  .nav-caret {
+    background: transparent;
+    border: 0;
+    padding: 0.22rem 0.14rem;
+    font-size: 0.64rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    line-height: 1;
+  }
+  .nav-caret:hover {
+    color: var(--brand-primary);
+  }
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-shrink: 0;
+  }
+  .header-btn {
+    padding: 0.42rem 0.75rem;
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+</style>

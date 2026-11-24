@@ -1,0 +1,21 @@
+---
+interface Props {
+  status: 'measured' | 'vendor' | 'historical' | 'partial' | 'not_tested' | 'unavailable' | 'pending';
+  label?: string;
+}
+
+const LABELS: Record<Props['status'], string> = {
+  measured: '实测记录 (Measured)',
+  vendor: '品牌资料宣称 (Vendor)',
+  historical: '历史档案 (Historical)',
+  partial: '视节点/部分可用 (Partial)',
+  not_tested: '未测试 (Not Tested)',
+  unavailable: '不可用/失败 (Unavailable)',
+  pending: '待核实 (Pending)',
+};
+
+const { status, label } = Astro.props;
+const text = label ?? LABELS[status];
+---
+
+<span class={`badge badge--${status}`}>{text}</span>

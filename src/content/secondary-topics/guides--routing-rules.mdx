@@ -1,0 +1,385 @@
+---
+pillarId: "guides"
+slug: "routing-rules"
+title: "分流规则实战指南：匹配优先级、规则集与AI流媒体分流"
+description: "系统解析代理分流规则实战原理：拆解域名与 IP 匹配优先级、短路原则与二进制规则集，给出国内直连、OpenAI 与流媒体标准分流工程架构。"
+h1: "分流规则（Routing Rules）深度实战：匹配优先级、mrs/srs 规则集与 AI/流媒体标准工程结构"
+intent: "规则实战与精细分流架构指南"
+targetKeyword: "代理分流规则配置与 AI 流媒体实战"
+secondaryKeywords:
+  - "DOMAIN DOMAIN-SUFFIX GEOSITE GEOIP no-resolve 优先级"
+  - "Rule Global Direct 分流模式对比"
+  - "mrs srs 现代二进制规则集"
+  - "OpenAI Claude Gemini 排除香港分流规则"
+  - "Netflix 动画疯 ABEMA 流媒体分流配置"
+longTailKeywords:
+  - "Clash 分流规则里 IP-CIDR 和 GEOIP 为什么要加 no-resolve"
+  - "Rule Global 和 Direct 三种代理分流模式有什么区别"
+  - "Mihomo mrs 和 sing-box srs 规则集比传统 list yaml 好在哪"
+  - "怎么写规则让 ChatGPT Claude Gemini 自动排除香港节点"
+  - "修改分流规则后为什么网页还是继续走旧节点不生效"
+entities:
+  - "Routing Rules"
+  - "DOMAIN-SUFFIX"
+  - "GEOSITE"
+  - "GEOIP"
+  - "IP-CIDR"
+  - "no-resolve"
+  - "Rule / Global / Direct"
+  - ".mrs 二进制规则集"
+  - ".srs 二进制规则集"
+  - "ChatGPT / Claude / Gemini"
+  - "Netflix / 动画疯 / ABEMA"
+keywordBoundary: "聚焦代理规则语法（DOMAIN/DOMAIN-SUFFIX/DOMAIN-KEYWORD/GEOSITE/GEOIP/IP-CIDR/no-resolve）、自上而下短路优先级、Rule/Global/Direct 模式及白名单/黑名单哲学对比、.mrs/.srs 现代二进制规则集优势，以及覆盖国内直连+国际通用+AI排港+Netflix/动画疯/ABEMA的完整工程规则模板；AI 与流媒体机场实测差异详例归入 /guides/articles/ai-streaming-geoip-routing/，配置文件全局字段与 Merge/Script 覆写模板归入 /guides/clash-config/。"
+answerFirst: "分流规则（Routing Rules）的底层执行遵循严格的「自上而下短路原则（First-Match Short-Circuit）」：每个网络连接进入规则引擎后，从第一行开始依次比对，一旦命中某一条规则便立刻停止后续扫描并按该规则指定的策略出口转发。因此，工程规则编写的黄金顺序永远是「高精度内网与例外直连置顶 → 高风控 AI 独立规则（OpenAI/Claude/Gemini 强制排除香港）→ 流媒体分区分流（Netflix/动画疯/ABEMA/YouTube 防送中/TikTok）→ 国内域名与 GeoSite/GeoIP 直连（IP 类规则务必附带 no-resolve 防止冗余 DNS 阻塞）→ MATCH 兜底代理」。格式方面，现代 Mihomo（.mrs）与 sing-box（.srs）二进制规则集已经全面取代臃肿的传统文本列表，能把上万条规则的加载内存与解析延迟降至毫秒级。每次调整规则后，务必在客户端清理全部活跃连接（含 QUIC UDP 443 长连接），新规则才会立即对后续请求生效。"
+updatedDate: "2026-11-24"
+ctaHeading: "联合配置文件覆写与 AI/流媒体实测排查"
+ctaActions:
+  - label: "AI 与流媒体 GeoIP 分流案例"
+    href: "/guides/articles/ai-streaming-geoip-routing/"
+    style: "primary"
+  - label: "配置 Clash Merge / Script 覆写"
+    href: "/guides/clash-config/"
+    style: "secondary"
+  - label: "查看 ChatGPT 网页风控排查"
+    href: "/ai-media/chatgpt/"
+    style: "secondary"
+relatedLinks:
+  - title: "Gemini 地区定位与实况分析"
+    href: "/ai-media/gemini/"
+    category: "AI 与流媒体"
+    reason: "结合实测数据了解为什么必须把 Gemini 从通用规则拆出至新加坡等稳定区"
+  - title: "YouTube 送中（CN）排查与修复"
+    href: "/ai-media/youtube/"
+    category: "AI 与流媒体"
+    reason: "排查新加坡/台湾广播节点被识别为 CN 的诱因及规则隔离方法"
+  - title: "Disney+、动画疯与 TikTok 解锁"
+    href: "/ai-media/streaming/"
+    category: "AI 与流媒体"
+    reason: "掌握巴哈姆特动画疯、ABEMA 与 TikTok 的地域原生要求及节点筛选"
+  - title: "香港节点优势与 AI 限制权衡"
+    href: "/routes/hong-kong/"
+    category: "线路节点"
+    reason: "理解如何让香港 20–30ms 低延迟承载日常浏览，同时剥离受限应用"
+faqs:
+  - q: "为什么分流规则里的 GEOIP、IP-CIDR 后面经常要加上 no-resolve？不加会怎样？"
+    a: "当代理客户端收到的是纯域名请求（例如系统代理模式下的浏览器访问），而请求在前几条域名规则都没命中、一路走到了中间某条 IP-CIDR 或 GEOIP 规则时，如果不加 no-resolve，规则引擎为了判断这个域名到底属不属于某个 IP 段，会强行在本地暂停转发并额外发起一次 DNS 解析拿到 IP 后再做比对。这不仅拖慢首包延迟，甚至可能在特定配置下引发本地 DNS 泄漏。加上 no-resolve 后，只有原本就以纯 IP 发起的连接或前面已经完成解析的流程才会匹配该 IP 规则，纯粹的域名请求会直接跳过并继续匹配后续域名规则或 MATCH。"
+  - q: "Rule、Global 和 Direct 三种分流模式在工程上到底怎么切换使用？"
+    a: "Rule（规则模式）是日常 99% 场景的唯一正解，它严格按规则树决定直连还是代理；Global（全局模式）会跳过常规直连分流规则，强迫几乎所有流量统一走 GLOBAL 策略组指定的单一节点，仅适合临时排查某条冷门域名是不是因为漏加规则而打不开，用完必须切回 Rule，否则国内站点会极慢且白白烧光流量；Direct（直连模式）则让所有请求绕过代理节点直接本地发出，适合临时关闭代理测试原生宽带连通性或进入内网环境。"
+  - q: "现代规则集 .mrs（Mihomo）和 .srs（sing-box）比传统 .yaml / .list 文本规则好在哪里？"
+    a: "传统 .yaml 或 .list 纯文本规则集一旦收录上万条域名或 CIDR 网段，文件体积动辄数 MB，内核每次重启或更新订阅都要耗费大量 CPU 与内存做字符串解析与前缀树构建，在低内存软路由上极易卡顿甚至内存溢出。而 .mrs（Mihomo Rule-Set）与 .srs（sing-box Rule-Set）是预先编译好的二进制前缀树/基数树结构，体积通常只有原文本的几分之一到几十分之一，内核可直接零开销加载或内存映射，匹配速度极快且热更新毫秒级完成。"
+  - q: "为什么我写了 DOMAIN-SUFFIX,chatgpt.com,AI-ChatGPT 并排在很靠前的位置，打开网页还是提示香港地区受限？"
+    a: "最常见的原因有三个：第一，遗漏了认证与静态资源关联域名（如 openai.com、auth0.com、oaistatic.com），导致登录验证流依然走了默认的香港节点；第二，浏览器正在复用之前建立在旧香港节点上的 HTTP/3（QUIC）或 HTTPS 长连接，改完规则后必须点击客户端的「关闭全部活跃连接」并清除网站 Cookie 或用无痕窗口重试；第三，虽然规则指给了 AI 策略组，但该策略组内部选中的节点本身就是香港或已经被风控的 IP。"
+  - q: "为什么同样是香港低延迟节点，可以放心地走日常网页和 GitHub，却必须把 OpenAI、Claude、Gemini、TikTok 排除出去？"
+    a: "根据站内品牌实测归档（如光速云 2026-08-19 实测截图），香港节点物理距离近、TLS RTT 常仅 20–30ms，是日常查资料与拉代码的绝佳主力；但受服务商商业合规区域划定限制，香港不在 OpenAI 网页版、Claude、Gemini 的直接支持区域内，TikTok 也已停止在港运营。因此在工程上应当「扬长避短」，把香港留给常规代理兜底，而通过分流规则把 AI 与 TikTok 精准剥离到日本、新加坡或美国节点。"
+  - q: "既然白名单模式（国内直连，其余全走代理）这么省心，为什么还有人用黑名单模式（仅列表走代理）？"
+    a: "白名单模式（即国内规则直连 + 末尾 MATCH 走代理）的好处是新出现的海外冷门网站不用每次手动加规则就能立刻打开，适合绝大多数需要流畅访问全球信息的用户；但它的缺点是如果国内某个新上线的冷门小站暂时没进 cn 规则集，可能会被误判走代理多耗一点点流量。黑名单模式（仅列出的海外域走代理 + 末尾 MATCH 走直连）能确保 100% 国内流量绝对不绕路且极其省流，但每遇到一个新海外站点都要手动补规则，维护成本高，仅适合极度省流或轻量查阅的特定用户。"
+  - q: "如果用规则匹配动画疯（Bahamut）和日本 ABEMA TV，为什么还是经常打不开或报错地区限制？"
+    a: "规则分流只能保证「请求被送往你指定的台湾或日本策略组」，并不能替你的机场节点变出原生 IP。动画疯通常要求台湾本土原生 IP（或特定服务端 DNS 解锁辅助，如站内光速云 08-19 截图曾观测到的多区代理解锁痕迹），而 ABEMA TV 对日本普通机房 IP 封锁极严，部分廉价机房日本节点会全线失败。配好规则后，仍需在对应地区策略组里逐一测试筛选真正具备流媒体解锁能力的落地节点。"
+---
+
+如果说选择机场和安装客户端决定了你的网络工具「能不能连上」，那么**分流规则（Routing Rules）**决定的则是这套工具「好不好用、省不省流量、会不会触发封号」。
+
+现实中最常见的三种用网崩溃场景，其实全部源于规则缺位或顺序错乱：第一种，长期开着 `Global` 全局模式，导致淘宝加载图片转圈、企业微信文件传输龟速、百度网盘把月付 150GB 的专线流量三天跑光；第二种，默认规则把延迟只有 25 毫秒的香港节点设成了唯一主力出口，结果网页版 ChatGPT、Claude、Gemini 和 TikTok 轮番报错拒绝服务；第三种，明明照着网上教程粘了几十行规则进去，改完刷新网页却依然毫无变化——因为既没理解规则自上而下的「短路机制」，也没有清理浏览器残留的 QUIC 长连接。
+
+本文将从规则语法内核、匹配优先级与 `no-resolve` 机制讲起，对比三类工作模式与现代 `.mrs` / `.srs` 二进制规则集，并最终落出一套覆盖 **国内直连 + 国际通用 + AI 三巨头排港隔离 + 流媒体精细分流** 的完整工程规则结构。
+
+---
+
+## 一、核心规则语法与匹配优先级：自上而下短路原则与 `no-resolve`
+
+在 [Mihomo](/clients/mihomo/)（原 Clash.Meta）与 [sing-box](/clients/sing-box/) 的规则路由引擎中，不管你的规则列表有 20 行还是 20 万行，引擎在调度每一条新建网络连接时，都只遵循一条铁打不动的执行逻辑：**自上而下短路原则（First-Match Short-Circuit）**。
+
+具体而言：当一条请求进入内核，引擎从 `rules` 列表的第 1 行开始逐行往下核对。**只要命中了某一条规则，内核立刻终止后续所有规则的匹配扫描**，直接把数据包交给该规则末尾指定的出站目标（例如 `DIRECT`、`REJECT` 或某个策略组）；只有当前一条未命中时，才会继续往下检测下一行，直到触达最底部的兜底规则（`MATCH`）。
+
+理解了「短路原则」，就能瞬间明白为什么**规则排错顺序会导致整套配置瘫痪**：如果你不小心把宽泛的 `GEOSITE,cn,DIRECT` 或者兜底的 `MATCH,🚀 节点选择` 放到了第 1 行，那么写在它下面的所有精密的 OpenAI、Claude、内网直连规则全都会变成永远不会执行的死代码。
+
+### 1. 八大常用规则类型精度、性能与工程排位对照表
+
+| 规则关键字 | 匹配对象与作用逻辑 | 工程性能开销 | 推荐排位层级 | 典型写法示例（不含多余注释） |
+| :--- | :--- | :--- | :--- | :--- |
+| **`DOMAIN`** | **精确完整域名匹配**，仅当请求域名一字不差完全一致时命中 | 极低（哈希表 O(1) 查找） | **第一梯队（最顶层）** | `DOMAIN,api.openai.com,🤖 AI-OpenAI` |
+| **`DOMAIN-SUFFIX`** | **域名后缀匹配**，命中主域名及其所有子域名（如匹配 `openai.com` 即同时覆盖 `chat.openai.com`） | 极低（后缀树匹配） | **第一梯队（高优先级主力）** | `DOMAIN-SUFFIX,claude.ai,🤖 AI-Claude` |
+| **`DOMAIN-KEYWORD`** | **域名关键词子串匹配**，只要域名任意位置包含该词即命中（容易误伤无关域名，慎用） | 中等（逐条字符串扫描） | **仅作补充例外（尽量少用）** | `DOMAIN-KEYWORD,openai,🤖 AI-OpenAI` |
+| **`DOMAIN-REGEX`** | **正则表达式匹配域名**，适合处理编号规律极强的 CDN 或特定泛域名集群 | 较高 | **按需精准置顶** | `DOMAIN-REGEX,^googlevideo\.com$,🎬 YouTube` |
+| **`RULE-SET`** | **引用外部托管或本地规则集**（推荐使用 `.mrs` / `.srs` 二进制规则包，动辄承载数万条域名或 IP） | 极低（编译后前缀树） | **第二梯队（主体分流层）** | `RULE-SET,ai_bundle,🤖 AI-OpenAI` |
+| **`GEOSITE`** | **内核内置或加载的分类域名库**（如 `cn`、`private`、`openai`、`netflix`、`geolocation-!cn`） | 低（依赖 `geosite.dat`） | **第二梯队（若已用全套 `mrs` 可替代）** | `GEOSITE,cn,DIRECT` |
+| **`IP-CIDR` / `IP-CIDR6`** | **IPv4 或 IPv6 网段匹配**，用于兜底纯 IP 请求与局域网私网放行 | 极低（基数树位运算） | **第三梯队（兜底前置段，需带 `no-resolve`）** | `IP-CIDR,192.168.0.0/16,DIRECT,no-resolve` |
+| **`GEOIP`** | **IP 地理位置归属库匹配**（最常见用于 `GEOIP,CN,DIRECT` 国内 IP 直连兜底） | 低（基于 MaxMind mmdb / mrs） | **第三梯队（紧贴 `MATCH` 之前，必须带 `no-resolve`）** | `GEOIP,CN,DIRECT,no-resolve` |
+
+此外，在桌面端或客户端侧（非网关旁路由）还可以利用 **`PROCESS-NAME`** 按本地软件进程名强制分流——例如把 P2P 下载软件（如 `qBittorrent` 或国内网盘客户端）直接置顶设为 `PROCESS-NAME,qbittorrent.exe,DIRECT`，不仅避免 P2P 高并发触发机场后台滥用封号，还能防止上传流量把套餐额度瞬间抽干。
+
+### 2. 深入理解 `no-resolve` 参数：为什么 IP 规则漏加它会拖慢全网？
+
+在阅读成熟规则模板时，几乎所有 `IP-CIDR` 与 `GEOIP` 规则尾部都附带着一个 `no-resolve` 参数。对于很多初学者来说，这是最容易被顺手删掉却后果严重的关键字。
+
+设想这样一个真实请求流：你在浏览器访问一个尚未被前面域名规则拦截的冷门国外网站，请求以**域名形式**进入规则树。当它一路向下扫描来到 `GEOIP,CN,DIRECT` 这一行时：
+
+- **如果没有加 `no-resolve`**：Mihomo 为了搞清楚这个冷门域名究竟是不是中国的 IP，会**强行暂停当前转发流程**，立刻调用本地 DNS 去解析这个域名的真实 A 记录。如果本地网络刚好被污染或等待 DNS 超时，整个请求会平白无故卡住几百毫秒甚至数秒；更糟糕的是，在 `redir-host` 模式下这还会导致原本应当交由海外节点去解析的境外域名提前泄露给本地 DNS（排查方法参见 [DNS 污染与泄漏专项排障](/troubleshooting/dns/)）。
+- **加上 `no-resolve` 之后**：内核看到这是一条还未解析成纯 IP 的域名请求，便会直接跳过 `GEOIP,CN` 这一行，继续向下落入末尾的 `MATCH,🚀 节点选择`，直接把域名交给海外代理节点去远端解析并拉取网页，实现零延迟阻塞且零本地 DNS 泄漏。而真正本身就以纯 IP 发起的直连请求（例如局域网访问路由后台或微信、游戏直连服务器 IP），则会毫无阻碍地命中 `IP-CIDR` 或 `GEOIP,CN` 走直连。
+
+---
+
+## 二、三类分流模式对比与现代 `.mrs` / `.srs` 二进制规则集演进
+
+理解了单条规则怎么匹配，接着就要从宏观上选定客户端的运行模式与规则集载体格式。
+
+### 1. `Rule` vs `Global` vs `Direct` 三类模式，以及白名单/黑名单分流哲学
+
+在几乎所有代理客户端的顶栏，都能看到三个核心运行模式开关：
+
+1. **`Rule`（规则模式）**：日常唯一推荐的常驻模式。所有流量严格进入上述「自上而下短路规则树」接受调度，既能保障国内站点全速直连不耗套餐流量，又能让海外资料、AI 与流媒体精准走各自对应的优化节点。
+2. **`Global`（全局模式）**：直接绕过精细的 `rules` 列表（部分内核仅保留最基础的回环与私有地址直连防死锁），将几乎所有外部连接强行塞进名为 `GLOBAL` 的总策略组所指派的那一个节点。**用途边界**：只用来在排障时验证「某个打不开的网站究竟是节点挂了，还是我的规则写漏了」。排查完毕必须立刻切回 `Rule`。
+3. **`Direct`（直连模式）**：彻底跳过所有远程代理节点，所有流量直接走本地网卡。用于测试宽带原生故障或进入特殊内网办公。
+
+在 `Rule` 模式内部，长期以来存在「白名单派」与「黑名单派」两条分流路线：
+- **白名单思路（主流推荐）**：列出局域网、国内域名、国内 IP 全部 `DIRECT`，最底部 `MATCH` 全部交给 `🚀 节点选择`。优点是遇到任何新上线或小众的海外科研、开源文档网站无需手动补规则即可秒开；缺点是极少数刚上线还没来得及收录进国内规则库的本土小站可能会走一次代理。
+- **黑名单思路**：列出需要加速访问的海外服务走代理，最底部 `MATCH` 设为 `DIRECT`。优点是国内流量绝对零误判、最省机场流量；缺点是维护心智极高，国外网站哪怕漏掉一个静态资源 CDN 域名就会网页排版错乱，一般仅在极小容量流量包或特定办公隔离场景下使用。
+
+### 2. `.mrs` 与 `.srs` 现代二进制规则集为什么能取代传统文本？
+
+在早期的 Clash 配置里，规则要么直接塞在主 YAML 里，要么通过 `rule-providers` 拉取纯文本 `.yaml` 或 `.list` 列表；地理数据库则依靠体积庞大的 `GeoSite.dat` 和 `Country.mmdb`。随着国内外域名列表膨胀到数十万条，传统文本和全量 `.dat` 数据库暴露出三大硬伤：软路由加载内存暴涨、每次重启或切换配置耗时数秒解析、远端同步带宽消耗大。
+
+现代双雄内核各自给出了高度一致的二进制演进方案——**Mihomo 的 `.mrs`（Mihomo Rule-Set）** 与 **`sing-box` 的 `.srs`（sing-box Rule-Set）**：
+
+| 对比维度 | 传统文本规则（`.yaml` / `.list`） | 传统全量地理库（`.dat` / `.mmdb`） | 现代二进制规则集（`.mrs` / `.srs`） |
+| :--- | :--- | :--- | :--- |
+| **底层存储结构** | 纯文本明文列表，含大量前缀关键字重复 | 打包了全球所有国家和地区分类的巨型单文件（通常 10MB 以上） | **预编译的紧凑二进制前缀树 / 基数树**，按需拆分单类目独立文件（常仅几十 KB） |
+| **内存与闪存占用** | 极高，文本解析期间内存翻倍 | 高，即使你只需要 `cn` 和 `openai`，也得把全球所有冷门地区整包载入低闪存路由器 | **极低**，可按需只挂载 `cn`、`private`、`openai` 等少数模块，软路由毫无压力 |
+| **冷启动与匹配耗时** | 每次更新都要重新编译匹配树，较慢 | 加载全库耗时长 | **毫秒级零解析加载**，且内部路由查找时间复杂度最优 |
+| **内核兼容性要求** | 全版本兼容 | 全版本兼容 | `.mrs` 需较新 [Mihomo](/clients/mihomo/) 内核（如 [Clash Verge Rev](/clients/clash-verge-rev/)、`FlClash`、`OpenClash` 新核、`Nikki`）；`.srs` 需 [sing-box](/clients/sing-box/) `1.8.0+`（如 `Hiddify`、`Karing`、`HomeProxy`、`SFA/SFI/SFM`），订阅格式转换可见 [订阅与规则格式指南](/guides/subscription/) |
+
+---
+
+## 三、标准工程规则架构实战：国内直连 + 国际通用 + AI 排港 + 流媒体分区分流
+
+下面结合站内品牌实测数据库中的客观特征，构建一套可直接投入日常主力使用的标准工程分流架构。为什么不能把所有海外流量都扔进一个组？站内的两份真实样本早已给出铁证：
+
+- **AI 锁区排除香港的实测依据**：在 [光速云](/brands/guangsuyun/) 2026-08-19 归档的三网 62/70 节点 MiaoKo 实测截图中，20 个 [香港节点](/routes/hong-kong/) 虽然延迟低至 20–31 毫秒，但 [ChatGPT](/ai-media/chatgpt/)（OpenAI）解锁几乎全部显示「仅 APP(HK)」而网页端受限，Gemini 更是全线失败；相反，[日本节点](/routes/japan/) 与美国节点网页端 OpenAI 表现稳健，新加坡节点则在当时同时解锁了 Gemini 与大量服务。同时如 [Claude 访问与风控指南](/ai-media/claude/) 所述，Claude 必须绑定手动锁定的非香港低风险节点。
+- **流媒体分化与防送中实测依据**：在 [光速云](/brands/guangsuyun/) 08-19 与 [灵动云](/brands/lingdongyun/) 2026-07 实测样本中，均观测到部分新加坡与台湾节点出现 **[YouTube 送中（CN）](/ai-media/youtube/)**（即 IP 被 Google 误判为中国大陆地区导致无广告或功能受限），以及台湾广播 IP 在 **[Netflix 解锁](/ai-media/netflix/)** 上被识别成英国（GB）或西班牙（ES）片库的现象；而 **TikTok** 已退出香港市场，使用香港节点必黑屏；至于台湾**巴哈姆特动画疯（Bahamut）**与日本 **ABEMA TV**，对本土 IP 或特定解锁出口有着极高要求（详见 [Disney+、动画疯与 TikTok 解锁专题](/ai-media/streaming/)）。
+
+### 1. 策略组职责分层图谱
+
+为了彻底解决「快而不全、全而不快」的矛盾，标准的工程架构将全部策略出口拆解为七个职责清晰的分组（具体策略组 YAML 参数与正则排港写法见 [Clash / Mihomo 配置文件教程](/guides/clash-config/)）：
+
+1. **`🚀 节点选择`（日常通用国际出口）**：默认主力，可放心地选择 [香港低延迟节点](/routes/hong-kong/)（20–30ms）或 [日本节点](/routes/japan/)、新加坡高速节点，承载 Google 搜索、GitHub、开发者文档、Docker 镜像与普通外网浏览。
+2. **`🤖 AI-OpenAI与Claude`（非港锁定 `select` 组）**：通过正则强制排除香港、台湾与信息节点（同时过滤 [高倍率节点](/routes/multiplier/)），人工锁定 1 个稳定日本、新加坡或美国节点（禁用自动测速跳线）。
+3. **`✨ AI-Gemini`（区域特化 `select` 组）**：根据当前机场实测表现，优先锁定明确绿标解锁的新加坡或美国原生定位节点，且配套处理同一会话下的 Google 账号域一致性（详见 [Gemini 节点分化实况](/ai-media/gemini/)）。
+4. **`🎬 流媒体-Netflix与Disney`（高带宽解锁 `select` 组）**：方便根据片库字幕需求在港、台、日、新之间手动切换原生全解锁高带宽节点，避免自动切到只能看自制剧的机房 IP（参见 [Netflix 分区实况](/ai-media/netflix/)）。
+5. **`📺 流媒体-YouTube防送中`（独立可控 `select` 组）**：专门避开在测速表中出现过「送中(CN)」的新加坡/台湾广播节点，稳定指向未送中的日本、香港或美国大带宽节点（参见 [YouTube 送中排查](/ai-media/youtube/)）。
+6. **`⛩️ 动漫专属-动画疯与ABEMA`（区域强制指向组）**：分别拆分台湾原生组（供巴哈姆特动画疯）与日本原生解锁组（供 ABEMA TV），互不干扰（参见 [流媒体解锁专题](/ai-media/streaming/)）。
+7. **`🎵 TikTok专属`（非港锁定 `select` 组）**：严格排除香港节点，指派日本、新加坡、美国或英国支持地区。
+
+### 2. 完整标准工程规则结构模板（Mihomo YAML 规则体）
+
+以下是一套符合现代工程规范的完整分流结构（演示中外部规则源以规范化的 `example.invalid` 占位路径呈现架构逻辑，实际写入客户端覆写时可结合自身信赖的开源 `.mrs` 规则库或直接使用内建 `GEOSITE` 规则实现相同分层；如需将以下前置逻辑融入 [Clash Verge Rev](/clients/clash-verge-rev/) 覆写脚本，只需把 `rules` 前段填入 `prependRules` 数组即可）：
+
+```yaml
+# ============================================================
+# 标准工程分流规则结构 (Mihomo / Clash.Meta)
+# 优先级原则：内网与特殊例外 -> 拦截冗余协议 -> AI 排港隔离 -> 流媒体分区 -> 常规海外 -> 国内直连 -> 兜底代理
+# ============================================================
+
+rule-providers:
+  private_domain:
+    type: http
+    behavior: domain
+    format: mrs
+    url: "https://example.invalid/meta-rules/private.mrs"
+    path: ./ruleset/private.mrs
+    interval: 86400
+
+  cn_domain:
+    type: http
+    behavior: domain
+    format: mrs
+    url: "https://example.invalid/meta-rules/cn.mrs"
+    path: ./ruleset/cn.mrs
+    interval: 86400
+
+  cn_ip:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: "https://example.invalid/meta-rules/cn-ip.mrs"
+    path: ./ruleset/cn-ip.mrs
+    interval: 86400
+
+  geolocation_not_cn:
+    type: http
+    behavior: domain
+    format: mrs
+    url: "https://example.invalid/meta-rules/geolocation-!cn.mrs"
+    path: ./ruleset/geolocation-!cn.mrs
+    interval: 86400
+
+rules:
+  # ----------------------------------------------------------
+  # 第 1 层：本地局域网、办公内网与高损耗软件强制直连（最高优先级）
+  # ----------------------------------------------------------
+  - RULE-SET,private_domain,DIRECT
+  - DOMAIN-SUFFIX,local,DIRECT
+  - DOMAIN-SUFFIX,internal.corp,DIRECT
+  - PROCESS-NAME,qbittorrent.exe,DIRECT
+  - PROCESS-NAME,Transmission,DIRECT
+
+  # 可选工程优化：阻断针对流媒体的 UDP 443 QUIC，迫使浏览器回退 TLS TCP 提升代理稳定性
+  # - AND,((NETWORK,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,googlevideo.com)),REJECT-DROP
+
+  # ----------------------------------------------------------
+  # 第 2 层：AI 生产力平台独立分流（强制排除香港，采用 select 固定出口）
+  # ----------------------------------------------------------
+  # 2.1 Claude (Anthropic) — 对机房与跳 IP 极其敏感，必须固定节点
+  - DOMAIN-SUFFIX,anthropic.com,🤖 AI-OpenAI与Claude
+  - DOMAIN-SUFFIX,claude.ai,🤖 AI-OpenAI与Claude
+  - DOMAIN-SUFFIX,claudeusercontent.com,🤖 AI-OpenAI与Claude
+
+  # 2.2 OpenAI / ChatGPT — 补全登录认证域与静态资源域，规避香港仅 APP(HK)
+  - DOMAIN-SUFFIX,openai.com,🤖 AI-OpenAI与Claude
+  - DOMAIN-SUFFIX,chatgpt.com,🤖 AI-OpenAI与Claude
+  - DOMAIN-SUFFIX,oaistatic.com,🤖 AI-OpenAI与Claude
+  - DOMAIN-SUFFIX,oaiusercontent.com,🤖 AI-OpenAI与Claude
+  - DOMAIN-SUFFIX,auth0.com,🤖 AI-OpenAI与Claude
+  - DOMAIN-SUFFIX,identrust.com,🤖 AI-OpenAI与Claude
+
+  # 2.3 Google Gemini & AI Studio — 拆离通用 Google，避开非支持区与送中 IP
+  - DOMAIN-SUFFIX,gemini.google.com,✨ AI-Gemini
+  - DOMAIN-SUFFIX,aistudio.google.com,✨ AI-Gemini
+  - DOMAIN-SUFFIX,makersuite.google.com,✨ AI-Gemini
+  - DOMAIN-SUFFIX,generativelanguage.googleapis.com,✨ AI-Gemini
+  - DOMAIN-SUFFIX,ai.google.dev,✨ AI-Gemini
+  - DOMAIN-SUFFIX,bard.google.com,✨ AI-Gemini
+
+  # ----------------------------------------------------------
+  # 第 3 层：流媒体精细化分区分流（防送中、防锁区、解原生）
+  # ----------------------------------------------------------
+  # 3.1 Netflix & Disney+
+  - DOMAIN-SUFFIX,netflix.com,🎬 流媒体-Netflix与Disney
+  - DOMAIN-SUFFIX,netflix.net,🎬 流媒体-Netflix与Disney
+  - DOMAIN-SUFFIX,nflximg.com,🎬 流媒体-Netflix与Disney
+  - DOMAIN-SUFFIX,nflximg.net,🎬 流媒体-Netflix与Disney
+  - DOMAIN-SUFFIX,nflxvideo.net,🎬 流媒体-Netflix与Disney
+  - DOMAIN-SUFFIX,nflxso.net,🎬 流媒体-Netflix与Disney
+  - DOMAIN-SUFFIX,disneyplus.com,🎬 流媒体-Netflix与Disney
+  - DOMAIN-SUFFIX,disney-plus.net,🎬 流媒体-Netflix与Disney
+  - DOMAIN-SUFFIX,dssott.com,🎬 流媒体-Netflix与Disney
+  - DOMAIN-SUFFIX,bamgrid.com,🎬 流媒体-Netflix与Disney
+
+  # 3.2 巴哈姆特动画疯（须指向台湾原生或解锁辅助组）与日本 ABEMA（须指向日本原生组）
+  - DOMAIN-SUFFIX,gamer.com.tw,⛩️ 台湾-动画疯
+  - DOMAIN-SUFFIX,bahamut.com.tw,⛩️ 台湾-动画疯
+  - DOMAIN-SUFFIX,hinet.net,⛩️ 台湾-动画疯
+  - DOMAIN-SUFFIX,abema.tv,🗾 日本-ABEMA
+  - DOMAIN-SUFFIX,abema.io,🗾 日本-ABEMA
+  - DOMAIN-SUFFIX,ameba.jp,🗾 日本-ABEMA
+  - DOMAIN-SUFFIX,hayabusa.io,🗾 日本-ABEMA
+
+  # 3.3 YouTube（避开送中节点）与 TikTok（严格排港）
+  - DOMAIN-SUFFIX,youtube.com,📺 流媒体-YouTube防送中
+  - DOMAIN-SUFFIX,youtu.be,📺 流媒体-YouTube防送中
+  - DOMAIN-SUFFIX,googlevideo.com,📺 流媒体-YouTube防送中
+  - DOMAIN-SUFFIX,ytimg.com,📺 流媒体-YouTube防送中
+  - DOMAIN-SUFFIX,yt.be,📺 流媒体-YouTube防送中
+  - DOMAIN-SUFFIX,tiktok.com,🎵 TikTok专属
+  - DOMAIN-SUFFIX,tiktokv.com,🎵 TikTok专属
+  - DOMAIN-SUFFIX,tiktokcdn.com,🎵 TikTok专属
+  - DOMAIN-SUFFIX,byteoversea.com,🎵 TikTok专属
+  - DOMAIN-SUFFIX,musical.ly,🎵 TikTok专属
+
+  # ----------------------------------------------------------
+  # 第 4 层：常规国际站点与开发者生态（默认可走低延迟香港主力组）
+  # ----------------------------------------------------------
+  - DOMAIN-SUFFIX,github.com,🚀 节点选择
+  - DOMAIN-SUFFIX,githubusercontent.com,🚀 节点选择
+  - DOMAIN-SUFFIX,docker.io,🚀 节点选择
+  - RULE-SET,geolocation_not_cn,🚀 节点选择
+
+  # ----------------------------------------------------------
+  # 第 5 层：国内域名与国内 IP 段直连（保障国内业务全速且零浪费流量）
+  # ----------------------------------------------------------
+  - RULE-SET,cn_domain,DIRECT
+  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
+  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
+  - RULE-SET,cn_ip,DIRECT,no-resolve
+  - GEOIP,CN,DIRECT,no-resolve
+
+  # ----------------------------------------------------------
+  # 第 6 层：白名单最终兜底（未命中上述任何规则的冷门海外资源统一走主力代理）
+  # ----------------------------------------------------------
+  - MATCH,🚀 节点选择
+```
+
+### 3. 联动深度案例：为什么单配域名有时依然报错？
+
+上述工程结构已经覆盖了绝大部分日常场景，但在实际落地时仍有两类隐藏细节需要结合 [AI 与流媒体 GeoIP 分流实战规则](/guides/articles/ai-streaming-geoip-routing/) 同步留意：
+
+- **Google 主账号与 Gemini 的地域上下文联动**：当你的主力浏览器登录着 Google 账号，如果 `google.com` 或 `accounts.google.com` 走了香港节点、而 `gemini.google.com` 走了新加坡节点，Google 服务端风控有概率因为同一会话在极短时间内横跨两个地域接口而拒绝 Gemini 访问。一旦遇到此类连带报错，可以在使用 Gemini 期间把日常主策略组或整个 Google 域名集群暂时同步切往同一非香港国家节点。
+- **Disney+ 与流媒体静态/CDN 资源域关联**：流媒体平台往往存在主网页域与视频切片流域分离的情况（例如 Netflix 的 `nflxvideo.net`、Disney+ 的 `bamgrid.com` 与 `dssott.com`）。如果规则漏掉了视频流 CDN 域，就会出现片单封面能刷出来、一点播放按钮立刻转圈报错的假象，甚至消耗高倍率默认组流量。
+
+---
+
+## 四、常见国产软件、开发工具与网盘误入代理的高耗流纠偏案例
+
+哪怕写好了 AI 与流媒体规则，现实中最容易把用户月付套餐或高价不限时包「一夜烧穿」的元凶，往往不是海外网站，而是**未命中国内直连规则的国产大流量软件、网盘客户端与本地开发工具**。一旦这类大吞吐流量误走代理，再叠加上部分机场线路的 `2x`–`5x` [流量倍率系数](/routes/multiplier/)，往往一晚就能白白扣光几十甚至上百 GB 配额（尤其对于购买了 [光速云](/brands/guangsuyun/) `¥147/247GB` 等 [不限时一次性流量包](/pricing/non-expiring/) 的用户，更是不可挽回的纯损耗）。
+
+### 1. 五类高发误入代理场景与纠偏对照表
+
+| 误入场景分类 | 典型软件与请求特征 | 误走代理的真实后果（含倍率放大） | 精准规则纠偏方法（置于第 1 层最高优先级） |
+| :--- | :--- | :--- | :--- |
+| **国产网盘与云同步** | 百度网盘、阿里云盘、夸克网盘、WPS/飞书大附件传输 | 上传下载双向计费；若误连 `3x` 节点传 20GB 素材，后台直接扣除 `60GB` 配额且速度大幅缩水 | 用 `PROCESS-NAME` 强制直连网盘主程序，并将国内对象存储 CDN 后缀显式列入前置 `DIRECT` |
+| **国内开源镜像源** | `npmmirror`、清华/阿里 PyPI 镜像、Docker 国内加速、Gitee | 依赖包下载本来就在国内节点，绕道香港或美国节点反而降至几百 KB/s 并白烧几十 GB 镜像流量 | 将国内镜像域名后缀置顶 `DIRECT`，仅保留 `github.com` 与海外原始源走 `🚀 节点选择` |
+| **游戏更新与 P2P 挂种** | Steam/Epic 游戏大更新、系统大版本升级、`qBittorrent` / 迅雷 | 动辄 50–100GB 下载包与整夜做种上传瞬间打爆小包套餐，P2P 高并发还可能触发机场审计限速 | 将 BT/PT 客户端进程名直接置顶 `DIRECT`，系统大更新下载期间核查 `MATCH` 未误命中高倍率组 |
+| **国产音视频与直播** | 腾讯会议、钉钉/飞书音视频会议、B 站/虎牙直播推送 | 高并发 UDP 音视频流绕行跨国节点造成延迟飙升、画面卡顿，同时持续消耗代理流量 | 通过完整 `cn_domain` 与会议进程直连双保险锁定 `DIRECT`，确保实时媒体包不进代理隧道 |
+| **开发容器与内网** | `Docker`、`WSL2`、公司零信任 VPN、内网 `GitLab` / ERP | `fake-ip` 假地址或代理规则拦截私有域导致镜像拉取失败、内网系统超时断连 | 把公司内部域名与私有网段置顶 `DIRECT`（带 `no-resolve`），并在 [TUN 模式](/guides/tun/) 补齐 `fake-ip-filter` |
+
+### 2. 真实纠偏规则模板与适用边界
+
+需要注意，只有支持通用订阅导出的机场（如 [光速云](/brands/guangsuyun/)、[一翻云](/brands/yifan/)、[梯子云](/brands/tiziyun/)、[可信云](/brands/kexin/) 等）才允许你在 [Clash Verge Rev](/clients/clash-verge-rev/) 中注入以下自定义防偷跑规则；如果是 [飞猫云](/brands/feimao/)、[隐形人](/brands/yinxingren/) 等纯专属客户端品牌，则无法手动修改内核级规则列表（参见 [专属客户端 vs 通用订阅对照](/compare/dedicated-client-vs-universal-sub/)）。针对通用订阅用户，可直接在覆写 `prepend-rules` 顶部加入以下纠偏片段：
+
+```yaml
+# 防高倍率偷跑与国内开发/网盘纠偏（置顶插入第 1 层）
+prepend-rules:
+  # 1. 国内常见网盘、云盘与高吞吐传输进程直连（仅桌面端进程匹配生效）
+  - PROCESS-NAME,baidunetdisk.exe,DIRECT
+  - PROCESS-NAME,aDrive.exe,DIRECT
+  - PROCESS-NAME,QuarkCloudDrive.exe,DIRECT
+  - PROCESS-NAME,qbittorrent.exe,DIRECT
+  - PROCESS-NAME,Thunder.exe,DIRECT
+
+  # 2. 国内开发镜像源与代码托管直连（与海外 GitHub 明确分离）
+  - DOMAIN-SUFFIX,npmmirror.com,DIRECT
+  - DOMAIN-SUFFIX,tuna.tsinghua.edu.cn,DIRECT
+  - DOMAIN-SUFFIX,mirrors.aliyun.com,DIRECT
+  - DOMAIN-SUFFIX,gitee.com,DIRECT
+
+  # 3. 常见国内网盘传输与会议服务核心域补充直连兜底
+  - DOMAIN-SUFFIX,baidupcs.com,DIRECT
+  - DOMAIN-SUFFIX,aliyundrive.com,DIRECT
+  - DOMAIN-SUFFIX,meeting.tencent.com,DIRECT
+```
+
+最后再配合策略组正则把 `2x`、`3x`、`5x` 高倍率节点从主力自动组剔除，就能彻底堵住「挂着代理传网盘或拉依赖却莫名耗光套餐」的隐藏漏洞。
+
+---
+
+## 五、规则修改后的生效铁律：清理长连接、处理 QUIC 与日志验证
+
+几乎每一个刚学写分流规则的用户都踩过同一个坑：**明明把规则写得完美无缺并保存生效了，刷新浏览器打开 ChatGPT 或 Netflix 却发现依然报错，甚至连接日志里显示它还在走老的香港节点**。
+
+这并不是分流规则没起作用，而是现代网络协议的**长连接复用（Keep-Alive 与 HTTP/3 QUIC）**机制在作祟：
+
+1. **TCP/TLS 与 HTTP/3 长连接不会自动断开**：代理客户端里的 `rules` 规则只在**建立新连接的那一瞬间**执行一次匹配判断。只要你刚才打开网页时已经通过香港节点建好了一条长连接，哪怕你一秒后把规则改成了日本节点，浏览器接下来的几十秒甚至几分钟内依然会沿着那条还没关闭的旧隧道继续发数据包。
+2. **UDP 443（QUIC）在部分代理环境下的绕过与卡顿**：现代 Chrome、Edge 与手机 App 默认优先通过 UDP 443 端口尝试 HTTP/3（QUIC）握手。部分机场节点对 UDP 转发支持不佳，或旧 QUIC 会话死死咬住旧路由不放。这也是为什么上文工程模板中预留了针对特定视频流或域名的 `REJECT-DROP` 示例——拒绝 UDP 443 后，浏览器会在毫秒内自动降级回走标准且稳定的 TCP TLS 连接，规则接管立刻变得顺滑精准。
+
+**每次调整完分流规则后，请严格执行以下四步验证动作**：
+
+1. **断开客户端全部活跃连接**：在 `Clash Verge Rev`、FlClash 或 `Shadowrocket` 的连接（Connections / 请求日志）管理页面，点击「关闭全部连接（Close All Connections）」按钮，强行掐断所有历史残余会话。
+2. **刷新本地浏览器测试环境**：新开一个浏览器无痕隐私窗口（Incognito Mode），避开原窗口里已经打上地区拦截标记的 Cookie 与 LocalStorage 缓存，重新访问目标站点（如 `chatgpt.com` 或 `claude.ai`）。
+3. **打开实时连接面板核对命中行**：回到客户端「连接」页面，在搜索框内键入目标域名关键词（如 `anthropic`、`openai`、`googlevideo`、`netflix`），重点观察每一条活跃连接右侧显示的**命中规则（Rule）**和**实际链路（Chains）**：
+   - 若命中规则显示为 `DOMAIN-SUFFIX(claude.ai)` 且链路末端的节点名称为你指定的日本或美国节点，说明规则 100% 精准接管；
+   - 若命中规则显示为 `MATCH` 且节点跳去了香港，说明该请求使用了某个未列入规则的辅助子域名（例如登录验证接口的新域名），把日志中显示的新域名直接补进第 2 层对应分组即可彻底堵住漏洞。
+4. **验证国内业务是否零耗流**：最后打开一个国内常见视频站或网盘，确认连接面板中对应请求的链路显示为 `DIRECT`，且不再经过任何机场节点，整套分流工程即正式验收完成。
+
+如果在使用高配规则时遇到部分命令行工具（如 `git`、`curl`、`Python`、`Claude CLI`）或 UWP 应用完全不理会系统代理分流规则的情况，请继续阅读 [TUN 虚拟网卡模式原理解析](/guides/tun/)，让底层虚拟网卡接管与这套规则树形成完整闭环。

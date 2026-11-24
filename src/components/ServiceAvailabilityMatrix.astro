@@ -1,0 +1,139 @@
+---
+import type { ServiceStatus } from '../data/brandSchema';
+
+interface Props {
+  brandName: string;
+  accentColor: string;
+  aiServices: ServiceStatus[];
+  streamingServices: ServiceStatus[];
+}
+
+const STATUS_MAP: Record<ServiceStatus['status'], { label: string; dot: string }> = {
+  measured: { label: '已实测可用 (Measured)', dot: '#10b981' },
+  historical: { label: '历史测试记录 (Historical)', dot: '#60a5fa' },
+  vendor: { label: '资料宣称支持 (Vendor)', dot: '#f59e0b' },
+  partial: { label: '视节点/部分可用 (Partial)', dot: '#fbbf24' },
+  not_tested: { label: '尚未测试 (Not Tested)', dot: '#64748b' },
+  unavailable: { label: '失败/不支持 (Unavailable)', dot: '#ef4444' },
+};
+
+const { brandName, accentColor, aiServices, streamingServices } = Astro.props;
+---
+
+<section class="obs-panel" style={`--accent: ${accentColor};`} aria-label={`${brandName} AI 与流媒体可用性矩阵`}>
+  <div class="obs-panel__head">
+    <div>
+      <div class="obs-panel__eyebrow">SERVICE AVAILABILITY MATRIX · AI & STREAMING</div>
+      <h3 class="obs-panel__title">{brandName} AI 工具与流媒体状态矩阵</h3>
+    </div>
+  </div>
+
+  <div class="sam-cols">
+    <div class="obs-subcard">
+      <div class="sam-group-title">AI 生产力平台</div>
+      <div class="sam-list">
+        {aiServices.map((item) => {
+          const meta = STATUS_MAP[item.status];
+          return (
+            <div class="sam-item">
+              <div class="sam-item__top">
+                <strong>{item.service}</strong>
+                <span class="sam-status">
+                  <i class="sam-dot" style={`background: ${meta.dot};`}></i>
+                  {meta.label}
+                </span>
+              </div>
+              <p class="sam-note">{item.note}</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+
+    <div class="obs-subcard">
+      <div class="sam-group-title">流媒体与社媒平台</div>
+      <div class="sam-list">
+        {streamingServices.map((item) => {
+          const meta = STATUS_MAP[item.status];
+          return (
+            <div class="sam-item">
+              <div class="sam-item__top">
+                <strong>{item.service}</strong>
+                <span class="sam-status">
+                  <i class="sam-dot" style={`background: ${meta.dot};`}></i>
+                  {meta.label}
+                </span>
+              </div>
+              <p class="sam-note">{item.note}</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+
+  <p class="obs-note">
+    口径说明：严格区分“厂商资料宣称（Vendor）”“部分节点可用（Partial）”与“独立脚本实测（Measured）”。平台风控随时变化，不能仅凭旧记录保证全节点可用。
+  </p>
+</section>
+
+<style>
+  .sam-cols {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  @media (min-width: 768px) {
+    .sam-cols {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .sam-group-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #93c5fd;
+    margin-bottom: 0.65rem;
+    letter-spacing: 0.03em;
+  }
+  .sam-list {
+    display: grid;
+    gap: 0.65rem;
+  }
+  .sam-item {
+    padding-bottom: 0.6rem;
+    border-bottom: 1px dashed var(--obs-border);
+  }
+  .sam-item:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+  .sam-item__top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.88rem;
+    color: #f8fafc;
+  }
+  .sam-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: #cbd5e1;
+  }
+  .sam-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    display: inline-block;
+  }
+  .sam-note {
+    margin: 0.25rem 0 0;
+    font-size: 0.8rem;
+    color: var(--obs-text-muted);
+    line-height: 1.5;
+  }
+</style>

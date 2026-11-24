@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { ALL_BRANDS } from '../data/brands';
+import { toBrandPath } from '../lib/slug';
+import { buildBreadcrumbSchema } from '../lib/schema';
+
+const seo = {
+  title: '品牌数据更新日志与待核验清单｜网络AI',
+  description: '跟踪网络AI 对 31 家机场品牌的建库审计、源文档冲突处理记录以及下一步联网核验队列。',
+  pathname: '/changelog/',
+};
+const schemas = [buildBreadcrumbSchema([{ name: '首页', href: '/' }, { name: '品牌数据更新日志', href: '/changelog/' }])];
+---
+
+<BaseLayout seo={seo} schemas={schemas}>
+  <div class="container page-section prose-article">
+    <Breadcrumbs items={[{ name: '首页', href: '/' }, { name: '品牌数据更新日志', href: '/changelog/' }]} />
+    <h1>品牌数据更新日志与核验队列</h1>
+    <div class="surface-card" style="margin-block:1.25rem;">
+      <strong class="mono">2026-11-23 · 初始数据库审计与整站发布基线</strong>
+      <ul>
+        <li>完成原始《32家机场品牌清单》去重审计：合并 <strong>Firefly</strong> 与 <strong>Firefly 萤火虫</strong> 为单一实体 <code>/brands/firefly/</code>，确立全库 <strong>31 家</strong>唯一品牌实体。</li>
+        <li>引入光速云 2026-08-19 五张实测原始截图并入档案，同时记录其与文字材料之间的协议（Shadowsocks vs VLESS/AnyTLS）及轻量版流量（59GB vs 69GB）冲突。</li>
+        <li>隔离图表设计文档中的 <code>2026.6.1 飞猫云样例</code>，确保 2026-10-19 测速数据全部明确标注“非晚高峰”。</li>
+        <li>保留云界线、环球梯、榴莲云推广入口原文并标记 <code>format_anomaly_unverified</code>。</li>
+      </ul>
+    </div>
+
+    <h2>各品牌当前待核验项目清单</h2>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>品牌</th>
+            <th>待核验清单</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ALL_BRANDS.map((b) => (
+            <tr>
+              <td><a href={toBrandPath(b.slug)}><strong>{b.name}</strong></a></td>
+              <td>{b.pendingVerifications.join('；')}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,143 @@
+---
+slug: "linux-openwrt-clients-guide"
+title: "Linux与OpenWrt代理客户端指南：v2rayA与Nikki配置"
+description: "详解 Linux 桌面与 OpenWrt 软路由客户端选型：对比 v2rayA、OpenClash 与 Nikki，演示守护进程保活与网关透明代理实操。"
+h1: "Linux 与 OpenWrt 软路由客户端实战指南：包格式识别、防火墙适配与版本红线"
+pillar: "clients"
+categoryLabel: "Linux 与软路由"
+targetKeyword: "OpenWrt 软路由代理插件推荐"
+secondaryKeywords:
+  - "OpenClash PassWall2"
+  - "Nikki OpenWrt 24.10"
+  - "HomeProxy sing-box"
+  - "Linux v2rayA DEB RPM AppImage"
+appliesTo: "Ubuntu/Debian/Fedora/Arch Linux 及 OpenWrt 22.03–24.10+ 软路由"
+prerequisites:
+  - "Linux 终端或 OpenWrt SSH 登录权限，操作前已备份原有网络与防火墙配置"
+  - "确认设备 CPU 架构（x86_64、aarch64、mipsel 等）及闪存剩余空间"
+  - "OpenWrt 用户需明确当前固件版本号及防火墙后端（iptables fw3 或 nftables fw4）"
+pubDate: "2026-11-23"
+updatedDate: "2026-11-23"
+answerSummary: "Linux 桌面端优先选择提供 DEB、RPM 或 AppImage 包的 Clash Verge Rev、FlClash 或 v2rayN；无桌面环境的服务器与家庭网关主机推荐部署提供 Web 面板与透明代理的 v2rayA。OpenWrt 软路由方面，老固件与习惯图形化丰富功能的环境常用 OpenClash 或 PassWall2；基于 nftables 的现代固件可选用 HomeProxy（sing-box）；而轻量化 Mihomo 插件 Nikki 存在明确硬性门槛：仅支持 OpenWrt 24.10 及以上版本，旧版固件强行安装会直接报错失效。动手修改任何透明代理或防火墙规则前，务必备份原网络配置并确认路由剩余闪存空间。"
+faqs:
+  - q: "为什么说 Nikki 必须 OpenWrt 24.10 及以上版本才能装？"
+    a: "站内客户端台账明确记录了 Nikki 的硬性运行前提：它依赖 OpenWrt 24.10 及以上版本提供的特定内核网络组件、nftables 特性与新版软件源依赖环境。在 OpenWrt 22.03、23.05 或更早的第三方魔改旧固件上安装 Nikki 会导致依赖缺失、防火墙规则加载失败甚至断网。"
+  - q: "OpenClash、PassWall2 和 HomeProxy 在软路由上怎么选？"
+    a: "如果机场提供完整的 Clash YAML 订阅且你熟悉 Clash 策略组，OpenClash 功能最全；如果追求稳定转发、多核心切换（Xray/sing-box）或硬路由闪存偏紧张，PassWall2 结构更清晰；如果你的路由器运行较新的官方 OpenWrt（fw4 nftables）且偏爱原生 sing-box 生态，HomeProxy 是最契合现代架构的选择。"
+  - q: "Linux 桌面端选 DEB、RPM 还是 AppImage？"
+    a: "Ubuntu/Debian/Linux Mint 系直接安装 .deb 包（支持系统包管理与权限集成）；Fedora/RHEL/openSUSE 系选 .rpm 包；如果发行版较冷门、希望免安装随用随走，选 .AppImage（需赋予可执行权限并安装 libfuse2 依赖）。"
+relatedLinks:
+  - title: "跨设备与软路由协同使用指南"
+    href: "/guides/multi-device/"
+    note: "了解多终端与家庭网关配合时的设备数限制与分流策略"
+  - title: "Mihomo 内核专题"
+    href: "/clients/mihomo/"
+    note: "查看 OpenClash 与 Nikki 共同依赖的 Mihomo 内核说明"
+  - title: "sing-box 生态专题"
+    href: "/clients/sing-box/"
+    note: "了解 HomeProxy 与无桌面环境配置思路"
+  - title: "TUN 模式与防火墙安全回退"
+    href: "/guides/articles/tun-vs-system-proxy-dns/"
+    note: "避免 Docker/WSL2 与透明代理路由冲突"
+---
+
+## Linux 客户端形态与包格式选型
+
+在 Linux 环境中，客户端选择取决于你运行的是「带图形界面的桌面工作站」还是「无显示器的终端服务器 / 家庭旁路由主机」。
+
+### 1. Linux 桌面端：DEB / RPM / AppImage 选包规则
+
+`Clash Verge Rev`、`v2rayN`、`FlClash`、`Clash Nyanpasu`、`Hiddify`、`Karing` 和 `Clash Mi` 均提供 Linux 桌面客户端。安装前先通过终端确认系统发行版与 CPU 架构：
+
+```bash
+uname -m
+cat /etc/os-release | grep -E "^(ID|VERSION_ID)="
+```
+
+根据输出结果匹配对应安装包格式：
+
+- **`.deb` 格式**：适用于 Debian、Ubuntu、Linux Mint、Deepin、Pop!_OS 等 APT 系发行版。优势是能够自动注册系统桌面快捷方式与部分 TUN 提权服务。安装命令示例：
+
+```bash
+sudo apt update && sudo apt install ./client-package-amd64.deb
+```
+
+- **`.rpm` 格式**：适用于 Fedora、Red Hat Enterprise Linux (RHEL)、AlmaLinux、Rocky Linux、openSUSE 等 DNF/YUM 系发行版：
+
+```bash
+sudo dnf install ./client-package-x86_64.rpm
+```
+
+- **`.AppImage` 格式**：适用于 Arch Linux（除 AUR 外）、NixOS 或不想修改系统包依赖的跨发行版场景。使用前需添加可执行权限；若在 Ubuntu 22.04/24.04 运行报 FUSE 错误，需按需安装 `libfuse2`：
+
+```bash
+chmod +x Client-x86_64.AppImage
+./Client-x86_64.AppImage
+```
+
+**重要提示**：在 Linux 桌面端启用 TUN 虚拟网卡模式时，由于内核权限隔离，往往需要为底层代理核心（如 `mihomo`）授予 `CAP_NET_ADMIN` 网络管理能力或通过 systemd 服务运行。切勿为了图省事直接长期使用 `sudo` 以 root 身份启动整个 Electron/Tauri 图形界面进程。
+
+### 2. 无桌面主机与轻量网关：v2rayA
+
+对于没有桌面环境（Headless）的 Ubuntu Server、树莓派或家庭 Debian 旁路由，`v2rayA` 是最成熟的选择之一：
+
+- **核心架构**：内置 Web 管理控制台（默认监听本机 `2017` 端口），在局域网任意设备的浏览器中打开即可完成订阅导入、节点切换与透明代理开关。
+- **兼容内核**：驱动 `v2ray-core` 或 `Xray`，支持多种主流订阅导入及分流规则。
+- **操作前安全要求**：站内台账明确提醒，**在 Linux 主机开启 v2rayA 透明代理前，必须了解当前系统防火墙类型（iptables 或 nftables）并提前备份原有网络与防火墙配置**，防止规则下发后导致 SSH 远程连接中断。
+
+## OpenWrt 软路由四大插件横向对比
+
+把代理部署在 OpenWrt 主路由或旁路由上，可以让全屋手机、电视盒子（Apple TV、Android TV）和游戏主机免装客户端直接分流。但软路由环境一旦配置出错会影响全屋断网，动手前必须先查清固件底细。
+
+| 插件名称 | 底层核心 | 固件与环境要求 | 内存与闪存开销 | 适用场景与核心提醒 |
+| :--- | :--- | :--- | :--- | :--- |
+| **OpenClash** | Mihomo (Clash.Meta) | 兼容 fw3 与 fw4，需注意内核与规则集体积 | 较高（不适合低闪存小路由） | Clash 生态功能最全，需核对固件版本与 CPU 架构 |
+| **PassWall2** | Xray / sing-box | 适配广泛，注重依赖包完整性 | 中等（相对轻巧） | 多核心节点管理与局域网访问控制清晰；小闪存设备须检查剩余空间 |
+| **Nikki** | Mihomo | **硬性要求：OpenWrt 24.10 及以上版本** | 轻量化设计 | 现代化 Mihomo 透明代理管理；**旧版固件完全不兼容** |
+| **HomeProxy** | sing-box | 依赖较新 OpenWrt nftables (fw4) 环境 | 较低至中等 | 现代原生 sing-box 架构，安装前需确认软件源内核包版本 |
+
+## OpenWrt 部署前的三项硬性自检（必做）
+
+在 OpenWrt 的 LuCI 界面或 SSH 终端点击安装任何 `.ipk` 插件前，先运行以下三条命令，避免“变砖”或空间耗尽导致配置无法保存：
+
+```sh
+# 1. 检查 OpenWrt 固件版本号与架构（确认是否满足 24.10+ 等要求）
+cat /etc/openwrt_release
+
+# 2. 检查 overlay 可用剩余闪存空间（硬路由尤其关键）
+df -h /overlay
+
+# 3. 检查系统防火墙后端（是否存在 nft 命令以区分 fw4 与 fw3）
+which nft fw4 fw3 iptables
+```
+
+### 自检结果解读与避坑红线
+
+1. **版本红线（Nikki 专属硬要求）**：查看 `DISTRIB_RELEASE` 字段。只有明确为 `24.10` 及以上版本的 OpenWrt 固件，才可考虑部署 `Nikki`。如果显示 `23.05`、`22.03`、`21.02` 或基于旧版源码编译的第三方固件，请直接放弃 Nikki，改用对应架构的 `OpenClash` 或 `PassWall2`。
+2. **闪存空间红线**：许多百元级家用硬路由（如 16MB/32MB Flash 机型）的 `/overlay` 剩余空间只有几 MB。而 `OpenClash` 加上 Mihomo 内核以及 GeoIP/GeoSite 数据库通常需要 15MB–30MB 空间。空间不足时强行安装会造成固件只读锁死，此类设备应扩展外部存储或改用 x86/ARM 软路由设备，或仅在手机/电脑端运行客户端。
+3. **防火墙后端识别（fw3 vs fw4）**：OpenWrt 从 22.03 起全面从 `iptables`（fw3）迁移到 `nftables`（fw4）。`HomeProxy` 与 `Nikki` 面向现代 `fw4` / `nftables` 架构构建；若你在老旧 `fw3` 固件上安装仅支持 `fw4` 的插件，透明代理流量将完全无法转发。
+
+## 软路由分流与专属客户端机场的冲突提示
+
+部署软路由之前，还有一个前提经常被新手忽略：**并非所有机场都能放进 OpenWrt 路由器里**。
+
+- OpenClash、PassWall2、Nikki、HomeProxy 和 v2rayA 全部依赖机场提供**标准第三方订阅链接或节点参数**。
+- 如果你购买的机场服务明确标注「仅支持官方专属客户端、不提供第三方订阅链接」（例如 [飞猫云](/brands/feimao/)、[隐形人](/brands/yinxingren/)、[SOGO 云](/brands/sogo/) 中的封闭客户端方案等；注：SOGO 云虽在文案中提及支持主流软路由自研端，但具体安装包形式在站内仍标为待核实），则无法直接填入 OpenClash 或 PassWall2 使用。
+- 选择用于软路由的机场时，务必优先确认其支持 Clash YAML、VLESS 或 sing-box 通用订阅导入，并先购入单月套餐测试，详见 [专属客户端 vs 通用订阅机场对照](/compare/dedicated-client-vs-universal-sub/)。
+
+## 安全备份与断网紧急回退步骤
+
+为了保证全屋网络在折腾软路由时能随时秒级恢复：
+
+1. **配置备份**：在 OpenWrt LuCI 菜单「系统」—「备份与升级」中点击「生成备份」，将压缩包下载到本地电脑。
+2. **先开局域网控权，再开全局转发**：首次配置 OpenClash 或 PassWall2 时，先只代理测试设备（在访问控制中设置「仅代理指定内网 IP」），验证手机或电脑连接正常后再放开到全屋局域网设备。
+3. **DNS 冲突预防**：不要同时启用 OpenClash 的 DNS 劫持和 PassWall2 的 DNS 转发，同一台路由器同一时刻只保留并启用**一个**代理插件，其余未使用的插件务必在服务列表中彻底禁用（Disable）并停止进程。
+4. **断网回退**：若开启透明代理后全屋无法打开网页且 LuCI 无法响应，通过网线直连电脑手动指定静态 IP（如 `192.168.1.100`，网关 `192.168.1.1`），SSH 登录后停止代理服务并重启防火墙：
+
+```sh
+/etc/init.d/openclash stop
+/etc/init.d/passwall2 stop
+/etc/init.d/firewall restart
+```
+
+若仍需排查局域网 DNS 污染或 Fake-IP 回环异常，可进一步阅读 [DNS 模式对比与回退操作指南](/guides/articles/tun-vs-system-proxy-dns/)。

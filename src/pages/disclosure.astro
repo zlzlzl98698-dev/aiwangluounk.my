@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { AFFILIATE_DISCLOSURE } from '../data/links';
+import { buildBreadcrumbSchema } from '../lib/schema';
+
+const seo = {
+  title: '广告赞助与推广披露政策｜网络AI',
+  description: '说明网络AI 的商业合作模式、联盟推广链接（Affiliate）运作机制、/go/ 网关重定向隔离、rel 属性规范及编辑独立性声明。',
+  pathname: '/disclosure/',
+};
+const schemas = [buildBreadcrumbSchema([{ name: '首页', href: '/' }, { name: '广告与推广披露', href: '/disclosure/' }])];
+---
+
+<BaseLayout seo={seo} schemas={schemas}>
+  <div class="container page-section prose-article">
+    <Breadcrumbs items={[{ name: '首页', href: '/' }, { name: '广告与推广披露', href: '/disclosure/' }]} />
+    <h1>广告赞助与商业推广披露政策</h1>
+    <p class="summary-callout">
+      <strong>核心披露声明</strong>：{AFFILIATE_DISCLOSURE}
+    </p>
+
+    <h2>一、联盟推广（Affiliate）运作机制</h2>
+    <p>
+      <strong>网络AI</strong> 始终致力于为中文读者提供免付费、无门槛、高质量的静态技术研究文档与测评数据库。为了维持高昂的测试宽带（上海电信/广东移动等三大运营商 1000M FTTH 独立光纤）、多设备实验室运维、域名解析及边缘 CDN 分发成本，本站参与了部分服务商的联盟营销计划（Affiliate Program）。
+    </p>
+    <p>
+      当读者通过本站提供的按钮或链接访问第三方服务商并产生付费订阅时，服务商可能会向本站返还小比例的推广佣金。<strong>请读者知悉：这一过程绝不会增加您的实际结账金额；在多数情况下，通过本站记录的专属优惠码，您甚至能获得低于官方标价的折后价格。</strong>
+    </p>
+
+    <h2>二、技术规范与搜索引擎合规隔离</h2>
+    <p>
+      为了坚决捍卫搜索引擎爬虫预算、彻底隔绝垃圾商业链接欺诈风险，本站在代码与网络协议层面实施了严苛的合规技术防护：
+    </p>
+    <ul>
+      <li><strong>全站集中数据字典治理</strong>：全站所有商业引流地址均严格收归于 <code>src/data/links.ts</code> 集中维护，绝不散落在文章代码内，严防暗链或隐蔽重定向；</li>
+      <li><strong>统一 <code>/go/&#123;slug&#125;/</code> 隔离网关</strong>：所有外部商业链接均通过内部跳转网关分发，彻底将第三方推广落地页域名从页面的静态源码中解耦；</li>
+      <li><strong>严格遵守 Google 赞助链接规范</strong>：全站所有商业推广链接均强制绑定 <code>rel="nofollow sponsored noopener"</code> 属性，告知搜索引擎爬虫“此链接属于商业合作”，绝不进行任何形式的 PageRank 权重买卖。</li>
+    </ul>
+
+    <h2>三、编辑独立性与非商业利益驱动</h2>
+    <p>
+      我们坚信公信力是技术评测平台的生命线。在此郑重声明：
+    </p>
+    <ol>
+      <li><strong>佣金比例不决定评测推荐位次</strong>：我们绝不会因为某家服务商返佣比例高而刻意掩盖其频繁断连、掉单不补或高倍率计费的客观缺陷；也不会因某款开源客户端（如 sing-box、v2rayN）无任何商业返利而减少相关教程的投入；</li>
+      <li><strong>运营优先级与事实核查独立运作</strong>：站内基于可用性、套餐门槛设定的“推荐候选”（例如光速云），仅仅代表技术组在特定预算档位下的综合选型建议。在对应的品牌档案中，其数据冲突、流媒体限制及历史争议依然会受到全方位的无差别审计；</li>
+      <li><strong>拒绝付费删帖与排名购买</strong>：本站不接受任何品牌付费删除负面技术评测、虚构 5 星好评或强行插队榜首的商业请求。</li>
+    </ol>
+
+    <h2>四、用户最终购买决策提醒</h2>
+    <p>
+      网络AI 仅作为客观技术资料的整理与呈现方，并非任何代理服务商的代理机构、联营伙伴或担保方。第三方服务商的套餐定价、服务可用性、节点稳定性与售后退款政策由各服务商自行制定并承担责任。在您做出任何充值决策前，请务必核实该服务商官网的《服务条款》（TOS）与退款规范，优先选择支持按月支付的低门槛方案，理性消费。
+    </p>
+  </div>
+</BaseLayout>

@@ -1,0 +1,87 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TopicPillarView from '../../components/TopicPillarView.astro';
+import { NAV_PILLARS } from '../../data/navigation';
+import {
+  buildBreadcrumbSchema,
+  buildCollectionPageSchema,
+  buildFaqSchema,
+  buildItemListSchema,
+} from '../../lib/schema';
+import { toGuidePath } from '../../lib/slug';
+
+export async function getStaticPaths() {
+  return NAV_PILLARS.filter((p) => p.id !== 'brands').map((pillar) => ({
+    params: { pillar: pillar.id },
+    props: { pillar },
+  }));
+}
+
+const { pillar } = Astro.props;
+const allGuides = await getCollection('guides');
+const publishedGuides = allGuides
+  .filter((g) => g.data.pillar === pillar.id)
+  .map((g) => ({
+    title: g.data.h1,
+    href: toGuidePath(g.data.slug),
+    summary: g.data.answerSummary,
+  }));
+
+const pillarEntries = await getCollection('pillars');
+const pillarDoc = pillarEntries.find((entry) => entry.data.id === pillar.id);
+const rendered = pillarDoc ? await render(pillarDoc) : null;
+const Content = rendered?.Content;
+const headings = rendered?.headings ?? [];
+
+const seoTitle = pillarDoc?.data.title ?? `${pillar.title}专题｜网络AI`;
+const seoDesc = pillarDoc?.data.description ?? pillar.summary;
+const faqs = pillarDoc?.data.faqs ?? [];
+
+const seo = {
+  title: seoTitle,
+  description: seoDesc,
+  pathname: pillar.href,
+  modifiedTime: pillarDoc?.data.updatedDate ?? '2026-11-23',
+};
+
+const schemas = [
+  buildBreadcrumbSchema([
+    { name: '首页', href: '/' },
+    { name: pillar.title, href: pillar.href },
+  ]),
+  buildCollectionPageSchema({
+    title: seoTitle,
+    description: seoDesc,
+    pathname: pillar.href,
+    dateModified: pillarDoc?.data.updatedDate ?? '2026-11-23',
+    about: pillarDoc?.data.entities ?? [pillar.title],
+  }),
+  buildItemListSchema({
+    name: `${pillar.title} 二级专题索引`,
+    pathname: pillar.href,
+    items: pillar.children.map((c) => ({ name: c.title, href: c.href })),
+  }),
+  ...(faqs.length > 0 ? [buildFaqSchema(faqs)] : []),
+];
+---
+
+<BaseLayout seo={seo} schemas={schemas}>
+  <TopicPillarView
+    pillar={pillar}
+    h1={pillarDoc?.data.h1}
+    intent={pillarDoc?.data.intent}
+    targetKeyword={pillarDoc?.data.targetKeyword}
+    entities={pillarDoc?.data.entities}
+    updatedDate={pillarDoc?.data.updatedDate}
+    leadSummary={pillarDoc?.data.answerFirst ?? pillar.summary}
+    headings={headings}
+    ctaHeading={pillarDoc?.data.ctaHeading}
+    ctaActions={pillarDoc?.data.ctaActions}
+    faqs={faqs}
+    nextPillarLinks={pillarDoc?.data.nextPillarLinks}
+    publishedGuides={publishedGuides}
+  >
+    {Content && <Content />}
+  </TopicPillarView>
+</BaseLayout>

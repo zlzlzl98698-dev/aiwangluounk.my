@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { NAV_PILLARS } from '../data/navigation';
+
+const seo = {
+  title: '页面未找到 (404)',
+  description: '您访问的页面地址不存在或已调整，请通过全站导航、站内搜索或品牌数据库继续访问。',
+  pathname: '/404.html',
+  noindex: true,
+};
+---
+
+<BaseLayout seo={seo} pagefindIgnore={true}>
+  <div class="container page-section" style="max-width: 780px; padding-block: 3.5rem;">
+    <div class="surface-card">
+      <div class="mono" style="color:var(--brand-cyan); font-weight:700;">HTTP 404 · NOT FOUND</div>
+      <h1 style="margin:0.4rem 0 0.75rem;">抱歉，未能找到您访问的页面</h1>
+      <p style="color:var(--text-secondary);">
+        该 URL 可能存在拼写错误或尚未发布。您可以通过下方核心入口或页头搜索框快速定位所需品牌档案与教程：
+      </p>
+      <div style="display:flex; flex-wrap:wrap; gap:0.55rem; margin-block: 1.25rem;">
+        <a href="/" class="btn btn-primary">返回首页</a>
+        <a href="/brands/" class="btn btn-secondary">浏览 31 品牌库</a>
+        <a href="/clients/" class="btn btn-secondary">客户端指南</a>
+        <a href="/troubleshooting/" class="btn btn-secondary">故障排查</a>
+      </div>
+      <div style="border-top:1px solid var(--border-hairline); padding-top:1rem;">
+        <strong style="font-size:0.88rem;">全站十大一级栏目：</strong>
+        <div style="display:flex; flex-wrap:wrap; gap:0.4rem 0.85rem; margin-top:0.5rem; font-size:0.86rem;">
+          {NAV_PILLARS.map((p) => (
+            <a href={p.href}>{p.title}</a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

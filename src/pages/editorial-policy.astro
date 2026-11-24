@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { buildBreadcrumbSchema } from '../lib/schema';
+
+const seo = {
+  title: '编辑原则与评测方法论｜网络AI',
+  description: '网络AI 的内容写作准则：Answer-First 优先结论、条件化约束、不编造体验、测速数据与商业推广严格隔离及事实勘误机制。',
+  pathname: '/editorial-policy/',
+};
+const schemas = [buildBreadcrumbSchema([{ name: '首页', href: '/' }, { name: '编辑原则', href: '/editorial-policy/' }])];
+---
+
+<BaseLayout seo={seo} schemas={schemas}>
+  <div class="container page-section prose-article">
+    <Breadcrumbs items={[{ name: '首页', href: '/' }, { name: '编辑原则', href: '/editorial-policy/' }]} />
+    <h1>网络AI 编辑原则与评测方法论</h1>
+    <p>
+      在涉及网络安全、隐私保护与跨境数据传输的技术领域，模糊不清的推荐不仅会造成经济损失，更可能带来账号封禁或数据泄露风险。为了维护最高标准的客观性与可复现性，<strong>网络AI</strong> 全体编辑与技术审校人员严格遵循以下五项核心原则：
+    </p>
+
+    <h2>一、Answer-First 结论先行与条件化约束</h2>
+    <p>
+      我们深知读者的阅读时间极为宝贵。每篇指南、评测或排障文章均在正文顶部以突出的视觉模块给出明确的<strong>核心结论（TL;DR）</strong>，明确指出适合与不适合的具体场景。
+    </p>
+    <ul>
+      <li><strong>拒绝无意义的绝对化修饰</strong>：禁止使用“最好用”、“全网最稳”、“无可挑剔”等无法量化的空洞词汇；</li>
+      <li><strong>强制条件化结论</strong>：所有推荐必须附带前置约束条件。例如：“如果你的核心需求是解锁 ChatGPT 且预算在 25 元/月以内，此方案适用；若需要玩外服游戏追求极低 UDP 抖动，该方案不适用”。</li>
+    </ul>
+
+    <h2>二、杜绝虚假测速与捏造测试经历</h2>
+    <p>
+      绝不生产脱离实际网络环境的批量换词软文。我们对测试数据确立了明确的技术分级红线：
+    </p>
+    <ul>
+      <li><strong>真实测速数据必须标明四大要素</strong>：测试执行时间（精确到具体日期或季度）、测试本地宽带环境（如广东移动 1000M FTTH）、测试工具版本及样本量；</li>
+      <li><strong>设计样例物理隔离</strong>：前端界面演示用的排版样例（如“2026.6.1 飞猫云晚高峰样例”）严禁被包装为真实评测结论或计入品牌历史档案；</li>
+      <li><strong>坦诚标注数据盲区</strong>：当某服务商未公开节点协议或缺乏独立测速样本时，直接标示为“待补充核实”或“品牌资料暂缺”，绝不凭借主观臆断进行拼凑。</li>
+    </ul>
+
+    <h2>三、商业策略与事实核查绝对隔离</h2>
+    <p>
+      本站通过合理的推广佣金（Affiliate）覆盖实验室高带宽与服务器开支，但商业关系绝不干预技术事实的独立呈现：
+    </p>
+    <ul>
+      <li><strong>编辑优先不等于免受监督</strong>：以光速云为例，尽管其作为本站首页推荐候选之一，我们仍在其专属档案页深度披露了“99元轻量版 59GB vs 69GB 文档冲突”、“香港节点 ChatGPT 仅 App 可用”等潜在缺陷；</li>
+      <li><strong>统一隔离网关与标记</strong>：所有商业引流链接统一通过 <code>/go/&#123;slug&#125;/</code> 内部网关进行跳转，全量包裹 <code>rel="nofollow sponsored noopener"</code>，并显式标注佣金披露；</li>
+      <li><strong>禁止软文代写</strong>：不接受任何商业机构付费删除负面技术评测、隐藏源数据冲突或购买免责星级的要求。</li>
+    </ul>
+
+    <h2>四、一实体一权威页，杜绝矩阵站群</h2>
+    <p>
+      为了防止在搜索引擎中制造低质量内容冗余，本站对 31 家品牌严格执行“一实体对应一个唯一权威 URL（<code>/brands/&#123;slug&#125;/</code>）”的归档原则。全站所有对比、排行、优惠码及排障教程均围绕唯一实体页展开引用，绝不为了堆砌关键词而重复拆建同质化子站或镜像页面。
+    </p>
+
+    <h2>五、72 小时公开勘误与同行评审机制</h2>
+    <p>
+      我们深知没有绝对完美的数据库，开源社区的监督是保持数据长久鲜活的关键。我们制定了标准化的勘误工作流：
+    </p>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>处理阶段</th>
+            <th>时效承诺</th>
+            <th>执行动作与交付物</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>接收反馈</strong></td>
+            <td>24 小时内</td>
+            <td>通过邮件或工单接收用户提交的报错、价格变动截图或失效链接报告，确认问题类型。</td>
+          </tr>
+          <tr>
+            <td><strong>技术复核</strong></td>
+            <td>48 小时内</td>
+            <td>技术审校人员在评测实验室对应宽带环境中进行抓包复现、面板核对或交叉证据查验。</td>
+          </tr>
+          <tr>
+            <td><strong>构建发布</strong></td>
+            <td>72 小时内</td>
+            <td>完成数据修正，重新构建全站静态产物，并在 <a href="/changelog/">全站更新与冲突日志</a> 中公开留痕。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</BaseLayout>

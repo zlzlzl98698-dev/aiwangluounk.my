@@ -1,0 +1,248 @@
+---
+pillarId: "ai-media"
+slug: "gemini"
+title: "Gemini 与 AI Studio 节点解锁实况（2026）：08-19 实测分化、账号归属地与双组拆分｜网络AI"
+description: "结合实测截图揭示 Gemini 节点分化原因，拆解 Google 账号归属地、DNS 去向、gemini.google.com 限制及与 YouTube 送中冲突的独立分流方案。"
+h1: "Gemini 与 AI Studio 地区解锁实况：节点分化、账号归属与独立分流实战"
+intent: "地区解锁排错与分流配置型"
+targetKeyword: "Gemini机场节点解锁与地区限制"
+secondaryKeywords:
+  - "Gemini目前不支持您所在的国家"
+  - "Google AI Studio代理分流"
+  - "光速云Gemini新加坡解锁"
+  - "Google账号归属地更改"
+  - "Gemini与YouTube送中冲突"
+longTailKeywords:
+  - "为什么Google搜索和YouTube都能用唯独Gemini提示所在地区不支持"
+  - "光速云2026-08-19截图为什么新加坡解锁Gemini日本和美国全失败"
+  - "gemini.google.com和aistudio.google.com分流规则怎么写"
+  - "新加坡节点解锁Gemini却YouTube送中CN怎么拆开两个策略组"
+  - "31家机场品牌中哪些对Gemini标视节点而定哪些未实测"
+entities:
+  - "Gemini (Google)"
+  - "Google AI Studio"
+  - "光速云"
+  - "灵动云"
+  - "可信云"
+  - "速界"
+  - "二猫云"
+  - "一翻云"
+  - "MiaoKo"
+  - "YouTube 送中(CN)"
+  - "Google 账号归属地"
+keywordBoundary: "聚焦 Google Gemini 网页/App 与 Google AI Studio / Gemini API 的双重区域锁定机制、IP 与 Google 账号归属地校验、DNS 解析链路一致性、08-19 实测截图解剖、与 YouTube 送中的规则拆分方法以及 31 品牌 Gemini 核查口径；ChatGPT 分流见 /ai-media/chatgpt/，Claude 隔离见 /ai-media/claude/。"
+answerFirst: "Google Gemini 是全库所有 AI 平台中地区通过率分化最剧烈、也最容易让「只看测速不看明细」用户踩坑的服务。站内《32 家机场品牌清单》中几乎所有给出细分说明的品牌都谨慎将其标为「视节点而定」；而在光速云 2026-08-19 62 节点 MiaoKo 实测截图中，AI_google_gemini 一列呈现出极具冲击力的实态：香港专线（01–20）、日本（01–10）、美国（01–10）、台湾（01–05）以及英/法/德/泰全部显示失败，仅有新加坡（01–10）、土耳其（01）与马来西亚（01–02）实现解锁。更棘手的是，Gemini 不仅查节点 IP，还同步核验 Google 账号关联归属地、DNS 解析去向以及 Google 主域认证一致性（accounts.google.com 若走香港而 gemini.google.com 走新加坡必报错）；同时光速云 08-19 与灵动云 07-20 实测均显示新加坡节点容易伴随 YouTube 送中（CN）。实战必须把 Gemini/AI Studio 与 YouTube 拆分为两个完全独立的策略组。"
+updatedDate: "2026-11-24"
+ctaHeading: "拆分 Google AI 规则或核对品牌实测档案"
+ctaActions:
+  - label: "查阅 AI 与流媒体 GeoIP 分流实战"
+    href: "/guides/articles/ai-streaming-geoip-routing/"
+    style: "primary"
+  - label: "对照光速云 08-19 实测全图"
+    href: "/brands/guangsuyun/"
+    style: "secondary"
+  - label: "排查 YouTube 送中(CN) 定位异常"
+    href: "/ai-media/youtube/"
+    style: "secondary"
+relatedLinks:
+  - title: "ChatGPT 访问与机场节点风控排查"
+    href: "/ai-media/chatgpt/"
+    category: "AI 生产力"
+    reason: "理解为什么日本和美国节点能稳跑 ChatGPT，却可能在 Gemini 上全线失败"
+  - title: "Claude 访问与风控隔离指南"
+    href: "/ai-media/claude/"
+    category: "AI 生产力"
+    reason: "避免在需要高频切换新加坡测试 Gemini 时误伤同一规则组里的 Claude 固定出口"
+  - title: "YouTube 送中(CN) 成因与修复"
+    href: "/ai-media/youtube/"
+    category: "海外流媒体"
+    reason: "解决新加坡节点解锁了 Gemini 却连带导致 YouTube 被判为 CN 的分流冲突"
+  - title: "DNS 错误与 Fake-IP 冲突排查"
+    href: "/troubleshooting/dns/"
+    category: "故障排查"
+    reason: "排查浏览器内置 DoH 或本地 DNS 泄露导致的 Google 地区识别错乱"
+faqs:
+  - q: "为什么同一个机场的 Google 搜索和 YouTube 都能正常打开，唯独 Gemini 报错地区不支持？"
+    a: "因为 Google 对常规搜索、YouTube 与 Gemini/AI Studio 执行完全不同层级的合规审查。YouTube 几乎对所有海外 IP 放行，而 Gemini 会严格拦截香港等未开放地区，并拒绝被商用风控库标记为高风险或跨区广播异常的数据中心机房段，因此必须依赖特定干净地区的落地上游。"
+  - q: "光速云 2026-08-19 截图里为什么新加坡能解 Gemini，日本和美国 20 个节点反而全失败？"
+    a: "在光速云 2026-08-19 62 节点 MiaoKo 截图中，日本01–10 使用的是美国公司跨区广播 IP（US·KOMI-NET-AS401243），美国01–10 与香港专线01–20 亦属商宽/机房段，当时在 AI_google_gemini 列均未通过 Google 地区审核；只有新加坡01–10、马来西亚01–02 与土耳其01 在当时通过了接口检测。这说明不能想当然以为「美国或日本肯定比新加坡稳」。"
+  - q: "除光速云外，其他 30 家品牌在站内有实测确认一定能解 Gemini 吗？"
+    a: "没有。灵动云 2026-07-20/21 实测摘要未单列 Gemini（标为未测试），可信云明确声明缺乏统一实测数据，其余有说明的十余家品牌（如二猫云、SOGO 云、一翻云、唯兔云、速界等）在档案中几乎全部标注为「视节点而定」或「Vendor 宣称，不保证永久稳定」，大佬云等种子品牌亦为待核实状态。"
+  - q: "已经切到实测解锁的新加坡节点，为什么打开 gemini.google.com 还是提示不受支持？"
+    a: "高发原因有三个：第一，你当前登录的 Google 账号本身关联归属地仍被标记为中国大陆或香港，账号侧限制直接否决了节点 IP；第二，分流规则只写了 gemini.google.com 却漏掉了 accounts.google.com 或 googleapis.com，导致登录态走香港而 Gemini 走新加坡引发双出口冲突；第三，浏览器缓存了旧的拦截 Cookie，需先开无痕窗口验证。"
+  - q: "gemini.google.com 和 aistudio.google.com 的分流与解锁表现完全一样吗？"
+    a: "两者的前端入口域名与后端 API 域名不同。消费级 Gemini 网页使用 gemini.google.com 等域，而开发者使用的 Google AI Studio 与 Gemini API 主要走 aistudio.google.com、makersuite.google.com、generativelanguage.googleapis.com 与 ai.google.dev。有时消费级入口能开但未覆盖 AI Studio 域名导致编程调用失败，规则必须将两组域名全部纳入。"
+  - q: "既然新加坡节点能解锁 Gemini，为什么不把 YouTube 也一起放在新加坡策略组？"
+    a: "因为存在显著的「送中」冲突。在光速云 2026-08-19 70 节点图与灵动云 2026-07 实测中，新加坡节点均出现大面积 YouTube 送中（CN）现象。如果共用同一个新加坡组，YouTube 会丧失海外区域推荐和部分 Premium 权益；正确做法是 Gemini 走实测解锁的新加坡节点，而 YouTube 单独分流到未送中的香港、日本或美国节点。"
+  - q: "光速云 2026-08-19 截图显示新加坡解锁 Gemini，现在 11 月购买还一定完全一样吗？"
+    a: "不一定。08-19 截图是当时 62 节点快照状态，距今已近或超过 3 个月。随着机场调整新加坡/美/日上游落地机房或 Google GeoIP 库动态刷新，当下哪几个国家编号解锁都可能发生变化，购买月付后应使用无痕窗口或本地检测手段亲自确认。"
+---
+
+在配置 AI 办公环境时，最让用户措手不及的「隐形壁垒」往往不是 ChatGPT，也不是 Claude，而是 Google 旗下的 **Gemini** 与 **Google AI Studio**。几乎每个人都遇到过这样一个诡异场景：客户端连着节点，Google 搜索秒开、YouTube 4K 流畅播放、甚至连 ChatGPT 和 Claude 都正常对话，可一旦点开 `gemini.google.com` 或 `aistudio.google.com`，屏幕上却冷冰冰地弹出 **`Gemini isn't currently supported in your country`（目前尚不支持您所在的国家/地区）**。
+
+更让人摸不着头脑的是，很多人依照「用 ChatGPT 就选美国或日本」的经验，把 AI 策略组切到了美国和日本节点，结果 Gemini 依然全线报错。要彻底理解并解决 Gemini 的访问难题，必须穿透「只看节点 IP」的浅层认知，看清 Google 在 **节点地区实态、账号关联归属地、DNS 与主域一致性，以及消费端与 AI Studio 接口差异** 上的四重校验机制。
+
+---
+
+## 一、香港节点普遍受限与光速云 2026-08-19 实测铁证
+
+与 OpenAI 和 Anthropic 一样，Google 官方未将香港地区列入 Gemini 与 Google AI Studio 的直接开放支持区域。只要客户端默认连着低延迟的香港专线节点，打开 `gemini.google.com` 几乎是百分之百触发地区拦截。
+
+但真正颠覆直觉的，是不同海外地区在实测中的分化程度。以全库证据最完整的 [光速云](/brands/guangsuyun/) **2026-08-19 MiaoKo 五张原生截图**为例，其中 62 节点 Shadowsocks 测试图明确包含了 `AI_google_gemini` 检测列，给出了极其清晰且反常识的分布事实：
+
+| 测试地区（光速云 2026-08-19 62 节点快照） | 节点规模与 IP/ASN 背景 | ChatGPT (`AI_openai`) 表现 | Gemini (`AI_google_gemini`) 实测结果 | 工程启示 |
+| :--- | :--- | :--- | :--- | :--- |
+| **香港专线（01–20）** | 20 节点，`AS32167` 商宽/机房，`MEDIUM(30)` | 多显示 `仅APP(HK)` | **全部失败（0/20）** | 香港物理延迟虽低至 20–31ms，但对 Gemini 彻底不可用 |
+| **日本（01–10）** | 10 节点，`US·KOMI-NET-AS401243`（美资广播至日），`LOW(9)` | 网页与 App 普遍可用 | **全部失败（0/10）** | 跨区广播 IP 极易被 Google 识别异常或判入不支持状态，不能指望日本通吃 |
+| **美国（01–10）** | 10 节点，`US·Yancy-AS138415`，`LOW(1)` | 网页与 App 普遍可用 | **全部失败（0/10）** | 风险分极低且能解 ChatGPT/TikTok，但在当日快照中却未能通过 Gemini 接口检测 |
+| **台湾（01–05）** | 5 节点，`AS398993`，`MEDIUM(30)` | 部分可用 | **全部失败（0/5）** | 台湾落地在流媒体与 Google 定位上飘移频繁，通过率极低 |
+| **新加坡（01–10）** | 10 节点，`AS401243`，`MEDIUM(30)` | 网页与 App 普遍可用 | **全线解锁（10/10）** | **当时最核心的亚太可用出口**（但同日 70 节点图暴露全组 YouTube 送中） |
+| **马来西亚（01–02）与土耳其（01）** | 冷门补充节点（含欧洲英/法/德与泰国均败） | 部分可用 | **马来西亚、土耳其成功解锁**；英/法/德/泰均失败 | 验证了冷门合规地区在特定机房段下的奇效，适合当备选池 |
+
+**这组实测数据的核心警告**：如果某位用户按传统思路，在客户端里建立了一个「AI 专用组」并按习惯只筛选美国和日本节点，那么他在光速云 08-19 这套节点环境下，**ChatGPT 体验满分，但 Gemini 将 100% 打不开**。在所有主流 AI 平台中，Gemini 也是唯一一个强烈要求**从通用 AI 策略组里独立拆组、单独按实测结果指定国家出口**的服务。
+
+同时必须严守时效边界：2026-08-19 截图反映的是当时特定节点池的历史快照（距今已近或超过 3 个月）。实际落地时，随着机场更换上游机房或 Google 刷新风控数据库，究竟是新加坡、美国还是日本节点当下有效，必须以导入订阅后在本地无痕窗口或终端检测的实时结果为准，不可将某一次历史截图当作永久不变的铁律。
+
+---
+
+## 二、不只是看节点 IP：Google 账号归属地、DNS 与主域一致性校验
+
+在排除了香港节点、也切到了看似正常的新加坡或美国节点后，依然有大约三成用户反映 `gemini.google.com` 报错地区不支持。原因在于 Google 对 Gemini 执行的是**「三层立体核验」**，单靠改节点 IP 只能过第一关。
+
+### 1. Google 账号关联归属地（Account Country Association）
+
+Google 为每个注册账号在后台维护着一个法律条款归属国家/地区字段（通常受账号注册时的初始网络环境、绑定手机号归属、Google Play 付款资料国家以及长期登录位置影响）。
+- **典型症状**：同一个机场、同一个新加坡节点，用朋友的美区/新加坡注册的老账号登录 `gemini.google.com` 秒开；换上你自己常用的、早期在国内或香港网络环境下创建的 Google 账号，同一秒立刻弹出「目前尚不支持您所在的国家/地区」——即使浏览器开了无痕窗口、IP 确凿无疑是干净的新加坡原生地址也照样被拒。
+- **验证与应对方法**：
+  1. 首先测试退出当前 Google 账号（或使用另一个已知归属美国/新加坡/日本的干净测试账号）在同一节点下访问 `gemini.google.com` 或登录页，若换号立刻进入界面，即可 100% 坐实是**原账号自身归属地被标记在受限区**。
+  2. 登录受限账号前往 Google 官方的「条款与隐私归属地查询/变更申请」页面（可通过 Google 账户条款设置或搜索关联国家表单入口），检查当前关联国家是否显示为中国或香港；若长期稳定工作在支持区网络环境下，可按官方流程提交合理理由申请将账号关联地区更改至实际支持国家（通常需要数个工作日审核，且审核期间不宜频繁跳变 IP）。
+
+### 2. DNS 解析去向与 Google 主域「双出口脑裂」
+
+Google 生态内部的登录认证系统与 AI 推理服务之间高度耦合。新手在配置分流规则时，最容易犯的一个错误是**只把 `gemini.google.com` 放进了新加坡策略组，却把 `google.com`、`accounts.google.com` 或 `googleapis.com` 留在了默认代理组（往往连着香港低延迟节点）**。
+- **发生了什么**：当你打开 Gemini 时，浏览器先拿着 `accounts.google.com` 的 OAuth 凭证通过香港节点去续签或校验身份，紧接着又把会话请求通过新加坡节点发给 `gemini.google.com`。Google 服务端在毫秒级内检测到同一个账户请求链条同时存在香港与新加坡两个出口归属，不仅直接拒绝提供 Gemini 服务，甚至可能触发账号安全警示。
+- **DNS 解析泄露干扰**：如果本地客户端未接管 DNS 解析，或者 Chrome/Edge 浏览器启用了自带的加密 DNS（DoH）并指向境内公共服务器，部分 Google 接口域名在本地被错误解析或绕过域名规则引擎（例如客户端仅靠 IP-CIDR 兜底匹配），同样会导致流量误入直连或错乱节点组。解决办法是确保客户端开启健康的 `fake-ip` 或远程 DNS 解析，并关闭浏览器内置 DoH（排查详见 [DNS 错误与 Fake-IP 冲突排查](/troubleshooting/dns/)）。
+
+---
+
+## 三、`gemini.google.com` vs `aistudio.google.com`：双入口架构与分流差异
+
+很多工程师发现自己能在浏览器里用网页版 `gemini.google.com` 聊天，但一打开开发者控制台 **`aistudio.google.com`（Google AI Studio）** 调试 Prompt，或者在本地 Python 脚本里通过 `Gemini API` 跑批量请求时，却报 `400 User location is not supported for the API use`。这源于 Google 把消费端产品与开发者平台拆分在了两套独立的域名与计费风控体系中：
+
+| 对比维度 | Gemini 消费端 (`gemini.google.com`) | Google AI Studio 与 API (`aistudio.google.com`) |
+| :--- | :--- | :--- |
+| **核心关联域名** | `gemini.google.com`、`bard.google.com`、`proactivebackend-pa.googleapis.com`、`alkalimakersuite-pa.clients6.google.com` | `aistudio.google.com`、`makersuite.google.com`、`generativelanguage.googleapis.com`、`ai.google.dev` |
+| **区域开放与免费层限制** | 面向普通消费账号开放，受账号归属地、Google Workspace 管理员开关与 IP 位置影响 | 部分地区（例如部分欧洲经济区与受限地区）对免费 API 配额（Free Tier）或 Pay-as-you-go 计费存在独立区域门槛；要求出口 IP 严格位于 API 支持国 |
+| **开发工具链漏网风险** | 主要在浏览器与手机 App 运行，常规系统代理即可覆盖大部分网页请求 | 大量使用 Python `google-genai` SDK、Node.js、curl 或 IDE 插件调用 `generativelanguage.googleapis.com`，**未开 TUN 模式极易直接走本地直连报错** |
+| **并发与限流敏感度** | 侧重账号安全与防机器滥用，报错多为地区提示或登录校验 | 严查并发 API 请求与地区一致性，若多个开发者共享同一个被滥用过免费 Key 的机房 IP，极易遭遇 API 接口层直接拒绝 |
+
+**工程落地要点**：在写客户端分流规则时，**切勿只写一条 `gemini.google.com`**，必须把 AI Studio 与 `googleapis.com` 的生成式接口域名全部纳入同一组策略，并在使用桌面 IDE 或终端调用 Gemini API 时务必开启 **TUN 虚拟网卡模式**（详见 [TUN 模式原理与开启步骤](/guides/tun/)）。
+
+### 1. Chrome 内置 AI 与 Google Workspace 账号策略盲区
+
+除了网页版与 API，许多用户还会在 Chrome 桌面浏览器侧边栏、Android 系统的 Gemini App 或 Google Workspace 企业/教育版账号中遇到莫名失效，这两类场景存在两个经常被误判为「节点坏了」的独立制约：
+1. **Google Workspace 组织策略关闭**：如果你登录的是学校分配的 `.edu` 邮箱或公司企业版 Workspace 账号，管理员后台默认可能关闭了「早期访问体验」或 Gemini 扩展应用权限。此时无论切换新加坡、美国还是日本原生住宅 IP，页面都会提示账号无法访问该服务——只需换用普通个人 `@gmail.com` 账号对比测试即可 10 秒定界。
+2. **移动端 Gemini App 本地缓存与系统区号残留**：在 Android 或 iOS 手机上安装官方 Gemini App 后，若曾不小心连着香港节点打开过一次，App 内部会持久化保存「当前地区受限」的状态缓存。随后即便切回已解锁的新加坡节点，打开 App 依然持续报错；解决方式是彻底退出 App 进程、清理应用缓存（或重装应用），再在 Shadowrocket / FlClash / sing-box 规则接管下重新打开。
+
+### 2. 终端开发链路（Python / Node / CLI）与多 AI 平台共存原则
+
+当你的电脑同时需要运行 ChatGPT（日本/美国出口）、Claude（绝对固定单一美/日 `select` 出口）以及 Gemini / AI Studio（新加坡或实测解锁出口）时，**千万不要把三大平台的域名塞进同一个策略组**。否则每次为了迁就 Gemini 而把整个 AI 组切去新加坡节点时，同组里的 `claude.ai` 会因为突然跨国跳变 IP 而触发风控警告。各自建立 `🤖 OpenAI`、`🛡️ Claude`、`💎 Gemini` 三个互不干扰的独立策略组，是兼顾生产力与账号安全的最优解。
+
+---
+
+## 四、「Gemini 解锁 vs YouTube 送中(CN)」悖论与客户端双组拆分模板
+
+在站内对 [光速云](/brands/guangsuyun/) 与 [灵动云](/brands/lingdongyun/) 的历史实测数据进行交叉比对时，我们发现了一个几乎所有新手都会撞上的经典悖论：
+
+1. 在光速云 2026-08-19 的 62 节点图里，**新加坡（01–10）是亚太主流区域中唯一全数解锁 Gemini 的救命稻草**；
+2. 然而在光速云同一天 70 节点 `INTL_youtube` 图里，**`SG新加坡01–10` 与 `TW台湾01–10`（9/10）却大面积出现 `送中(CN)`**；无独有偶，[灵动云](/brands/lingdongyun/) 2026-07-20/21 的 60 节点实测摘要也同时记录了**「新加坡与台湾节点出现 YouTube 送中（CN）」**。
+
+这意味着什么？如果你因为新加坡能用 Gemini，就把全部 Google 系流量（包含 YouTube 和日常 Google 搜索）一股脑绑死在新加坡节点上，结果就是 **Gemini 能用了，但你的 YouTube 瞬间变成「送中(CN)」状态**——首页推荐错乱、部分仅限海外播放的版权视频黑屏，甚至影响 YouTube Premium 家庭组权益（详见 [YouTube 送中成因与排查](/ai-media/youtube/)）。
+
+### 正确解法：将「Google AI」与「YouTube」拆分成两个独立策略组
+
+在支持通用订阅的 Mihomo（Clash.Meta）或 sing-box 客户端（如 [Clash Verge Rev](/clients/clash-verge-rev/)、Stash）中，利用配置覆写功能将两条链路物理隔离：
+
+```yaml
+# Mihomo / Clash Verge Rev 配置覆写：Gemini/AI Studio 与 YouTube 独立分流防冲突
+proxy-groups:
+  # 1. 专供 Gemini 与 AI Studio 使用（参考实测情况优先包含新加坡、马来西亚等解锁区，严格排除香港）
+  - name: "💎 Gemini 与 AI Studio"
+    type: select
+    include-all: true
+    filter: "(?i)(新加坡|SG|Singapore|马来西亚|MY|土耳其|TR|美国|US|日本|JP)"
+    exclude-filter: "(?i)(香港|HK|Hong|澳门|MO|Macau|台湾|TW|Taiwan|倍率|过期|剩余)"
+
+  # 2. 专供 YouTube 使用（严格排除高发送中的新加坡与台湾节点，优先走正常的香港/日本/美国）
+  - name: "▶️ YouTube 干净分流"
+    type: select
+    include-all: true
+    filter: "(?i)(香港|HK|Hong|日本|JP|Japan|美国|US|America)"
+    exclude-filter: "(?i)(新加坡|SG|Singapore|台湾|TW|Taiwan|倍率|过期|剩余)"
+
+prepend-rules:
+  # 第一优先级：YouTube 独立切出，避免被新加坡送中节点连累
+  - DOMAIN-SUFFIX,youtube.com,▶️ YouTube 干净分流
+  - DOMAIN-SUFFIX,youtu.be,▶️ YouTube 干净分流
+  - DOMAIN-SUFFIX,googlevideo.com,▶️ YouTube 干净分流
+  - DOMAIN-SUFFIX,ytimg.com,▶️ YouTube 干净分流
+  - DOMAIN-SUFFIX,yt3.ggpht.com,▶️ YouTube 干净分流
+
+  # 第二优先级：Gemini 网页端、AI Studio、API 及登录认证一致性域全部绑入 Gemini 组
+  - DOMAIN-SUFFIX,gemini.google.com,💎 Gemini 与 AI Studio
+  - DOMAIN-SUFFIX,aistudio.google.com,💎 Gemini 与 AI Studio
+  - DOMAIN-SUFFIX,makersuite.google.com,💎 Gemini 与 AI Studio
+  - DOMAIN-SUFFIX,generativelanguage.googleapis.com,💎 Gemini 与 AI Studio
+  - DOMAIN-SUFFIX,ai.google.dev,💎 Gemini 与 AI Studio
+  - DOMAIN-SUFFIX,bard.google.com,💎 Gemini 与 AI Studio
+  - DOMAIN,proactivebackend-pa.googleapis.com,💎 Gemini 与 AI Studio
+  - DOMAIN,alkalimakersuite-pa.clients6.google.com,💎 Gemini 与 AI Studio
+  # 保持 Google 账号认证与搜索主体在同一干净非香港出口，消除认证与推理双 IP 地域冲突
+  - DOMAIN,accounts.google.com,💎 Gemini 与 AI Studio
+  - DOMAIN-SUFFIX,google.com,💎 Gemini 与 AI Studio
+```
+
+**规则编写的关键细节提示**：
+- 为什么把 `YouTube` 规则放在 `google.com` 之前？因为规则自上而下匹配，确保 YouTube 先命中 `▶️ YouTube 干净分流` 避开送中的新加坡节点；随后再用 `💎 Gemini 与 AI Studio` 统一托底 `gemini.google.com`、`aistudio.google.com` 以及 `accounts.google.com`、`google.com`，既保证登录认证域与 Gemini 处于完全一致的非香港合规地区，又不会让 YouTube 被新加坡节点拖入送中泥潭。
+- 如你同时重度使用 Google 搜索且担心新加坡节点上的搜索受送中影响，可在 `💎 Gemini 与 AI Studio` 里测试新加坡不同编号节点的 Google 搜索纯净度，或仅将 `accounts.google.com` 与 Gemini/AI Studio 系列域名绑定在一起（更多分流组合细节可参阅 [AI 与流媒体 GeoIP 分流实战规则](/guides/articles/ai-streaming-geoip-routing/)）。
+
+---
+
+## 五、全库 31 家机场品牌 Gemini 支持口径审计（严标待核实边界）
+
+在整理全站 31 家品牌档案时，我们发现一个非常有趣的事实：**哪怕是平日里宣传口号喊得最响的商家，一碰到 Gemini，大多数也不敢在详细列表里写死「全节点保证」**。以下是全库 31 家品牌关于 Gemini 的真实档案状态与待核实边界：
+
+| 档案证据类别 | 涉及品牌 | 站内原始记载实态（严格按来源标注） | 选购与验证建议 |
+| :--- | :--- | :--- | :--- |
+| **Historical（带逐区节点截图实证）** | [光速云](/brands/guangsuyun/) | **2026-08-19 62 节点 MiaoKo 截图**：仅 **新加坡（01–10）、马来西亚（01–02）、土耳其（01）** 解锁 Gemini；日本（01–10）、香港（01–20）、美国（01–10）、台湾（01–05）及英/法/德/泰全部失败（注：08-19 快照已近/满 3 个月，存在动态变动可能） | 支持第三方订阅导入，可先购 ¥25 极速版月付，配合上方 YAML 规则把 Gemini 锁定在新加坡节点后实测当下状态 |
+| **明确「未测 / 缺乏统一实测」或「不承诺稳定」** | [灵动云](/brands/lingdongyun/)、[可信云](/brands/kexin/)、[二猫云](/brands/ermao/)、[速界](/brands/sujie/) | **灵动云** 2026-07 珠海联通实测虽测了 OpenAI，但**未单列 Gemini**（标为 `not_tested` 待核实）；**可信云**主动声明「缺乏统一实测数据，保持中性描述」；**二猫云**正文明确提示「官方对 Claude 和 Gemini 均未给出确定稳定承诺」；**速界**虽标注支持 Gemini 场景，但声明受 IP/地区/风控影响**不作永久全稳定承诺**（`vendor`） | 这四家在各自档案中呈现了较高的诚实披露边界；均宜先通过单月最低档在本地测通可用节点后再决定是否续费 |
+| **清晰标为「视节点而定」（缺逐节点实测图，Vendor）** | [暮光加速](/brands/muguang/)、[飞猫云](/brands/feimao/)、[微风网络](/brands/weifeng/)、[星岛梦](/brands/xingdaomeng/)、[无忧链接](/brands/wuyou/)、[唯兔云](/brands/weitu/)、[Firefly](/brands/firefly/)、[U1S1](/brands/u1s1/)、[灵猫网络](/brands/lingmao/)、[一翻云](/brands/yifan/)、[SOGO 云](/brands/sogo/)、[闪跃](/brands/shanyue/)、[全球云](/brands/quanqiu/)、[隐形人](/brands/yinxingren/) | 以上 14 家品牌在《32 家机场品牌清单》的解锁状态栏中，无一例外地将 Gemini 标为 **`视节点而定`**（其中唯兔云、Firefly、闪跃、星岛梦虽在宣传特色段顺带提及，但解锁清单栏仍回落为「视节点而定」）。**全部缺乏独立逐节点 Gemini 实测截图**，目前均属待核实或 `vendor` 口径 | 特别注意客户端自由度差异：[一翻云](/brands/yifan/)、星岛梦/唯兔云（Trojan）等可走第三方规则拆分；而飞猫云、无忧链接、Firefly、灵猫、SOGO、闪跃、全球云、隐形人等**仅限专属客户端**，遇到只有新加坡能解 Gemini 而香港能看 YouTube 时无法自动按域名分流，只能全局手动切换 |
+| **仅泛称支持 AI 或营销词（未针对 Gemini 实测）** | [极连云](/brands/jilian/)、[光年梯](/brands/guangnian/)、[梯子云](/brands/tiziyun/) | 极连云与光年梯仅在短资料中写「覆盖常见 AI 工具场景」；梯子云主要针对 Netflix/ChatGPT/Claude 宣称「完美解锁」（`vendor` 宣传口径，未对 Gemini 单列逐节点实测） | 均未核实 Gemini 实际通过率，归类为**待核实**，切忌将泛用 AI 宣传语直接当作 Gemini 全区保证 |
+| **完全未披露 / 明确未实测（待核实种子）** | [大佬云](/brands/dalaoyun/)、[闪电鼠](/brands/shandianshu/)、[云界线](/brands/yunjiexian/)、[榴莲云](/brands/liulianyun/)、[神行加速](/brands/shenxing/)、[环球梯](/brands/huanqiuti/)、[宇宙云](/brands/yuzhou/)、[浪网](/brands/wangwang/)、[边缘节点 EdgeNova](/brands/edgenova/) | 原始档案未提供任何 AI 解锁信息，或明确注明「未实测 / 不能推断支持」 | 在未获得独立实测数据之前，全部按**未测试待核实**对待，切勿为了用 Gemini 直接冲低价年付 |
+
+*(延伸阅读：如果你计划从每月 ¥18–¥25 档选一家支持通用订阅的机场开始测试 Gemini，可对照 [月付机场试错清单](/pricing/monthly/) 与 [按用途推荐机场指南](/recommend/by-use/)，避免买进无法撰写独立分流规则的封闭客户端品牌。)*
+
+---
+
+## 六、Gemini 与 AI Studio 报错五步自检排错流程
+
+当你遇到 `Gemini isn't currently supported`、`Something went wrong` 或 AI Studio API 调用被拒时，请不要盲目把整个客户端切到全局乱试，按以下五步顺序可在 3 分钟内精准锁定症结：
+
+1. **第一步（无痕交叉测试）**：在客户端将规则暂时指向经筛选的新加坡（或美国/马来西亚/日本其他冷门编号）节点，打开浏览器**无痕/隐私窗口**（且先不要登录你原有的常用 Google 账号），直接访问 `gemini.google.com`。如果未登录态下的无痕窗口已经能顺利渲染出欢迎页，说明**节点 IP 本身通过了 Google 区域检测**，问题只在于旧窗口缓存 Cookie 或你原来的 Google 账号归属地！
+2. **第二步（检验 Google 账号自身归属地）**：在无痕窗口内登录你的主力 Google 账号。如果未登录前能进、一登录账号立刻变成「地区不受支持」，则基本确认为账号侧关联国家仍停留在受限地区（CN/HK）。可换用另一个干净外区账号对照验证，并按官方条款流程核查账号关联地区。
+3. **第三步（检查 Google 主域与 AI 域一致性）**：打开 Clash/Mihomo 的「连接（Connections）」监控面板，筛选 `google` 与 `gemini`，核对 `accounts.google.com`、`gemini.google.com`、`aistudio.google.com`、`generativelanguage.googleapis.com` 是否**全部命中了同一个非香港策略组且出口指向同一个国家节点**。如果发现其中一条漏进了香港节点或 `DIRECT`，立刻补全覆写规则并关闭所有活跃连接重连。
+4. **第四步（封堵 DNS 泄露与浏览器 DoH）**：关闭 Chrome/Edge 设置中的「使用安全 DNS（DoH）」，确认客户端已开启远程 DNS 或 `fake-ip` 解析，并在终端/开发环境中开启 **TUN 模式**，防止 Python/Node SDK 绕过系统代理直连 `generativelanguage.googleapis.com`。
+5. **第五步（逐区筛点取代迷信单一国家）**：不同机场购买的上游机房各不相同——光速云 08-19 快照是新加坡/马/土解锁而日/美失败，并不代表所有机场都是如此；如果某家机场的新加坡全失败，不要忘记顺次在无痕窗口下实测它的美国、日本或台湾/欧洲冷门节点，一旦测出当前可用的编号节点，即在 `select` 策略组中将其固定下来长期使用。
+
+---
+
+## 七、自检当前节点在 Google 侧真实地理归属的实用方法
+
+在没有专业批量脚本的情况下，普通用户也可以通过两个极低成本的动作，判断自己手头正在连接的某台新加坡或美国节点究竟有没有被 Google 判为「送中（CN）」或跨区广播异常：
+
+1. **观察 Google 搜索页脚定位与语言跳转行为**：打开无痕窗口访问 `google.com`，拉到页面最底部查看左下角显示的位置提示。如果一个标称「新加坡03」的节点在无痕页脚显示的地区却是香港、中国或某个完全不相干的欧洲国家，或者刚输入搜索词就频繁弹出 `unusual traffic` 验证码，说明该节点的上游广播定位已经漂移或并发污染严重，往往在 `gemini.google.com` 上也会遭遇连带拦截。
+2. **对照地区错误提示与 API 状态码差异**：
+   - 在浏览器打开 `gemini.google.com` 时，如果页面直接跳转到 `Supported countries` 地区说明页，核心原因在于 **IP 定位不被接受** 或 **账号归属地在受限区**；
+   - 如果在 AI Studio（`aistudio.google.com`）或终端调用 `generativelanguage.googleapis.com` 时返回 `400 FAILED_PRECONDITION: User location is not supported for the API use`，则几乎可以确定是你当前发起请求的出口（或终端漏开 TUN 走成了直连）落在了非 API 支持地区，核对连接日志中 `generativelanguage.googleapis.com` 实际命中的策略组与节点编号即可快速修正。
+3. **跨平台月付试错的预算纪律**：对于刚接触的新机场，如果核心刚需正是 Gemini 与 AI Studio，务必先确认其**支持第三方通用订阅**（排除只能用封闭客户端且无法拆分 YouTube 防送中策略的品牌），并先买单月最低档（参考 [月付机场对比](/pricing/monthly/) 与 [专属客户端 vs 通用订阅](/compare/dedicated-client-vs-universal-sub/)）跑通上述自检，切忌轻信宣传口号直接重金年付。
+

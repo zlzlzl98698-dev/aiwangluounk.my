@@ -1,0 +1,148 @@
+---
+import { Image } from 'astro:assets';
+import avatarImg from '../assets/avatar.webp';
+import { NAV_PILLARS, FOOTER_META_LINKS } from '../data/navigation';
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-about">
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <Image src={avatarImg} alt="网络AI 头像" width={32} height={32} style="border-radius:8px; border:1px solid var(--border-strong);" loading="lazy" />
+          <strong>网络AI · aiwangluounk.my</strong>
+        </div>
+        <p>
+          中文网络服务与代理工具研究型知识库、31 家机场品牌结构化数据库与客观购买决策参考平台。坚持区分厂商宣称、历史归档与可验证实测数据。
+        </p>
+      </div>
+      <div class="footer-meta">
+        <div class="footer-col-title">站点治理与透明度</div>
+        <ul>
+          {FOOTER_META_LINKS.map((item) => (
+            <li><a href={item.href}>{item.title}</a></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-pillars" aria-label="十大一级专题索引">
+      {NAV_PILLARS.map((pillar) => (
+        <div class="footer-pillar">
+          <a href={pillar.href} class="footer-pillar__title">
+            <span class="mono">{pillar.code}</span> {pillar.title}
+          </a>
+          <ul>
+            {pillar.children.map((sub) => (
+              <li><a href={sub.href}>{sub.title}</a></li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    <div class="footer-bottom">
+      <p>
+        © 2026 网络AI（aiwangluounk.my）。本站含部分商业推广链接，通过相关链接注册可能为本站带来佣金，不影响用户支付价格。所有技术教程与网络信息仅供合法合规用途与技术学习参考，请遵守所在地法律法规。
+      </p>
+      <p class="mono footer-feeds">
+        <a href="/rss.xml">RSS 订阅</a> · <a href="/sitemap-index.xml">XML Sitemap</a> · <a href="/robots.txt">robots.txt</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 3rem;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-strong);
+    padding-block: 2.25rem 1.75rem;
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+  }
+  .footer-top {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+  @media (min-width: 768px) {
+    .footer-top {
+      grid-template-columns: 1.5fr 1fr;
+    }
+  }
+  .footer-about strong {
+    font-size: 1rem;
+    color: var(--text-primary);
+  }
+  .footer-about p {
+    margin: 0.45rem 0 0;
+    color: var(--text-muted);
+    max-width: 60ch;
+  }
+  .footer-col-title {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+  .footer-meta ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1rem;
+  }
+  .footer-pillars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    gap: 1.25rem 1rem;
+    padding-block: 1.5rem;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+  .footer-pillar__title {
+    display: block;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: none;
+    margin-bottom: 0.45rem;
+  }
+  .footer-pillar__title .mono {
+    color: var(--brand-cyan);
+    font-size: 0.74rem;
+  }
+  .footer-pillar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.24rem;
+  }
+  .footer-pillar a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.8rem;
+  }
+  .footer-pillar a:hover {
+    color: var(--brand-primary);
+    text-decoration: underline;
+  }
+  .footer-bottom {
+    padding-top: 1.15rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .footer-bottom p {
+    margin: 0;
+    max-width: 82ch;
+  }
+  .footer-feeds {
+    white-space: nowrap;
+  }
+</style>

@@ -1,0 +1,176 @@
+---
+import type { BrandRecord } from '../data/brandSchema';
+import { toBrandPath } from '../lib/slug';
+import SourceBadge from './SourceBadge.astro';
+
+interface Props {
+  brand: BrandRecord;
+}
+
+const { brand } = Astro.props;
+---
+
+<article
+  class="brand-card surface-card"
+  data-slug={brand.slug}
+  data-name={brand.name.toLowerCase()}
+  data-aliases={brand.aliases.join(' ').toLowerCase()}
+  data-price={brand.minEffectiveMonthlyCny ?? 999}
+  data-monthly={brand.minMonthlyPlanCny ?? 999}
+  data-nonexpiring={brand.hasNonExpiringPlan ? 'yes' : 'no'}
+  data-clientmode={brand.supportsSubscription}
+  data-completeness={brand.dataCompleteness}
+  data-priority={brand.editorPriorityCandidate ?? 99}
+  data-route={brand.routes.map((r) => r.name).join(' ').toLowerCase()}
+>
+  <div class="brand-card__head">
+    <div class="brand-card__id">
+      <span class="brand-monogram" style={`background: ${brand.brandAccent};`}>{brand.monogram}</span>
+      <div>
+        <h3 class="brand-card__title">
+          <a href={toBrandPath(brand.slug)}>{brand.name}</a>
+        </h3>
+        <div class="brand-card__sub">
+          {brand.editorPriorityCandidate
+            ? `编辑候选 #${brand.editorPriorityCandidate}`
+            : `档案 #${brand.id}`} · {brand.launchYear}
+        </div>
+      </div>
+    </div>
+    <SourceBadge status={brand.sourceStatus} />
+  </div>
+
+  <p class="brand-card__desc">{brand.description}</p>
+
+  <dl class="brand-card__metrics">
+    <div>
+      <dt>折算入门</dt>
+      <dd class="mono">
+        {brand.minEffectiveMonthlyCny !== null ? `约 ¥${brand.minEffectiveMonthlyCny}/月` : '待核实'}
+      </dd>
+    </div>
+    <div>
+      <dt>单月最低</dt>
+      <dd class="mono">
+        {brand.minMonthlyPlanCny !== null ? `¥${brand.minMonthlyPlanCny}/月` : '未录/待核实'}
+      </dd>
+    </div>
+    <div>
+      <dt>订阅/客户端</dt>
+      <dd>
+        {brand.supportsSubscription === 'yes'
+          ? '通用订阅可用'
+          : brand.supportsSubscription === 'no_dedicated_only'
+            ? '仅专属客户端'
+            : '待核实'}
+      </dd>
+    </div>
+    <div>
+      <dt>不限时包</dt>
+      <dd>{brand.hasNonExpiringPlan ? '有记录' : '无/未录'}</dd>
+    </div>
+  </dl>
+
+  <div class="brand-card__foot">
+    <span class="brand-card__date">更新：{brand.lastUpdated}</span>
+    <a href={toBrandPath(brand.slug)} class="brand-card__link">
+      查看 {brand.name} 完整评测 →
+    </a>
+  </div>
+</article>
+
+<style>
+  .brand-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+  }
+  .brand-card:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-sm);
+  }
+  .brand-card__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .brand-card__id {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+  .brand-monogram {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.86rem;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  .brand-card__title {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.3;
+  }
+  .brand-card__title a {
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .brand-card__title a:hover {
+    color: var(--brand-primary);
+    text-decoration: underline;
+  }
+  .brand-card__sub {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+  }
+  .brand-card__desc {
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .brand-card__metrics {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.65rem 0.75rem;
+    background: var(--bg-muted);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+  }
+  .brand-card__metrics dt {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+  }
+  .brand-card__metrics dd {
+    margin: 0;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .brand-card__foot {
+    margin-top: auto;
+    padding-top: 0.55rem;
+    border-top: 1px solid var(--border-hairline);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+  }
+  .brand-card__date {
+    color: var(--text-muted);
+  }
+  .brand-card__link {
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .brand-card__link:hover {
+    text-decoration: underline;
+  }
+</style>

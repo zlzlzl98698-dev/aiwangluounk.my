@@ -1,0 +1,126 @@
+---
+slug: "ai-streaming-geoip-routing"
+title: "AI与流媒体GeoIP分流规则实战：ChatGPT与Netflix分流配置"
+description: "详解基于 GeoIP 与域名规则集实现 ChatGPT 仅走美日出口、Gemini 排除香港、Netflix 智能分流与 YouTube 送中规避的标准规则配置。"
+h1: "AI 与流媒体分流实战：破解 ChatGPT HK 限制、Gemini 失败、YouTube 送中与 Netflix 分区"
+pillar: "ai-media"
+categoryLabel: "AI 与流媒体分流"
+targetKeyword: "ChatGPT Gemini YouTube 送中分流规则"
+secondaryKeywords:
+  - "ChatGPT 仅 APP(HK)"
+  - "YouTube 送中 CN 修复"
+  - "Gemini 地区不支持"
+  - "Netflix 广播 IP 自制剧"
+appliesTo: "Mihomo (Clash Verge Rev / FlClash / Stash) 与 sing-box 客户端"
+prerequisites:
+  - "已获取包含多国家地区节点（香港、日本、新加坡、台湾、美国等）的机场订阅"
+  - "熟悉客户端内策略组（Proxy Group）的基本切换与测速操作"
+  - "准备用于验证出口识别的官方页面或独立流媒体检测方式"
+pubDate: "2026-11-23"
+updatedDate: "2026-11-23"
+answerSummary: "单一节点往往无法同时兼顾低延迟网页浏览、全功能 AI 工具与全区流媒体解锁。站内历史实测档案显示，香港节点延迟最低但 ChatGPT 常受限于「仅 APP(HK)」而网页端报错；Gemini 在不同节点间分化明显；部分新加坡与台湾节点会出现 YouTube 送中（CN）或 Netflix 识别跨区（如台湾落地识别为 ES）。实战最优解是在客户端内建立独立的「AI 专用策略组」与「流媒体策略组」：日常浏览走香港低延迟组，OpenAI/Claude/Gemini 强制分流至日本/新加坡/美国通过验证的节点，YouTube 与 Netflix 单独绑定对应无送中、原生解锁地区。"
+faqs:
+  - q: "为什么用香港节点手机 App 能打开 ChatGPT，电脑浏览器打开网页却提示地区不可用？"
+    a: "OpenAI 对网页端（chatgpt.com / auth.openai.com）与移动端 App 端（部分 API 通道）的风控策略并不完全一致。站内品牌实测档案中就明确记录了光速云香港节点「多为仅 APP(HK)，日/新/美网页多可用」的现象。解决方式是在分流规则中把 OpenAI/ChatGPT 相关域名单独指派给日本、新加坡或美国节点策略组。"
+  - q: "什么叫 YouTube 送中（CN）？怎么解决？"
+    a: "「送中」是指部分海外节点的出口 IP 因广播路由或用户定位数据漂移，被 Google/YouTube 的 GeoIP 数据库误判为中国大陆地区（CN），导致出现无广告但无法开启 YouTube Premium 后台播放、部分地区版权视频不可看、或定位显示在中国。在站内历史档案中，部分机场的新加坡或台湾节点就曾出现过送中（CN）样本。避开方式是把 Google/YouTube 规则切换至日本、美国或经过验证正常的香港节点，并在账号设置中关闭历史位置关联。"
+  - q: "为什么同一个机场的 Netflix 有的能看全区版权剧，有的只能搜到自制剧？"
+    a: "Netflix 对数据中心 IP（机房 IP）与广播 IP 会采取降级限制：能访问网站但只显示 Netflix Originals（自制剧），第三方版权热播剧全部隐藏；仅在识别为当地原生或授权住宅/合规出口 IP 时才解锁完整片库。如果发现片库变少，需要手动切换同地区其他编号节点或换用日本/新加坡原生解锁节点。"
+relatedLinks:
+  - title: "ChatGPT 专题说明"
+    href: "/ai-media/chatgpt/"
+    note: "查看网页端与 App 端风控差异及账号隔离建议"
+  - title: "Gemini 专题说明"
+    href: "/ai-media/gemini/"
+    note: "了解各出口地区对 Gemini 的限制特点"
+  - title: "YouTube 专题说明"
+    href: "/ai-media/youtube/"
+    note: "排查 4K/8K 带宽需求与送中（CN）识别机制"
+  - title: "分流规则配置基础"
+    href: "/guides/routing-rules/"
+    note: "了解国内直连、AI 与流媒体规则优先级顺序"
+---
+
+## 为什么必须把「日常节点」和「AI / 流媒体节点」拆开分流？
+
+在站内对多家机场的历史实测归档中（例如 [光速云](/brands/guangsuyun/) 2026-08-19 实测与 [灵动云](/brands/lingdongyun/) 2026-07-20/21 测试记录），一个反复出现的客观规律是：**没有任何单一地区节点能在所有维度上拿满分**。
+
+- **香港节点**：距离大陆最近，TLS RTT 常在 20–30ms，打开网页、GitHub、文档极快；但香港长期不在 OpenAI、Claude 和 Gemini 的官方直接支持地区名单内，网页版拦截极多，TikTok 也早已退出香港市场。
+- **新加坡 / 台湾节点**：延迟适中（约 40–50ms），往往对 AI 或流媒体表现各异，但在部分多线广播架构下，站内历史测试多次观测到部分新加坡、台湾节点出现 **YouTube 送中（CN）** 或 **Netflix/Disney+ 区域识别飘移**（例如台湾节点被识别为欧洲地区）。
+- **日本 / 美国节点**：延迟略高（日本约 50–75ms，美国 130–180ms），但对网页版 ChatGPT、Claude、Netflix 对应大区片库以及 YouTube 的兼容稳定性通常更高。
+
+因此，正确的客户端配置方式不是「全局切到美国忍受高延迟」，也不是「一直连香港然后抱怨打不开 AI」，而是利用 Clash/Mihomo 或 sing-box 的**分流规则（Rules）+ 独立策略组（Proxy Groups）**实现自动路由。
+
+## 四大高频异常的成因与定位表
+
+| 业务场景 | 常见报错或异常现象 | 技术成因定位 | 实战分流对策 |
+| :--- | :--- | :--- | :--- |
+| **ChatGPT (OpenAI)** | App 端正常对话，网页端提示 `Access denied` 或地区不支持 | 站内实测常见于**香港仅 APP(HK)**：香港出口对网页风控更严，且共享 IP 易触发 Cloudflare 质询 | 将 OpenAI 域名组强制分流至**日本 / 新加坡 / 美国**通过测速的干净节点 |
+| **Gemini (Google AI)** | 提示 `Gemini isn't currently supported in your country` | 即使使用同一机场，不同落地的 Google GeoIP 归属库更新周期不同（香港通常被拒，部分节点未通过） | 单独建立 `Google AI` 规则并绑定支持地区（如实测可用的**新加坡 / 日本 / 美国**节点） |
+| **YouTube** | 视频评论区或首页推荐混乱、无法使用 Premium 或提示位置为 CN | **YouTube 送中（CN）**：节点广播 IP 被 Google 位置库重定位为中国大陆 | 将 `YouTube` 规则拆出，避开已识别送中的特定新加坡/台湾节点，改走日/美/正常港节点 |
+| **Netflix / Disney+** | 搜索不到热播第三方电影，仅能看到 Netflix 自制剧（Originals） | **广播 IP / 机房 IP 降级策略**：未封死访问，但屏蔽非自制版权库 | 在流媒体策略组内切换到标注支持流媒体或实测解锁完整片库的节点 |
+
+## 实战分流配置示例（Mihomo / Clash YAML 覆写模板）
+
+如果你使用的是 `Clash Verge Rev`、`FlClash` 或 `Stash`，不要直接去修改机场原始订阅文件（因为下次自动更新订阅时修改会被全部覆盖）。正确做法是在客户端的「**配置覆写（Overrides / Merge）**」功能中追加策略组与前置规则。
+
+### 1. 建立三个专职策略组
+
+在策略组设计中，把「日常主力」「AI 专用」「流媒体专用」分开管理，互相不干扰节点切换：
+
+- `🚀 节点选择`：日常主出口，平时可固定在香港低延迟节点。
+- `🤖 AI 专用`：专供 ChatGPT、Claude、Gemini 使用，选项里建议用正则过滤掉香港节点（或人工只选日/新/美节点）。
+- `🎬 流媒体`：专供 Netflix、Disney+、YouTube 使用，方便当某个新加坡节点送中时一键切到日本或正常节点，而不影响正在进行的 AI 对话或远程 SSH。
+
+### 2. 规则优先级配置要点（YAML 覆写片段）
+
+在规则匹配时，**更细粒度的特定域名必须排在通用规则（如 `GEOSITE,geolocation-!cn` 或 `MATCH`）之前**。同时确保 `GEOIP,CN` 与 `DIRECT` 逻辑完整，防止国内请求绕行海外。
+
+以下为适用于 Mihomo 内核客户端的配置覆写思路示例（具体请结合机场原有规则组名称微调）：
+
+```yaml
+# 示例：Clash Verge Rev / Mihomo 规则前置追加（片段示意）
+prepend-rules:
+  # 1. AI 平台独立分流（必须位于通用代理规则之前）
+  - DOMAIN-SUFFIX,openai.com,🤖 AI 专用
+  - DOMAIN-SUFFIX,chatgpt.com,🤖 AI 专用
+  - DOMAIN-SUFFIX,oaistatic.com,🤖 AI 专用
+  - DOMAIN-SUFFIX,oaiusercontent.com,🤖 AI 专用
+  - DOMAIN-SUFFIX,anthropic.com,🤖 AI 专用
+  - DOMAIN-SUFFIX,claude.ai,🤖 AI 专用
+  - DOMAIN-SUFFIX,gemini.google.com,🤖 AI 专用
+  - DOMAIN-SUFFIX,generativelanguage.googleapis.com,🤖 AI 专用
+  - DOMAIN-SUFFIX,makersuite.google.com,🤖 AI 专用
+  - DOMAIN-SUFFIX,ai.google.dev,🤖 AI 专用
+
+  # 2. 流媒体独立分流（防止 YouTube 送中与 Netflix 跨区识别）
+  - DOMAIN-SUFFIX,youtube.com,🎬 流媒体
+  - DOMAIN-SUFFIX,youtu.be,🎬 流媒体
+  - DOMAIN-SUFFIX,googlevideo.com,🎬 流媒体
+  - DOMAIN-SUFFIX,ytimg.com,🎬 流媒体
+  - DOMAIN-SUFFIX,netflix.com,🎬 流媒体
+  - DOMAIN-SUFFIX,netflix.net,🎬 流媒体
+  - DOMAIN-SUFFIX,nflxvideo.net,🎬 流媒体
+  - DOMAIN-SUFFIX,disneyplus.com,🎬 流媒体
+  - DOMAIN-SUFFIX,bamgrid.com,🎬 流媒体
+```
+
+### 3. 避开「漏网域名」导致的验证失败
+
+很多用户明明配置了 `chatgpt.com` 走日本节点，打开网页依然报错地区受限，常见原因有三个：
+
+1. **登录认证域和静态资源域漏配**：OpenAI 的登录流程会跳转 `auth0.com`、`auth.openai.com` 以及人机验证域；Gemini 会联动 Google 账号主体登录与部分 `googleapis.com` 接口，而如果 `google.com` 走香港、`gemini.google.com` 走美国，Google 会立刻因双出口 IP 地域冲突而拒绝访问 Gemini！**经验法则：使用 Gemini 时，建议将同期的 Google 主检索与账号服务也暂切至同一非香港节点，或者使用 `Rule-Provider` 维护好的完整 Google/AI 规则集。**
+2. **浏览器 WebRTC 或时区/缓存残留**：更换节点地区后，浏览器可能仍保留之前被拦截时的 Cookie 或本地存储标记。切换完分流节点后，用浏览器「无痕模式（Incognito）」测试新节点往往能立刻生效；确认无误后再清理原窗口站点 Cookie。
+3. **节点并发风控**：部分机场虽然单价极低（如 5–6 元档或未标明解锁的方案），但其少数出口 IP 被大量用户同时用来请求 OpenAI/Claude API，导致 IP 风险分值升高。对于高频生产力需求，务必参考 [品牌资料的 AI 解锁说明](/ai-media/) 先以单月套餐验证实际通过率。
+
+## 验证分流是否真正生效的方法
+
+规则配好后，不要只看页面能不能打开，建议花 1 分钟通过客户端自带的「**连接（Connections）**」实时监控面板做精准核验：
+
+1. 打开客户端的「连接」日志页，在筛选框里分别输入 `chatgpt`、`gemini`、`googlevideo` 或 `netflix`。
+2. 在浏览器打开目标页面并刷新一次。
+3. 观察日志列表中的 **命中规则（Rule）** 与 **实际出口链路（Chains）**：
+   - 确认命中了你设置的 `🤖 AI 专用` 或 `🎬 流媒体` 策略组，而不是落入兜底规则或走成了 `DIRECT` 直连。
+   - 确认出口节点名称是你指定的日本/新加坡/美国节点，而非香港节点。
+4. **YouTube 送中自检**：打开 YouTube 网页版或 App，查看左上角 Logo 旁显示的国家代码（例如显示 `JP`、`US`、`HK` 为正常海外定位；如果未显示国家代码且账号下购买的 Premium 功能消失、或推荐页出现异常限制，说明当前节点的 IP 已被 Google 判定为送中状态，应立即在 `🎬 流媒体` 策略组切换其他地区节点）。
+5. **DNS 泄露与真实出口核查**：若你在规则中使用了 `GEOIP` 而非纯域名规则，务必在对应规则末尾加上 `no-resolve` 关键字（或在客户端内使用 Fake-IP），避免客户端为了匹配 GeoIP 而先在本地发起一次多余的 DNS 查询，进而拖慢连接并导致判断失误。

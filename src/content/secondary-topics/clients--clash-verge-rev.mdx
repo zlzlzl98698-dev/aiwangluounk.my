@@ -1,0 +1,340 @@
+---
+pillarId: "clients"
+slug: "clash-verge-rev"
+title: "Clash Verge Rev 深度配置指南：内核切换、TUN 服务模式、覆写分流与桌面端对比｜网络AI"
+description: "全面拆解 Clash Verge Rev 在 Windows、macOS 与 Linux 的官方源 SHA-256 校验、Mihomo 内核切换、系统代理与 TUN 服务模式权限、Merge/Script 覆写修复 OpenAI/Claude 分流，以及与 FlClash、Sparkle、Mihomo Party 的差异对比。"
+h1: "Clash Verge Rev 深度实操指南：安全校验、TUN 服务模式、覆写脚本与桌面客户端对比"
+intent: "客户端配置与实操决策型"
+targetKeyword: "Clash Verge Rev 配置与使用指南"
+secondaryKeywords:
+  - "Clash Verge Rev TUN 服务模式"
+  - "Clash Verge Rev 覆写脚本修复 ChatGPT"
+  - "Clash Verge Rev Mihomo 内核切换"
+  - "Clash Verge Rev 对比 FlClash 和 Mihomo Party"
+  - "Clash Verge Rev SHA-256 校验"
+longTailKeywords:
+  - "Clash Verge Rev 下载怎么区分 Intel 和 M 芯片以及核对 SHA256"
+  - "Clash Verge Rev 开启 TUN 模式提示服务模式权限不足怎么处理"
+  - "怎么用 Clash Verge Rev Script 覆写屏蔽香港节点修复 OpenAI 和 Gemini"
+  - "Clash Verge Rev 和 FlClash Clash Nyanpasu Mihomo Party 哪个更稳"
+  - "为什么 Clash Verge Rev 导入飞猫云或隐形人会失败"
+entities:
+  - "Clash Verge Rev"
+  - "Mihomo"
+  - "Clash.Meta"
+  - "FlClash"
+  - "Clash Nyanpasu"
+  - "Sparkle"
+  - "Mihomo Party"
+  - "TUN 模式"
+  - "Service Mode"
+  - "Merge / Script 覆写"
+keywordBoundary: "聚焦桌面端 Clash Verge Rev 的安装架构核验、Mihomo 内核管理、系统代理与 TUN 服务模式边界、Merge/Script 全局覆写实战及同类 Mihomo 桌面壳对比；Clash Meta 内核字段与移动端兼容归入 /clients/clash-meta/，多核心调度软件 v2rayN 归入 /clients/v2rayn/。"
+answerFirst: "Clash Verge Rev 是目前 Windows、macOS 与 Linux 桌面端生态最成熟的主力 Mihomo（Clash.Meta）客户端之一，核心优势在于将标准化 YAML 订阅管理、内核版本切换、TUN 服务模式接管与 Merge/Script 全局覆写集成在同一界面。部署前须完成三项前置确认：第一，核实所用机场支持第三方通用订阅（光速云、一翻云、梯子云、可信云等兼容，飞猫云、隐形人、SOGO 云等仅专属端品牌不可导入）；第二，严格匹配系统与 CPU 架构并从官方开源发布页核对发布者签名与 SHA-256 校验和，拒绝搜索引擎下载站二次打包；第三，日常网页浏览首选系统代理，终端或容器需要接管时再安装 Service Mode 启用 TUN，避免无脑双开。此外，与 Mihomo Party 对比时务必注意站内风险警示：Mihomo Party 须单独核实当前项目维护活跃度，不可未经确认即标为首选推荐客户端。"
+updatedDate: "2026-11-24"
+ctaHeading: "按设备排障或对比同生态工具与订阅方案"
+ctaActions:
+  - label: "Windows 客户端矩阵与哈希核验"
+    href: "/guides/articles/windows-clients-guide/"
+    style: "primary"
+  - label: "TUN 虚拟网卡与 DNS 回退指南"
+    href: "/guides/articles/tun-vs-system-proxy-dns/"
+    style: "secondary"
+  - label: "专属客户端 vs 通用订阅对照"
+    href: "/compare/dedicated-client-vs-universal-sub/"
+    style: "secondary"
+relatedLinks:
+  - title: "Clash Meta（Mihomo）生态与字段解析"
+    href: "/clients/clash-meta/"
+    category: "客户端"
+    reason: "深入理解 Mihomo 协议栈、proxy-groups、sniffer 嗅探与 Fake-IP 机制"
+  - title: "v2rayN 多核心调度深度指南"
+    href: "/clients/v2rayn/"
+    category: "客户端"
+    reason: "对比偏重单节点链接管理与 Xray/sing-box 核心切换的另一主流桌面方案"
+  - title: "订阅导入与 200 OK 空内容排查"
+    href: "/guides/articles/subscription-and-200ok-empty-fix/"
+    category: "故障排查"
+    reason: "定位导入机场订阅时节点为空、User-Agent 拦截与 TLS 证书报错"
+  - title: "客户端无法启动与闪退修复"
+    href: "/troubleshooting/app-startup/"
+    category: "故障排查"
+    reason: "处理 WebView2 白屏、安全软件误报隔离核心文件与覆写脚本写崩"
+faqs:
+  - q: "Clash Verge Rev 可以导入所有机场的订阅链接吗？"
+    a: "不能。只有开放标准 Clash/Mihomo 通用订阅的品牌（如光速云、一翻云、梯子云、极连云、可信云、唯兔云、星岛梦等）才能导入 Clash Verge Rev。飞猫云、隐形人、SOGO 云、闪跃、全球云，以及资料记录自 2026 年 10 月后转向专属端模式的 Firefly、灵猫网络、无忧链接均不提供通用订阅，强行复制面板网址导入只会报错或解析为空。"
+  - q: "为什么站内不直接给出 Clash Verge Rev 的下载直链？我该如何确认下载的是官方正版？"
+    a: "在站内客户端台账中，所有外部仓库与发布地址在未执行实时联网核验前均标注为 pending_verification，绝不拼凑猜测链接或使用空占位符。获取安装包时应前往项目官方开源发布页，核对发布者身份、版本更新连贯性与数字签名，下载后使用 PowerShell 的 Get-FileHash 或终端 shasum 工具比对官方公示的 SHA-256 校验和，切勿下载搜索引擎竞价广告中的所谓中文汉化版。"
+  - q: "Clash Verge Rev 里的 Merge 覆写和 Script 覆写有什么区别？应该用哪一个？"
+    a: "Merge 使用 YAML 语法进行字段增量合并或覆盖（例如直接追加几条 rules 或修改 dns 参数），上手简单但无法按节点名称关键词动态筛选；Script 使用 JavaScript 函数接收整份订阅配置对象并返回修改后的配置，能够用正则自动剔除香港节点、动态生成 AI 专属策略组并插在最前面，即使机场增删节点也能自动适配。"
+  - q: "开启 TUN 模式时提示服务模式未安装或权限不足怎么办？"
+    a: "在 Windows 上创建虚拟网卡需要系统服务或管理员权限。进入设置页找到服务模式（Service Mode），点击安装并同意 UAC 管理员提权弹窗，安装完成且状态显示为活跃后再开启 TUN 开关；macOS 首次启用需输入系统管理员密码授予网络权限；Linux 需确认内核已赋予相应网络管理权限或使用对应特权配置。"
+  - q: "日常使用应该把「系统代理」和「TUN 模式」同时打开吗？"
+    a: "不建议同时双开。双开会导致浏览器流量走本地 HTTP 混合端口、其余进程走虚拟网卡，极易造成 DNS 缓存不一致、日志重复连接甚至网络卡顿。标准做法是二选一：平时仅浏览网页和常规办公只开系统代理；需要接管命令行工具、WSL2、游戏或 UWP 应用时，先关系统代理再开 TUN。"
+  - q: "Clash Verge Rev 内置的 Mihomo 内核在 Release 和 Alpha 之间怎么切换？"
+    a: "绝大多数日常用户应保持默认的 Release 稳定版内核，避免把测试阶段的新特性变动带入日常工作流。只有当机场下发了最新协议参数（例如部分新近部署的 AnyTLS 特性或新规则格式）而当前稳定版内核报错不识别时，才在设置的核心切换面板临时切换测试内核并留意日志稳定性。"
+  - q: "Clash Verge Rev 和 Mihomo Party、FlClash、Sparkle 比应该选谁？"
+    a: "如果主要在 Windows、macOS、Linux 桌面端使用且需要完善的覆写脚本与服务模式，Clash Verge Rev 综合成熟度高；追求 Windows 与 Android 四端极简一致体验可选 FlClash；需要对比测试多内核版本可选 Clash Nyanpasu；至于 Mihomo Party，站内客户端台账明确提示须单独核实项目当前维护活跃度，不可未经确认即作为首选推荐，使用任何衍生桌面壳前同样应先核验源码仓库活跃状态。"
+---
+
+在原版 Clash for Windows 停止维护之后，桌面代理客户端经历了短暂的碎片化过渡期，最终形成了以 **Mihomo（原 Clash.Meta）** 为事实标准规则引擎的新格局。在这一格局下，**Clash Verge Rev** 凭借对 Windows、macOS、Linux 三大桌面系统的完整支持、规范的服务模式提权设计以及灵活的全局配置覆写能力，成为当前跨平台桌面用户最常用的主力客户端之一。
+
+不过，把客户端装进电脑只是第一步。在实际使用中，用户真正容易踩坑的环节往往集中在五个地方：买到了不支持通用订阅的封闭机场导致导入失败、从非官方镜像下载到被篡改的二次打包文件、不会区分系统代理与虚拟网卡边界导致本地开发容器断网、每次更新订阅后手改的分流规则被洗白造成 ChatGPT 与 Gemini 在香港节点频繁受限，以及面对五花八门的同类客户端不知道如何取舍。本指南将围绕这五个实战关口展开完整拆解。
+
+---
+
+## 一、前置核验：确认机场订阅兼容性与安全下载渠道
+
+在投入时间配置客户端之前，必须先核对两端条件：**你的机场服务是否允许第三方导入**，以及**手头的安装包是否来自可信官方发布源**。
+
+### 1. 通用订阅阵营 vs 仅限专属客户端阵营
+
+根据站内对 31 家机场品牌的档案梳理，客户端生态已经分化为两条完全不同的路线。Clash Verge Rev 属于标准的第三方开源客户端，**只能导入提供 Clash/Mihomo YAML 通用订阅链接的服务**：
+
+- **支持第三方导入的参考样本**：例如 [光速云](/brands/guangsuyun/)、[一翻云](/brands/yifan/)、[梯子云](/brands/tiziyun/)、[可信云](/brands/kexin/)、[唯兔云](/brands/weitu/)、[星岛梦](/brands/xingdaomeng/)、[大佬云](/brands/dalaoyun/) 等，均保留了第三方订阅导入能力（其中光速云与梯子云同时兼顾自研端与通用订阅）。
+- **明确不支持 Clash Verge Rev 的封闭阵营**：例如 [飞猫云](/brands/feimao/)、[隐形人](/brands/yinxingren/)、[SOGO 云](/brands/sogo/)、[闪跃](/brands/shanyue/) 与 [全球云](/brands/quanqiu/) 明确仅限官方专属客户端使用，彻底不输出通用订阅地址；此外，[Firefly](/brands/firefly/)、[灵猫网络](/brands/lingmao/) 与 [无忧链接](/brands/wuyou/) 在 2026 年 10 月后的最新资料记录中也已转为仅提供专属客户端模式。如果你采购的是这类服务，即使强行把官网面板地址粘贴进 Clash Verge Rev，也只会触发格式解析错误或得到空节点列表。更完整的阵营对照可查阅 [专属客户端 vs 通用订阅深度对比](/compare/dedicated-client-vs-universal-sub/)。
+
+### 2. 下载来源规范、系统架构区分与 SHA-256 哈希校验
+
+代理客户端需要修改系统代理设置甚至安装底层网络服务，属于极高敏感度的本地工具，也是搜索引擎投毒的重灾区。根据 [第三方客户端总览](/clients/) 的合规准则，站内对全部客户端外部官方链接在未完成实时联网探测前均标注为待核实状态，且坚决杜绝使用无效空链接充当下载地址。用户自行前往开源项目官方发布页获取软件时，务必遵守以下校验标准：
+
+| 操作系统 | 处理器或发行版差异 | 安装包格式与核心注意点 |
+| :--- | :--- | :--- |
+| **Windows 10 / 11** | 常见 Intel/AMD 处理器选 `x64`（即 `amd64`）；高通骁龙平台选 `arm64` | 提供 `.exe` 安装向导与便携包；界面渲染依赖系统 `Microsoft Edge WebView2 Runtime`，精简版系统若打开白屏需补齐该运行库 |
+| **macOS** | 搭载 M1/M2/M3/M4 等苹果自研芯片选 `arm64`（`aarch64`）；老款 Intel 处理器选 `x64` | 常见 `.dmg` 镜像格式；严禁混用错误架构以免开启虚拟网卡时转译失败或权限报错 |
+| **Linux 桌面** | 主流为 `x86_64`（`amd64`）与部分 `aarch64` | Debian/Ubuntu 选 `.deb`，Fedora/RHEL 系选 `.rpm`，跨发行版通用选 `.AppImage`（部分新发行版运行 AppImage 需安装 `libfuse2`） |
+
+下载完成后，不要急于双击运行。请先核对发布页面中列出的官方 **SHA-256 校验值**，并在本地终端计算文件哈希进行逐位比对。
+
+在 Windows PowerShell 中检查安装包哈希值：
+
+```powershell
+# 查看当前系统处理器架构（AMD64 对应 x64，ARM64 对应 arm64）
+$env:PROCESSOR_ARCHITECTURE
+
+# 计算下载目录中安装包的 SHA-256 值并与官方发布页比对
+Get-FileHash -Path "$HOME\Downloads\Clash.Verge_x64-setup.exe" -Algorithm SHA256
+```
+
+在 macOS 或 Linux 终端中检查校验值：
+
+```bash
+# 确认硬件架构（arm64 或 x86_64）
+uname -m
+
+# macOS 计算 SHA-256
+shasum -a 256 ~/Downloads/Clash.Verge_aarch64.dmg
+
+# Linux 计算 SHA-256
+sha256sum ~/Downloads/Clash.Verge_amd64.deb
+```
+
+只要计算出的 64 位十六进制哈希字符串与官方发布页公布的数值有任何一位不一致，或者文件来自搜索引擎广告中所谓的「国内高速镜像」「中文绿色破解增强版」，都应立即删除文件，切勿运行。有关系统级安全核验与各平台矩阵，可延伸对照 [Windows 客户端全矩阵](/guides/articles/windows-clients-guide/) 与 [iOS/macOS 客户端指南](/guides/articles/ios-macos-clients-guide/)。
+
+---
+
+## 二、订阅导入、参数优化与 Mihomo 内核切换
+
+安装完成并首次启动 Clash Verge Rev 后，界面通常分为「代理（Proxies）」「配置（Profiles）」「连接（Connections）」「规则（Rules）」「日志（Logs）」「设置（Settings）」等主要视图。正确的初始化顺序如下。
+
+### 1. 订阅导入与拉取参数调优
+
+在机场用户面板中找到「Clash 订阅」或「一键导入 Clash」按钮。如果点击一键拉起客户端没有响应，最稳妥的做法是**手动复制订阅链接**，切换到 Clash Verge Rev 的「配置（Profiles）」页面，粘贴进顶部的远程配置输入框并点击「导入（Import）」。
+
+导入成功后，建议立刻右键点击刚刚生成的配置卡片，打开「编辑信息（Edit Info）」进行两项关键调整：
+
+- **调整自动更新间隔（Update Interval）**：建议设置为 `1440` 分钟（每天自动更新一次）或 `720` 分钟。部分用户在排查故障时习惯频繁点击刷新，或者将更新周期设成几分钟一次，容易触发机场后端防火墙频率限制，反而导致返回 `403` 或空白文件。
+- **按需配置 User-Agent 与代理更新**：部分机场面板（如 V2Board/XBoard 后端）会对请求头中的 `User-Agent` 做严格识别。如果导入后提示下载成功但节点数为零，通常就是面板未识别当前请求标识或节点处于到期停用状态。此时可在此弹窗的 `User-Agent` 一栏尝试显式填写 `clash-verge` 或 `Clash.Meta`；若本地直连拉取遇到连接重置或证书报错，可先确认系统时间准确，再在同弹窗勾选「通过代理更新（Use Proxy）」（前提是手头已有至少一个可用节点）。详细定位方法可参考 [订阅导入与 200 OK 空内容排障](/guides/articles/subscription-and-200ok-empty-fix/)。
+
+### 2. Mihomo 内核版本管理与切换原则
+
+Clash Verge Rev 内部封装了独立的 Mihomo 核心二进制文件，允许用户在设置中查看当前核心版本并在不同发行分支间切换。理解内核切换的正确时机，可以避免大量无谓折腾：
+
+- **日常默认坚守稳定版（Release）**：绝大多数主流协议（`Shadowsocks`、`Trojan`、`VMess`、`VLESS-Reality`、`Hysteria 2`、`TUIC`）在 Release 稳定版 Mihomo 内核中早已得到充分验证。普通用户无需频繁追逐每日构建版。
+- **何时考虑切换测试版（Alpha）或手动更新**：根据站内品牌档案记录，例如 [光速云](/brands/guangsuyun/) 在 2026-08-19 70 节点测试截图底部已出现 `AnyTLS` 协议的电信专属入口节点，而 [一翻云](/brands/yifan/) 同时提供 `Hysteria 2`、`VLESS-Reality` 与 `Shadowsocks`。当服务商率先上线最新传输协议或实验性握手参数，而你当前使用的稳定版内核在「日志」中报出不识别的协议类型或未知传输字段时，才适合在 Clash Verge Rev 的「设置 — Clash 内核（Clash Core）」面板点击升级内核或切换至 Alpha 分支测试。
+- **切换后启动失败的处理**：若切换测试内核后出现软件界面显示正常但开关无法激活、核心报错退出，应第一时间切回稳定版内核，并检查 Windows 安全中心或第三方杀毒软件的「保护历史记录」——因为每次替换 `mihomo.exe` 二进制文件，都可能触发杀毒软件的启发式误报并直接将其隔离，具体修复可查阅 [客户端无法启动与核心闪退排查](/troubleshooting/app-startup/)。
+
+---
+
+## 三、系统代理 vs TUN 模式：权限机制、容器兼容与安全回退
+
+很多新手打开 Clash Verge Rev 后发现网页打得开，但终端命令行里的 `git clone`、`npm`、`curl`、AI IDE 客户端（如 Cursor / Claude CLI）或者游戏启动器全部卡死超时。这并非节点问题，而是没有分清「系统代理」与「TUN 虚拟网卡」的作用层级。
+
+| 对比维度 | 系统代理（System Proxy） | TUN 虚拟网卡模式（TUN Mode） |
+| :--- | :--- | :--- |
+| **接管层次** | 应用层环境变量与系统注册表/网络偏好设置 | 操作系统网络三层虚拟网卡（Windows 常见 `wintun`、macOS/Linux 为 `utun`/`tun`） |
+| **生效范围** | 仅限主动读取系统 HTTP/SOCKS 端口的程序（主要是浏览器） | **全局接管几乎所有本机进程**，含终端 CLI、桌面应用、UWP 与 UDP 协议软件 |
+| **权限门槛** | 普通用户权限即可随时开关 | 必须提权（Windows 需安装并运行服务模式，macOS/Linux 需管理员授权） |
+| **本地干扰风险** | 极低，不改写系统路由表，仅需注意异常退出残留 | 中等，可能影响 WSL2、Docker 容器网桥、企业零信任 VPN 与部分网银控件 |
+| **日常推荐策略** | **轻度网页与常见浏览器办公默认首选** | **需要终端工具、全软件接管或 UDP 流量时按需开启** |
+
+### 1. 服务模式（Service Mode）安装与权限处理
+
+在 Clash Verge Rev 中，如果直接拨动主界面的「TUN 模式」开关却弹出权限不足或核心拒绝创建网卡的提示，应按照以下标准路径授权，**不要长期用右键「以管理员身份运行」主程序作为常规习惯**（直接以管理员身份启动 GUI 容易导致拖放导入文件失效以及后台开机自启被系统拦截）：
+
+1. **Windows 平台**：打开软件「设置（Settings）」— 找到「服务模式（Service Mode）」右侧的小盾牌或管理图标 — 点击「Install（安装）」。系统会弹出一次 UAC 用户账户控制窗口，点击确认后，软件会在后台注册一个系统级服务负责驱动 `mihomo` 核心创建虚拟网卡。当状态显示为已安装且运行中后，再返回主面板打开 TUN 模式即可实现普通用户权限下的无感提权。
+2. **macOS 平台**：首次开启 TUN 模式时系统会弹出密码授权框以配置 `utun` 设备与路由表。如果此前误点拒绝导致一直报错，可在内核授权面板重新触发权限或检查系统设置中的后台网络权限。
+3. **Linux 平台**：通常需要安装对应包管理器提供的服务单元，或为内核二进制赋予 `CAP_NET_ADMIN` 网络管理权限，否则虚拟网卡创建会被内核拒绝。
+
+### 2. 禁止无脑双开与容器/内网冲突避坑
+
+在日常排障中，最常见的人为故障是**同时打开「系统代理」和「TUN 模式」**。两者同时启用时，浏览器请求先进入系统 HTTP 代理端口，而大量后台连接与 UDP 请求直接进入 TUN 网卡，如果策略组状态不同步或遇到 `Fake-IP` 缓存交错，极易导致网页反复转圈、连接日志暴涨，甚至触发某些平台风控。正确原则是**二选一**：开 TUN 就关系统代理，开系统代理就关 TUN。
+
+此外，开发者在 Windows 11 开启 TUN 模式后，常会遇到 **WSL2 或 Docker 容器突然无法访问外网或宿主机网络** 的问题。这源于虚拟网桥数据包跨接路由被拦截以及 DNS 解析指向 `198.18.0.1/16` 保留段而容器无法回溯。应对方法有三种：第一，工作开发时临时关闭 TUN，切回系统代理并在终端显式配置代理环境变量；第二，在客户端开启允许局域网连接（Allow LAN）并在 Windows 11 将 WSL2 网络模式调整为镜像模式；第三，参考 [系统代理与 TUN 虚拟网卡、DNS 与安全回退指南](/guides/articles/tun-vs-system-proxy-dns/) 在规则与 `fake-ip-filter` 中放行内网网段与容器域名。
+
+当你需要卸载软件、重装或遇到突发断网时，务必先在面板手动关闭「系统代理」和「TUN 模式」，再退出程序；若因强制关机或软件崩溃导致浏览器出现「代理服务器没有响应」，不要盲目重装网卡驱动，只需按 [TUN 与系统代理故障汇总](/troubleshooting/tun-proxy/) 检查系统网络设置中是否残留本地回环地址并手动取消勾选即可无损恢复。
+
+---
+
+## 四、Merge 与 Script 全局配置覆写实战：修复 OpenAI / Claude / Gemini 分流
+
+拿到机场通用订阅后，许多用户会发现：明明购买的套餐标注支持 ChatGPT 和流媒体，可实际打开网页版 ChatGPT 却提示拒绝访问，或者打开 Gemini 直接提示所在地区不受支持。
+
+结合站内实测样本就能看清原因：以 [光速云](/brands/guangsuyun/) 2026-08-19 归档的 MiaoKo 测速图为例，香港节点延迟虽低（约 22 至 31 毫秒），但 OpenAI 解锁状态几乎全部标注为「仅 APP(HK)」而网页端受限，Gemini 在香港、日本、美国与台湾样本中也存在大量失败，当时仅新加坡、马来西亚与土耳其样本顺利解锁；而另一份 [灵动云](/brands/lingdongyun/) 2026-07 实测样本则记录到台湾与新加坡部分节点出现 YouTube 送中或广播 IP 识别偏移。如果此时你的默认策略组开启了自动测速（`url-test`），客户端几乎必然自动选中延迟最低的香港节点，直接导致 AI 网页端全线报错。
+
+**为什么不能直接打开订阅文件手动修改？** 因为远程订阅只要到达自动更新周期（或你手动点击刷新），机场下发的新 YAML 文件就会把你手写的策略组和规则全部覆盖抹平。**Clash Verge Rev 的「全局扩展配置（Merge）」与「全局扩展脚本（Script）」正是为此设计的无损持久化方案**——每次订阅更新后，客户端会自动把你的覆写逻辑动态叠加到最新订阅上。
+
+### 1. Merge 与 Script 的分工选择
+
+- **全局扩展配置（YAML Merge）**：适合修改 `dns` 参数、`tun` 开关、调整部分顶层字段或向 `rules` 头部追加少量固定域名规则（使用 `prepend-rules`）。语法简单，但无法根据机场节点的中文名称动态生成或过滤节点列表。
+- **全局扩展脚本（JavaScript Script）**：适合真正一劳永逸解决 AI 分流与节点净化。脚本通过 `main(config)` 函数接管机场下发的整份配置对象，可以用正则表达式遍历所有节点名，自动剔除香港节点与倍率过高的线路，动态组装出稳定的美国/日本/新加坡 AI 专用策略组，并将对应规则置顶。
+
+### 2. 实战：用 Script 覆写自动修复 ChatGPT、Claude 与 Gemini 分流
+
+以下是一段经过精简设计的 Clash Verge Rev 全局扩展脚本示例。它完成三件核心工作：第一，自动过滤出名称不含香港、台湾、俄国及信息提示词的稳定美国/日本/新加坡节点；第二，为 **OpenAI/ChatGPT**、**Claude** 与 **Gemini** 分别建立手动选择（`select`）策略组（避免使用短间隔 `url-test` 在多国之间高频跳变 IP 触发账号风控）；第三，把对应规则强行插入 `rules` 数组最前端，确保优先级高于机场自带的泛用规则。
+
+```javascript
+// Clash Verge Rev 全局扩展脚本 (Script) 示例
+// 作用：自动为 OpenAI / Claude / Gemini 创建独立策略组，规避香港节点网页端限制
+
+function main(config) {
+  if (!config || !Array.isArray(config.proxies)) {
+    return config;
+  }
+
+  // 1. 排除信息节点及香港等容易触发网页端 AI 地区限制的节点
+  const excludePattern = /香港|HK|Hong\s*Kong|官网|剩余流量|过期|重置|倍率|试用/i;
+  const usJpSgPattern = /美国|US|United\s*States|日本|JP|Japan|新加坡|SG|Singapore/i;
+  const sgPattern = /新加坡|SG|Singapore/i;
+
+  const allProxyNames = config.proxies.map((p) => p.name);
+
+  const aiGeneralProxies = allProxyNames.filter(
+    (name) => !excludePattern.test(name) && usJpSgPattern.test(name)
+  );
+  const geminiProxies = allProxyNames.filter(
+    (name) => !excludePattern.test(name) && sgPattern.test(name)
+  );
+
+  // 若机场未按常规国家命名，保底回退到全部非排除节点，防止生成空策略组报错
+  const fallbackPool = allProxyNames.filter((name) => !excludePattern.test(name));
+  const aiCandidates = aiGeneralProxies.length > 0 ? aiGeneralProxies : fallbackPool;
+  const geminiCandidates = geminiProxies.length > 0 ? geminiProxies : aiCandidates;
+
+  if (!Array.isArray(config["proxy-groups"])) {
+    config["proxy-groups"] = [];
+  }
+
+  // 2. 构建独立策略组（采用 select 模式锁定固定节点，减少频繁换 IP 风控）
+  const customGroups = [
+    {
+      name: "AI-ChatGPT",
+      type: "select",
+      proxies: aiCandidates,
+    },
+    {
+      name: "AI-Claude",
+      type: "select",
+      proxies: aiCandidates,
+    },
+    {
+      name: "AI-Gemini",
+      type: "select",
+      proxies: geminiCandidates,
+    },
+  ];
+
+  // 移除同名旧组后前置注入，避免重复
+  const customNames = new Set(customGroups.map((g) => g.name));
+  config["proxy-groups"] = [
+    ...customGroups,
+    ...config["proxy-groups"].filter((g) => !customNames.has(g.name)),
+  ];
+
+  // 3. 将 AI 精细规则置顶（优先匹配）
+  const prependRules = [
+    "DOMAIN-SUFFIX,openai.com,AI-ChatGPT",
+    "DOMAIN-SUFFIX,chatgpt.com,AI-ChatGPT",
+    "DOMAIN-SUFFIX,oaistatic.com,AI-ChatGPT",
+    "DOMAIN-SUFFIX,oaiusercontent.com,AI-ChatGPT",
+    "DOMAIN-SUFFIX,anthropic.com,AI-Claude",
+    "DOMAIN-SUFFIX,claude.ai,AI-Claude",
+    "DOMAIN-SUFFIX,gemini.google.com,AI-Gemini",
+    "DOMAIN-SUFFIX,aistudio.google.com,AI-Gemini",
+    "DOMAIN-SUFFIX,generativelanguage.googleapis.com,AI-Gemini",
+  ];
+
+  if (!Array.isArray(config.rules)) {
+    config.rules = [];
+  }
+  config.rules = [...prependRules, ...config.rules];
+
+  return config;
+}
+```
+
+如果在写覆写规则时，只需要微调少量选项（例如向 `fake-ip-filter` 追加内网域名、或把个别域名设为 `DIRECT`），使用 YAML Merge 更加轻量直观：
+
+```yaml
+# Clash Verge Rev 全局扩展配置 (Merge) 示例
+# 用于补充局域网与时间服务直连过滤，防止系统联网图标误报异常
+prepend-rules:
+  - DOMAIN-SUFFIX,internal.company.local,DIRECT
+
+dns:
+  fake-ip-filter:
+    - "+.lan"
+    - "+.local"
+    - "time.*.com"
+    - "ntp.*.com"
+    - "+.msftconnecttest.com"
+```
+
+编写并保存脚本后，务必在配置文件菜单中确认已启用该全局覆写开关，随后回到「代理」界面查看是否成功出现 `AI-ChatGPT`、`AI-Claude` 与 `AI-Gemini` 三个分组，并在每组中手动固定一至两个状态稳健的目标国家节点。有关不同机场在 AI 与流媒体解锁上的真实差异，可进一步对照 [ChatGPT 访问与分流排查](/ai-media/chatgpt/) 与 [Gemini 地区分化实况](/ai-media/gemini/)。
+
+---
+
+## 五、同类桌面客户端差异对比：FlClash、Clash Nyanpasu、Sparkle 与 Mihomo Party
+
+在桌面端 Mihomo 生态中，除了 Clash Verge Rev，用户经常在各类社区讨论中看到 `FlClash`、`Clash Nyanpasu`、`Sparkle` 以及 `Mihomo Party` 的名字。这几款工具底层大多同样驱动 Mihomo 内核，但在界面设计理念、跨平台野心、拓展能力和维护风险上存在显著分化。
+
+| 客户端名称 | 底层内核 | 平台覆盖（站内台账核实） | 核心长处与交互定位 | 适用人群与关键注意事项 |
+| :--- | :--- | :--- | :--- | :--- |
+| **Clash Verge Rev** | Mihomo (`Clash.Meta`) | Windows、macOS、Linux | 功能完整度高，Merge/Script 覆写、服务模式 TUN 与内核切换均衡成熟 | 绝大多数桌面主力用户的稳妥首选 |
+| **FlClash** | Mihomo | Windows、Android、macOS、Linux | 界面简洁现代、跨电脑与安卓手机四端体验高度一致 | 追求极简低学习成本、不需要复杂 JS 脚本覆写的跨端用户 |
+| **Clash Nyanpasu** | 多内核支持（Mihomo 等） | Windows、macOS、Linux | 主打多内核灵活切换管理与高自由度配置增强 | 喜欢对比不同内核分支性能或有进阶调试需求的桌面玩家 |
+| **Sparkle** | Mihomo（衍生桌面端） | 桌面生态衍生工具 | 主打轻量化现代界面交互与基础规则管理 | 属于社区衍生界面壳，选用前须单独核实官方仓库源、签名完整性与更新连续性 |
+| **Mihomo Party** | Mihomo | Windows（站内台账标注） | 曾见于较多历史配置与分流迁移教程 | **站内重要风险警示：须单独核实当前项目维护活跃度，不可未经确认即标为首选推荐客户端** |
+
+### 选型决策建议与 Mihomo Party 风险提示
+
+1. **为什么把 Clash Verge Rev 与 FlClash 作为两条清晰主线**：如果你的使用重心完全在 Windows、macOS 或 Linux 电脑上，经常需要通过 Script 脚本精准接管机场下发的配置（例如把 Claude 和 Gemini 拆到不同国家），Clash Verge Rev 的桌面深耕度最高；如果你希望桌面电脑和 Android 手机保持几乎一模一样的清爽面板逻辑、厌烦复杂脚本，那么同属 Mihomo 内核且覆盖四大平台的 `FlClash` 非常值得并行考察。
+2. **关于 Mihomo Party 的严肃提示**：互联网上仍有不少早期图文或视频教程把 Mihomo Party 列为默认推荐。然而，开源桌面壳的维护者投入度、仓库归属与安全补丁响应能力会随时间动态变化。本站客户端台账明确为 Mihomo Party 标注了**风险提示**：在未独立核实其当前公开仓库的近期提交记录、版本发布连贯性与二进制签名安全性之前，不应将其作为盲选首选；正在使用旧版本配置的用户，也可以平滑将订阅 URL 与覆写逻辑迁移至 Clash Verge Rev 或 FlClash。
+3. **关于 Clash Nyanpasu 与 Sparkle 等衍生桌面壳**：当你需要在一套界面里同时对比不同版本 Mihomo 内核或尝试其他实验性核心特性时，`Clash Nyanpasu` 提供了良好的多内核调度体验；而对于社区中不断涌现的新兴轻量界面壳（如部分衍生壳 `Sparkle` 等），始终坚持「先看源码发布连续性、再核验校验和、最后导入敏感订阅」的原则，不因为界面好看就跳过安全核查。
+4. **如果你的机场主要给单节点链接而不是 Clash YAML**：遇到以单条分享链接或需要频繁在 Xray-core 与 sing-box 之间切换的场景，Clash Verge Rev 并非唯一解，可转至 [v2rayN 全平台多核心指南](/clients/v2rayn/) 评估多核心调度客户端。
+
+---
+
+## 六、高频安装与运行故障快速自检
+
+在配置 Clash Verge Rev 的过程中，绝大多数看似「软件坏了」的报错都集中在以下几个常见触发点，按表定位通常两分钟内即可排除：
+
+| 故障症状 | 高概率根因 | 正确无损排查路径 |
+| :--- | :--- | :--- |
+| **双击启动后界面白屏或无反应** | Windows 缺少 `Microsoft Edge WebView2` 组件，或显卡硬件加速兼容异常 | 安装或修复系统官方 WebView2 Runtime；若仍打不开，查阅 [客户端无法启动排查](/troubleshooting/app-startup/) |
+| **开启开关提示核心启动失败 / 端口被占用** | `7897` 等默认混合端口被另一款代理软件或加速器抢占，或 `mihomo.exe` 被杀软隔离 | 任务管理器清理残留进程、把混合端口改为高位冷门端口，或检查安全中心保护历史记录 |
+| **导入订阅后全部节点延迟显示 Timeout** | 本地系统时间偏差超过一分钟、订阅已过期，或正在开着失效旧代理拉取配置 | 先关闭代理开关，校准系统与标准网络时间同步（可对照 [节点全超时排障](/troubleshooting/timeout/)） |
+| **写完覆写脚本后无法打开配置或报错** | JavaScript 语法括号缺失、YAML Merge 缩进使用了 Tab 而非空格 | 在「订阅配置」中暂取消勾选刚编辑的全局脚本或扩展配置，恢复原始订阅验证后逐行排错 |
+| **关闭软件后浏览器彻底打不开任何网页** | 系统代理未在退出前正常清空，或 `Fake-IP` 地址仍留在浏览器缓存中 | 检查系统网络代理设置确认关闭 `127.0.0.1` 代理地址，并刷新系统 DNS 缓存后重启浏览器 |
+
+做好订阅备份、分清系统代理与 TUN 的职责分工、善用脚本覆写固化 AI 与流媒体分流策略，Clash Verge Rev 就能长期作为稳定可靠的桌面网络中枢运行。如果还需要进一步了解 Android、macOS 或软路由端如何与桌面端保持统一规则语法，可继续查阅 [Clash Meta（Mihomo）生态指南](/clients/clash-meta/) 与 [代理规则配置指南](/guides/routing-rules/)。

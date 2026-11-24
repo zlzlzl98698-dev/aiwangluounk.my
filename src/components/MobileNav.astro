@@ -1,0 +1,175 @@
+---
+import { NAV_PILLARS, FOOTER_META_LINKS } from '../data/navigation';
+---
+
+<div id="mobile-nav-drawer" class="mobile-drawer" hidden>
+  <div class="mobile-drawer__head">
+    <strong>全站专题导航（10 大板块）</strong>
+    <button type="button" id="mobile-nav-close" class="btn btn-secondary" aria-label="关闭移动菜单">
+      关闭
+    </button>
+  </div>
+  <nav aria-label="移动端主导航">
+    <ul class="mobile-accordion">
+      {NAV_PILLARS.map((pillar) => (
+        <li class="mobile-group">
+          <div class="mobile-group__bar">
+            <a href={pillar.href} class="mobile-group__title">
+              <span class="mono">{pillar.code}</span> {pillar.title}
+            </a>
+            <button
+              type="button"
+              class="mobile-group__toggle"
+              aria-expanded="false"
+              aria-controls={`mob-sub-${pillar.id}`}
+              aria-label={`展开 ${pillar.title} 子栏目`}
+            >
+              展开
+            </button>
+          </div>
+          <ul id={`mob-sub-${pillar.id}`} class="mobile-sublist" hidden>
+            {pillar.children.map((item) => (
+              <li>
+                <a href={item.href}>{item.title}</a>
+              </li>
+            ))}
+          </ul>
+        </li>
+      ))}
+    </ul>
+    <div class="mobile-meta">
+      <div class="mobile-meta__title">站点治理与透明度</div>
+      <div class="mobile-meta__links">
+        {FOOTER_META_LINKS.map((m) => (
+          <a href={m.href}>{m.title}</a>
+        ))}
+      </div>
+    </div>
+  </nav>
+</div>
+
+<script>
+  const drawer = document.getElementById('mobile-nav-drawer');
+  const openBtn = document.getElementById('mobile-nav-open');
+  const closeBtn = document.getElementById('mobile-nav-close');
+
+  openBtn?.addEventListener('click', () => {
+    if (!drawer) return;
+    drawer.hidden = false;
+    openBtn.setAttribute('aria-expanded', 'true');
+  });
+
+  closeBtn?.addEventListener('click', () => {
+    if (!drawer) return;
+    drawer.hidden = true;
+    openBtn?.setAttribute('aria-expanded', 'false');
+    openBtn?.focus();
+  });
+
+  drawer?.querySelectorAll<HTMLButtonElement>('.mobile-group__toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('aria-controls');
+      const sub = targetId ? document.getElementById(targetId) : null;
+      if (!sub) return;
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      btn.textContent = expanded ? '展开' : '收起';
+      sub.hidden = expanded;
+    });
+  });
+</script>
+
+<style>
+  .mobile-drawer {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-page);
+    z-index: 100;
+    overflow-y: auto;
+    padding: 1rem 1.15rem 2.5rem;
+  }
+  .mobile-drawer__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--border-hairline);
+    margin-bottom: 0.75rem;
+  }
+  .mobile-accordion {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .mobile-group {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-sm);
+  }
+  .mobile-group__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.55rem 0.75rem;
+  }
+  .mobile-group__title {
+    font-weight: 700;
+    font-size: 0.96rem;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .mobile-group__title .mono {
+    color: var(--brand-cyan);
+    font-size: 0.8rem;
+    margin-right: 0.25rem;
+  }
+  .mobile-group__toggle {
+    background: var(--bg-muted);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+  .mobile-sublist {
+    list-style: none;
+    margin: 0;
+    padding: 0.35rem 0.75rem 0.75rem;
+    border-top: 1px solid var(--border-hairline);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+  .mobile-sublist[hidden] {
+    display: none;
+  }
+  .mobile-sublist a {
+    display: block;
+    padding: 0.35rem 0.45rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    background: var(--bg-page);
+    border-radius: 4px;
+  }
+  .mobile-meta {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-hairline);
+  }
+  .mobile-meta__title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 0.55rem;
+  }
+  .mobile-meta__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    font-size: 0.86rem;
+  }
+</style>

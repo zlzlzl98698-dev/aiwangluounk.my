@@ -1,0 +1,420 @@
+---
+import type { NavPillar } from '../data/navigation';
+import { getL2TopicsByPillar } from '../data/topics';
+import { PILLAR_CROSS_LINKS } from '../lib/linkGraph';
+import Breadcrumbs from './Breadcrumbs.astro';
+import AnswerSummary from './AnswerSummary.astro';
+import ArticleTOC, { type TocHeading } from './ArticleTOC.astro';
+import RelatedLinks from './RelatedLinks.astro';
+
+interface Props {
+  pillar: NavPillar;
+  h1?: string;
+  intent?: string;
+  targetKeyword?: string;
+  entities?: string[];
+  updatedDate?: string;
+  leadSummary: string;
+  headings?: TocHeading[];
+  ctaHeading?: string;
+  ctaActions?: { label: string; href: string; style: 'primary' | 'secondary' }[];
+  faqs?: { q: string; a: string }[];
+  nextPillarLinks?: { title: string; href: string; category: string; reason: string }[];
+  publishedGuides?: { title: string; href: string; summary: string }[];
+}
+
+const {
+  pillar,
+  h1 = `${pillar.title}专题总览`,
+  intent = '专题决策与知识导航',
+  targetKeyword = pillar.title,
+  entities = [],
+  updatedDate = '2026-11-23',
+  leadSummary,
+  headings = [],
+  ctaHeading,
+  ctaActions = [],
+  faqs = [],
+  nextPillarLinks,
+  publishedGuides = [],
+} = Astro.props;
+
+const l2Topics = getL2TopicsByPillar(pillar.id);
+const crossLinks = nextPillarLinks && nextPillarLinks.length > 0
+  ? nextPillarLinks
+  : (PILLAR_CROSS_LINKS[pillar.id] ?? []);
+
+const allHeadings: TocHeading[] = [
+  ...headings,
+  { depth: 2, slug: 'subtopics-directory', text: `${pillar.title}六大二级专题入口` },
+  ...(publishedGuides.length > 0 ? [{ depth: 2, slug: 'published-guides', text: '关联深度实操与比较文章' }] : []),
+  ...(faqs.length > 0 ? [{ depth: 2, slug: 'pillar-faq', text: `${pillar.title}常见问题解答（FAQ）` }] : []),
+];
+---
+
+<div class="container page-section">
+  <Breadcrumbs
+    items={[
+      { name: '首页', href: '/' },
+      { name: pillar.title, href: pillar.href },
+    ]}
+  />
+
+  <header class="pillar-hero surface-card">
+    <div class="pillar-hero__meta">
+      <span class="mono pillar-code">PILLAR {pillar.code} · {pillar.href}</span>
+      <span>搜索意图：{intent}</span>
+      <span>核心主题：<code class="mono">{targetKeyword}</code></span>
+      <span>最近更新：<time datetime={updatedDate}>{updatedDate}</time></span>
+    </div>
+    <h1>{h1}</h1>
+    <p class="pillar-lead">{pillar.summary}</p>
+    <div class="pillar-quicknav" aria-label={`${pillar.title} 二级快捷跳转`}>
+      {pillar.children.map((sub) => (
+        <a href={sub.href} class="pillar-pill">{sub.title}</a>
+      ))}
+    </div>
+  </header>
+
+  <div class="pillar-layout">
+    <aside class="pillar-sidebar">
+      <ArticleTOC headings={allHeadings} />
+      {entities.length > 0 && (
+        <div class="surface-card entity-box">
+          <div class="entity-box__title">本专题关联核心实体</div>
+          <div class="entity-tags">
+            {entities.map((e) => (
+              <span>{e}</span>
+            ))}
+          </div>
+        </div>
+      )}
+    </aside>
+
+    <div class="pillar-main">
+      {allHeadings.length > 0 && (
+        <details class="mobile-toc surface-card">
+          <summary>展开本专题目录（快速跳至核心章节）</summary>
+          <ul>
+            {allHeadings
+              .filter((h) => h.depth >= 2 && h.depth <= 3)
+              .map((h) => (
+                <li class={h.depth === 3 ? 'mob-sub' : ''}>
+                  <a href={`#${h.slug}`}>{h.text}</a>
+                </li>
+              ))}
+          </ul>
+        </details>
+      )}
+
+      <AnswerSummary eyebrow="核心结论速览 · Answer-First" summary={leadSummary} />
+
+      <article class="prose-article pillar-prose">
+        <slot />
+      </article>
+
+      {ctaActions.length > 0 && (
+        <section class="surface-card pillar-cta" aria-label="下一步行动建议">
+          <div class="pillar-cta__copy">
+            <strong>{ctaHeading ?? `继续深入${pillar.title}`}</strong>
+            <p>基于上述判断依据与限制条件，选择适合当前阶段的下一步入口：</p>
+          </div>
+          <div class="pillar-cta__btns">
+            {ctaActions.map((act) => (
+              <a href={act.href} class={`btn ${act.style === 'primary' ? 'btn-primary' : 'btn-secondary'}`}>
+                {act.label}
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section id="subtopics-directory" class="page-section section-anchor" aria-label={`${pillar.title}二级子专题导航`}>
+        <div class="section-header">
+          <h2>{pillar.title}六大二级专题入口（全部独立成页）</h2>
+          <span class="section-subtitle">覆盖细分检索意图、比较维度与场景排障</span>
+        </div>
+        <div class="grid-cards grid-cards--3">
+          {pillar.children.map((sub, i) => {
+            const cfg = l2Topics.find((t) => t.href === sub.href);
+            return (
+              <article class="surface-card sub-card">
+                <div class="sub-card__code mono">{pillar.code}-0{i + 1}</div>
+                <h3><a href={sub.href}>{sub.title}</a></h3>
+                <p>{sub.description}</p>
+                {cfg && (
+                  <div class="sub-card__meta">
+                    规划 {cfg.l3Clusters.reduce((acc, c) => acc + c.articleTitles.length, 0)} 篇三级选题 · {cfg.faqs.length} 条问答
+                  </div>
+                )}
+                <a href={sub.href} class="sub-card__go">进入「{sub.title}」专题 →</a>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      {publishedGuides.length > 0 && (
+        <section id="published-guides" class="page-section section-anchor" aria-label="相关深度实操文章">
+          <div class="section-header">
+            <h2>已发布关联深度教程与指南</h2>
+          </div>
+          <div class="grid-cards grid-cards--2">
+            {publishedGuides.map((g) => (
+              <a href={g.href} class="surface-card guide-link">
+                <strong>{g.title}</strong>
+                <p>{g.summary}</p>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {faqs.length > 0 && (
+        <section id="pillar-faq" class="page-section section-anchor" aria-label={`${pillar.title}常见问题`}>
+          <div class="section-header">
+            <h2>{pillar.title}常见问题解答（FAQ）</h2>
+            <span class="section-subtitle">共 {faqs.length} 条结构化问答，结论与正文证据一致</span>
+          </div>
+          <div class="faq-list">
+            {faqs.map((f, idx) => (
+              <article class="surface-card faq-item">
+                <h3><span class="mono faq-idx">Q{idx + 1}.</span> {f.q}</h3>
+                <p>{f.a}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <RelatedLinks title="跨专题推荐阅读路径" links={crossLinks} />
+    </div>
+  </div>
+</div>
+
+<style>
+  .pillar-hero {
+    margin-bottom: 1.5rem;
+    padding: 1.35rem 1.4rem;
+  }
+  .pillar-hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 1.15rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.45rem;
+  }
+  .pillar-code {
+    font-weight: 700;
+    color: var(--brand-cyan);
+  }
+  .pillar-hero h1 {
+    margin: 0.25rem 0 0.55rem;
+    font-size: clamp(1.5rem, 3vw, 2.08rem);
+    line-height: 1.26;
+    letter-spacing: -0.02em;
+  }
+  .pillar-lead {
+    margin: 0;
+    font-size: 0.98rem;
+    color: var(--text-secondary);
+    max-width: 74ch;
+  }
+  .pillar-quicknav {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+  .pillar-pill {
+    padding: 0.28rem 0.72rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: var(--bg-muted);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-hairline);
+    border-radius: 999px;
+    text-decoration: none;
+  }
+  .pillar-pill:hover {
+    background: var(--bg-subtle);
+    color: var(--brand-primary);
+    border-color: rgba(29, 78, 216, 0.3);
+  }
+  .pillar-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.75rem;
+    align-items: start;
+  }
+  .pillar-sidebar,
+  .pillar-main {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .pillar-sidebar {
+    display: none;
+  }
+  @media (min-width: 980px) {
+    .pillar-layout {
+      grid-template-columns: 270px minmax(0, 1fr);
+    }
+    .pillar-sidebar {
+      display: block;
+      position: sticky;
+      top: 76px;
+      max-height: calc(100dvh - 92px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: 0.25rem;
+    }
+    .mobile-toc {
+      display: none;
+    }
+  }
+  .mobile-toc {
+    margin-bottom: 1rem;
+    padding: 0.8rem 1rem;
+    font-size: 0.86rem;
+  }
+  .mobile-toc summary {
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--text-primary);
+  }
+  .mobile-toc ul {
+    margin: 0.65rem 0 0;
+    padding-left: 1rem;
+    list-style: none;
+  }
+  .mobile-toc li {
+    margin-block: 0.28rem;
+  }
+  .mobile-toc li.mob-sub {
+    padding-left: 0.85rem;
+    font-size: 0.82rem;
+  }
+  .entity-box {
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+  }
+  .entity-box__title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+  }
+  .entity-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .entity-tags span {
+    font-size: 0.74rem;
+    padding: 0.16rem 0.48rem;
+    background: var(--bg-muted);
+    border: 1px solid var(--border-hairline);
+    border-radius: 4px;
+    color: var(--text-secondary);
+  }
+  .pillar-prose {
+    max-width: min(82ch, 100%);
+  }
+  .pillar-cta {
+    margin-top: 2rem;
+    background: var(--bg-subtle);
+    border: 1px solid rgba(29, 78, 216, 0.24);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .pillar-cta__copy strong {
+    font-size: 1.04rem;
+    color: var(--text-primary);
+  }
+  .pillar-cta__copy p {
+    margin: 0.25rem 0 0;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+  }
+  .pillar-cta__btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .section-anchor {
+    scroll-margin-top: 5.5rem;
+  }
+  .sub-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .sub-card__code {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+  .sub-card h3 {
+    margin: 0;
+    font-size: 1.06rem;
+  }
+  .sub-card h3 a {
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .sub-card h3 a:hover {
+    color: var(--brand-primary);
+    text-decoration: underline;
+  }
+  .sub-card p {
+    margin: 0;
+    font-size: 0.87rem;
+    color: var(--text-secondary);
+  }
+  .sub-card__meta {
+    margin-top: auto;
+    padding-top: 0.45rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .sub-card__go {
+    font-size: 0.84rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .guide-link {
+    text-decoration: none;
+    color: inherit;
+  }
+  .guide-link strong {
+    display: block;
+    color: var(--brand-primary);
+    margin-bottom: 0.3rem;
+  }
+  .guide-link p {
+    margin: 0;
+    font-size: 0.86rem;
+    color: var(--text-secondary);
+  }
+  .faq-list {
+    display: grid;
+    gap: 0.85rem;
+  }
+  .faq-item h3 {
+    margin: 0 0 0.4rem;
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+  .faq-idx {
+    color: var(--brand-primary);
+    margin-right: 0.25rem;
+  }
+  .faq-item p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+</style>

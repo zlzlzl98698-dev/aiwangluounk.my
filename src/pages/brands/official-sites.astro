@@ -1,0 +1,78 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TopicL2View from '../../components/TopicL2View.astro';
+import { NAV_PILLARS } from '../../data/navigation';
+import { getL2Topic } from '../../data/topics';
+import {
+  buildArticleSchema,
+  buildBreadcrumbSchema,
+  buildCollectionPageSchema,
+  buildFaqSchema,
+} from '../../lib/schema';
+
+const pillar = NAV_PILLARS.find((p) => p.id === 'brands')!;
+const topic = getL2Topic('brands', 'official-sites')!;
+const l2Entries = await getCollection('secondaryTopics');
+const doc = l2Entries.find((e) => e.data.pillarId === 'brands' && e.data.slug === 'official-sites');
+const rendered = doc ? await render(doc) : null;
+const Content = rendered?.Content;
+const headings = rendered?.headings ?? [];
+
+const seoTitle = doc?.data.title ?? topic.metaTitle;
+const seoDesc = doc?.data.description ?? topic.metaDescription;
+const updatedDate = doc?.data.updatedDate ?? '2026-11-23';
+const faqs = doc?.data.faqs && doc.data.faqs.length > 0 ? doc.data.faqs : topic.faqs;
+
+const seo = {
+  title: seoTitle,
+  description: seoDesc,
+  pathname: topic.href,
+  type: 'article' as const,
+  publishedTime: '2026-11-23',
+  modifiedTime: updatedDate,
+};
+
+const schemas = [
+  buildBreadcrumbSchema([
+    { name: '首页', href: '/' },
+    { name: pillar.title, href: pillar.href },
+    { name: topic.title, href: topic.href },
+  ]),
+  buildCollectionPageSchema({
+    title: seoTitle,
+    description: seoDesc,
+    pathname: topic.href,
+    dateModified: updatedDate,
+    about: doc?.data.entities ?? [topic.title],
+  }),
+  buildArticleSchema({
+    title: seoTitle,
+    description: seoDesc,
+    pathname: topic.href,
+    datePublished: '2026-11-23',
+    dateModified: updatedDate,
+  }),
+  ...(faqs.length > 0 ? [buildFaqSchema(faqs)] : []),
+];
+---
+
+<BaseLayout seo={seo} schemas={schemas}>
+  <TopicL2View
+    pillar={pillar}
+    topic={topic}
+    h1Override={doc?.data.h1}
+    intent={doc?.data.intent}
+    targetKeyword={doc?.data.targetKeyword}
+    entities={doc?.data.entities}
+    updatedDate={updatedDate}
+    answerFirstOverride={doc?.data.answerFirst}
+    headings={headings}
+    ctaHeading={doc?.data.ctaHeading}
+    ctaActions={doc?.data.ctaActions}
+    relatedLinksOverride={doc?.data.relatedLinks}
+    faqsOverride={faqs}
+  >
+    {Content && <Content />}
+  </TopicL2View>
+</BaseLayout>

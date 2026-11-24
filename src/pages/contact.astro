@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { buildBreadcrumbSchema } from '../lib/schema';
+
+const seo = {
+  title: '联系我们与数据勘误通道｜网络AI',
+  description: '向网络AI 提交品牌最新套餐变动、链接失效报告、测试截图补充或错误纠偏的标准化指引与 72 小时时效承诺。',
+  pathname: '/contact/',
+};
+const schemas = [buildBreadcrumbSchema([{ name: '首页', href: '/' }, { name: '联系我们', href: '/contact/' }])];
+---
+
+<BaseLayout seo={seo} schemas={schemas}>
+  <div class="container page-section prose-article">
+    <Breadcrumbs items={[{ name: '首页', href: '/' }, { name: '联系我们', href: '/contact/' }]} />
+    <h1>联系我们与数据勘误通道</h1>
+    <p>
+      <strong>网络AI（aiwangluounk.my）</strong> 致力于构建去中心化、可公开验证的代理协议与服务商测评知识库。由于网络服务商的域名更新、节点扩容、套餐调价与退款条款调整极为频繁，单靠内部技术组的周期性抽检难免存在时间差。我们热忱欢迎社区技术读者、服务商运营方与开源开发者向我们提供最新的实测佐证与勘误反馈。
+    </p>
+
+    <h2>一、勘误受理范围</h2>
+    <p>
+      我们优先受理以下具有明确事实依据（Fact-based）的修正请求：
+    </p>
+    <ul>
+      <li><strong>品牌套餐与定价变动</strong>：如官方已下架某一历史档位、调整了月付/年付价格或更改了不限时流量包的有效期限；</li>
+      <li><strong>历史冲突已获官方澄清</strong>：如光速云历史 59GB vs 69GB 冲突已在最新面板明确、云界线/Firefly 双推广码已统一；</li>
+      <li><strong>域名变更与访问故障</strong>：收录的历史推广入口域名遭污染、DNS 解析失效或跳转异常；</li>
+      <li><strong>客户端内核与重大安全事件</strong>：如某客户端（如 Clash Verge Rev、Nikki、v2rayN）发布重大底层安全补丁、或某第三方分发渠道出现投毒木马仿冒告警；</li>
+      <li><strong>技术文档错漏</strong>：教程中的 YAML/JSON 配置示例、端口指令或路由规则存在逻辑错误或语法过期。</li>
+    </ul>
+
+    <h2>二、标准化勘误工单模板</h2>
+    <p>
+      为了提高审核与复现效率，建议您在反馈时附带以下结构化信息：
+    </p>
+    <div class="surface-card mono" style="font-size: 0.85rem; line-height: 1.6; padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border);">
+      【邮件标题】数据勘误反馈：[涉及品牌名或教程路由] - [核心问题简述]<br /><br />
+      1. 涉及页面 URL：（例如：https://aiwangluounk.my/brands/guangsuyun/）<br />
+      2. 错误字段/陈述：（例如：套餐表格中的年付轻量版配额）<br />
+      3. 真实最新情况：（例如：官方后台已明确标为 69GB，附带 2026年最新订购页无水印截图）<br />
+      4. 测试环境说明（若涉及速度/解锁）：（运营商如广东电信 1000M、测试工具与版本、测试日期与时段）<br />
+      5. 提交人身份：（读者用户 / 品牌官方运营 / 开源维护者）
+    </div>
+
+    <h2>三、官方联络渠道与响应时效</h2>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>渠道类型</th>
+            <th>接入方式</th>
+            <th>处理周期</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>技术审校专线邮箱</strong></td>
+            <td><code>contact@aiwangluounk.my</code></td>
+            <td>工作日 24 小时内首问响应，48 小时内核验复现，72 小时内完成全站重构构建发布。</td>
+          </tr>
+          <tr>
+            <td><strong>开源社区 Issues</strong></td>
+            <td>公开 GitHub 勘误跟踪看板</td>
+            <td>面向公共技术规则库与协议分流模板，公开讨论与多方同行评审。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>四、严正立场声明：拒绝商业删帖</h2>
+    <p>
+      为维护网络AI 独立客观的立台之本，我们重申以下原则：
+    </p>
+    <ul>
+      <li><strong>不接受有偿删帖</strong>：绝不接受任何品牌方或公关机构以“付费赞助”、“购买横幅广告”或“提高返佣”为条件，要求删除客观存在的网络丢包、虚标倍率或不退款事实；</li>
+      <li><strong>实事求是，错则必改</strong>：只要反馈材料真实客观、可被技术复现，无论涉及推荐榜单前列还是常规档案，我们均一视同仁立即修正并载入 <a href="/changelog/">全站更新日志</a>。</li>
+    </ul>
+  </div>
+</BaseLayout>

@@ -1,0 +1,288 @@
+---
+pillarId: "clients"
+slug: "mihomo"
+title: "Mihomo内核技术架构全解：外壳解耦、OpenWrt Nikki与链式代理"
+description: "深度拆解 Mihomo 内核架构与 Clash Verge Rev、FlClash、Nikki 外壳解耦关系，详述 geodata-mode、规则集、DNS Fake-IP 与 dialer-proxy 链式代理适用条件。"
+h1: "Mihomo（原 Clash.Meta）内核深度解析：外壳解耦矩阵、OpenWrt 软路由红线与高阶分流架构"
+intent: "内核原理与全平台配置架构型"
+targetKeyword: "Mihomo Clash.Meta 内核架构与配置指南"
+secondaryKeywords:
+  - "Mihomo Clash Verge Rev FlClash 解耦"
+  - "Nikki OpenWrt 24.10 版本要求"
+  - "Mihomo fake-ip redir-host sniffer"
+  - "Mihomo geodata-mode rule-providers"
+  - "Mihomo dialer-proxy 链式代理"
+longTailKeywords:
+  - "Mihomo 和 Clash Meta 还有 Clash Verge Rev 是什么关系"
+  - "为什么软路由插件 Nikki 必须用 OpenWrt 24.10 及以上固件"
+  - "Mihomo 配置文件里 geodata-mode 和 mrs 规则集怎么选省内存"
+  - "Mihomo DNS 设置 fake-ip 和 redir-host 哪个更适合开发容器"
+  - "多机场怎么用 Mihomo dialer-proxy 链式代理落地"
+entities:
+  - "Mihomo"
+  - "Clash.Meta"
+  - "Clash Verge Rev"
+  - "FlClash"
+  - "Clash Nyanpasu"
+  - "Mihomo Party"
+  - "Clash Meta for Android"
+  - "Clash Mi"
+  - "OpenClash"
+  - "Nikki"
+  - "OpenWrt 24.10"
+  - "dialer-proxy"
+keywordBoundary: "聚焦 Mihomo（原 Clash.Meta）内核引擎的协议能力、与全平台 GUI 外壳/软路由插件的解耦关系、geodata-mode/rule-providers/DNS/sniffer 核心机制及 dialer-proxy 链式代理条件；单款桌面端操作细节归入 /clients/clash-verge-rev/，sing-box 生态对比归入 /clients/sing-box/。"
+answerFirst: "Mihomo（原名 Clash.Meta）是目前中文代理生态应用最广泛的现代 YAML 规则引擎核心，承接了已停更的原版 Clash 内核并补齐了对 VLESS-Reality、Hysteria 2、Trojan、Shadowsocks 与新版 AnyTLS 等现代协议的完整支持。在实际使用中，Mihomo 引擎与前端交互彻底解耦：向下驱动桌面端的 Clash Verge Rev、FlClash、Clash Nyanpasu（注：Mihomo Party 须单独核实近期维护活跃度），移动端的 Clash Meta for Android 与 Clash Mi，以及 OpenWrt 软路由端的 OpenClash 和 Nikki（资料明确提示 Nikki 硬性要求 OpenWrt 24.10 及以上版本，旧固件不兼容）。掌握 geodata-mode 与 mrs 规则集、fake-ip 与 redir-host 两种 DNS 模式的边界、sniffer 域名嗅探以及有严格前提约束的 dialer-proxy 链式代理，就能用一套配置思想打通全平台设备。"
+updatedDate: "2026-11-24"
+ctaHeading: "按设备形态进入 Mihomo 实操与软路由部署路径"
+ctaActions:
+  - label: "Linux 与 OpenWrt 软路由部署红线"
+    href: "/guides/articles/linux-openwrt-clients-guide/"
+    style: "primary"
+  - label: "Clash Verge Rev 桌面端设置指南"
+    href: "/clients/clash-verge-rev/"
+    style: "secondary"
+  - label: "深入 TUN 网卡与 Fake-IP 排障"
+    href: "/guides/articles/tun-vs-system-proxy-dns/"
+    style: "secondary"
+relatedLinks:
+  - title: "Clash Meta 生态历史演进对照"
+    href: "/clients/clash-meta/"
+    category: "客户端内核"
+    reason: "梳理 Clash Meta 更名为 Mihomo 后的术语兼容与多端入口"
+  - title: "Linux 与 OpenWrt 软路由实战"
+    href: "/guides/articles/linux-openwrt-clients-guide/"
+    category: "软路由指南"
+    reason: "查看 OpenClash 与 Nikki 闪存评估及 fw3/fw4 防火墙自检命令"
+  - title: "sing-box 新一代通用内核对比"
+    href: "/clients/sing-box/"
+    category: "内核对照"
+    reason: "横向比较 Mihomo YAML 体系与 sing-box JSON 路由管线差异"
+  - title: "Windows 代理客户端矩阵"
+    href: "/guides/articles/windows-clients-guide/"
+    category: "桌面端指南"
+    reason: "了解 Clash Verge Rev、FlClash 与架构哈希核验步骤"
+faqs:
+  - q: "Mihomo、Clash.Meta 和原版 Clash 到底是什么关系？"
+    a: "原版 Clash 内核早已停止维护，无法识别 VLESS-Reality、Hysteria 2 与 AnyTLS 等现代协议。社区活跃分支 Clash.Meta 接替了它的生态位，并随后正式更名为 Mihomo。今天你在机场后台看到的 ClashMeta 订阅以及桌面端 Clash Verge Rev 底层调用的核心，本质上都是 Mihomo 内核。"
+  - q: "为什么说 Clash Verge Rev、FlClash 和 OpenClash 都只是 Mihomo 的外壳？"
+    a: "因为真正监听端口、解析 YAML 分流规则、处理 DNS 查询和加密转发数据包的程序是底层的 mihomo 可执行核心；而 Clash Verge Rev（桌面）、FlClash（四端）、Clash Mi（苹果与桌面）、OpenClash 和 Nikki（软路由）负责的是界面展示、订阅拉取、覆写脚本注入以及系统权限或防火墙规则的自动化下发。"
+  - q: "为什么 OpenWrt 软路由插件 Nikki 明确要求 24.10 及以上版本？"
+    a: "站内客户端台账记录了 Nikki 的硬性运行条件：它依赖 OpenWrt 24.10 及以上版本引入的新版内核网络特性、nftables（fw4）运行机制以及对应软件源依赖包。在 OpenWrt 23.05、22.03 或更早魔改固件上安装 Nikki 会导致依赖缺失或透明代理完全失效，旧固件应继续使用 OpenClash 或 PassWall2。"
+  - q: "Mihomo Party 还能直接作为 Windows 首选推荐吗？"
+    a: "不能不经核查就作为首选。站内客户端台账针对 Mihomo Party 明确标注了风险提示：必须单独核实当前项目的维护活跃度、源码提交状态与发布渠道完整性，不宜仅凭早期攻略记忆就盲目将其标为首选推荐客户端，目前桌面端常规推荐优先考察 Clash Verge Rev 或 FlClash。"
+  - q: "配置里的 fake-ip 和 redir-host 应该怎么选？会不会影响开发容器？"
+    a: "普通日常浏览与手机移动场景推荐使用 fake-ip，因为首包无需等待上游真实解析、规则匹配最精准且能屏蔽本地 DNS 污染。但在同时运行 WSL2、Docker 容器、公司内网 VPN 或对保留网段 IP 敏感的联机环境时，fake-ip 返回的虚构地址容易引发路由或缓存断网，此时建议切换 redir-host 或完善 fake-ip-filter 过滤名单。"
+  - q: "开启 sniffer 域名嗅探有什么作用？为什么有时会导致某些连接变慢或异常？"
+    a: "当客户端通过 TUN 或透明代理接管流量时，某些程序直接向纯 IP 发起连接而不经过本地 DNS 查询，常规域名规则会失效。sniffer 能从 TLS ClientHello 或 HTTP 请求头里提取出真实目标域名用于重新匹配分流规则。但如果对不需要嗅探的端口、纯 IP 局域网服务或特殊自签 TLS 应用强行嗅探，可能触发握手异常，因此建议保留必要的跳过列表（skip-domain）。"
+  - q: "用 Mihomo 的 dialer-proxy 实现多机场链式代理，有哪些前提和风险？"
+    a: "首先，参与串联的所有机场必须开放支持第三方通用 YAML 订阅（仅限专属客户端的飞猫云、隐形人、SOGO 云等完全无法使用）。其次，链式代理会把两条线路的延迟直接相加，总吞吐受制于链路中最慢一环，且任何一环断连都会导致整条隧道中断。此外还需确认前端机场不禁止作为中转跳板的高并发访问，普通日常上网完全没必要启用链式代理。"
+---
+
+在代理工具从早年单一协议走向多协议并存的演进过程中，**Mihomo（原名 Clash.Meta）** 已经成为整个中文桌面端、安卓端与 OpenWrt 软路由规则代理生态的事实标准核心。当你在 Windows 上打开 `Clash Verge Rev`、在多台设备上同步 `FlClash`、或者在家庭软路由上配置 `OpenClash` 与 `Nikki` 时，界面之下真正承担数据包解析、策略调度与加解密转发工作的，全都是同一个 `Mihomo` 内核。
+
+理解 Mihomo 的设计哲学，能够帮你彻底摆脱「换一个软件就要重新学一遍」的循环焦虑，同时看清为什么部分老旧客户端连不上新机场、为什么软路由选错插件会导致全屋断网，以及如何通过 `geodata-mode`、`rule-providers`、`dns`、`sniffer` 和 `dialer-proxy` 发挥这套引擎的全部实力。
+
+---
+
+## 一、从原版 Clash 到 Mihomo：协议断代与核心能力演进
+
+要理解为什么必须迁移到 Mihomo 生态，首先要看清「原版 Clash Core 停更」留下的协议断代问题。原版 Clash 内核（以及早期经典版 Clash for Windows）在多年前停止开发维护，其协议栈停留在 Shadowsocks、VMess 与早期 Trojan 阶段，**原生不支持 VLESS、XTLS-Vision、Reality、Hysteria 2 以及最新出现的 AnyTLS 等现代传输协议**。
+
+对照站内 31 家机场品牌数据库的披露现状，现代机场的节点协议构成早已发生变化：
+
+- **三协议融合趋势**：如 [一翻云](/brands/yifan/) 在资料中明确提供 `Hysteria 2`、`VLESS-Reality` 与 `Shadowsocks` 三协议可选，适应不同运营商和弱网丢包环境；
+- **VLESS 与新协议普及**：包括 [光速云](/brands/guangsuyun/)（文字资料与 2026-08-19 70 节点测试快照同时记录了 `VLESS`、`Shadowsocks` 与底部的 10 个 `AnyTLS` 电信入口节点）、[可信云](/brands/kexin/)、[大佬云](/brands/dalaoyun/)、[闪电鼠](/brands/shandianshu/) 等大批品牌均把 `VLESS` 列为主力协议。
+
+如果用户仍然沿着几年前的教程下载早已停更的原版 Clash 客户端导入这些订阅，必然出现导入报错、节点列表缺失（例如缺少 `VLESS-Reality` 或 `AnyTLS` 节点）或全节点超时。Mihomo 在保持传统 Clash YAML 配置语法高度兼容的前提下，全面补齐了以下现代协议与底层能力：
+
+1. **完整现代入出站协议栈**：原生支持 `VLESS`（含 `XTLS-Vision` 与 `Reality` 伪装防探测）、`Hysteria` / `Hysteria 2`（基于 QUIC 的弱网抗丢包传输）、`TUIC`、`WireGuard` 出站、`Trojan`、`Shadowsocks`（含 2022 扩展）以及随核心版本持续跟进的 `AnyTLS` 等新型轻量传输。
+2. **标准化的 YAML 扩展能力**：继承并扩充了 `proxy-providers`（远端节点集）、`rule-providers`（远端分流规则集）、基于地理数据库的 `GEOSITE` / `GEOIP` 匹配，以及进程名称、ASN、网络类型等细粒度路由维度。
+3. **内置统一控制面板 API（External Controller）**：通过 RESTful API 与 WebSocket 暴露实时连接日志、流量统计、节点延迟与策略组状态，使上层前端（如 Metacubexd、Yacd、Zashboard 等 Web 面板以及各类桌面 GUI）可以完全与内核运行态解耦。
+
+---
+
+## 二、内核与 GUI 外壳的解耦关系：全平台客户端生态矩阵
+
+「壳与核分离」是理解 Mihomo 生态最关键的架构概念。底层的 `mihomo` 二进制程序本身没有图形界面，只负责读取配置文件并执行网络转发；上层由不同开发者社区维护的客户端则充当「图形交互外壳（GUI Shell）」或「路由器管理界面」，负责订阅定时拉取、配置覆写（Overrides）、系统代理开关、TUN 服务提权与防火墙规则下发。
+
+结合站内 `PROXY_CLIENTS` 客户端台账，当前围绕 Mihomo 内核构建的跨平台矩阵如下：
+
+| 客户端 / 插件名称 | 覆盖运行平台 | 底层核心依赖 | 收费模式 | 架构定位与站内硬性安全 / 版本提醒 |
+| :--- | :--- | :--- | :--- | :--- |
+| **Clash Verge Rev** | Windows / macOS / Linux | Mihomo (Clash.Meta) | 免费开源 | 桌面主力端；支持 Merge/Script 无损覆写与服务模式 TUN；macOS 须严格区分 Intel 与 Apple Silicon 架构，Linux 提供 DEB/RPM/AppImage |
+| **FlClash** | Windows / Android / macOS / Linux | Mihomo | 免费开源 | 跨四大系统的轻量极简界面，适合追求桌面端与安卓手机体验高度一致的用户；下载须核对 CPU 架构 |
+| **Clash Nyanpasu** | Windows / macOS / Linux | 多内核（Mihomo 等） | 免费开源 | 面向偏好深度配置增强与灵活切换多版本内核的进阶桌面用户 |
+| **Mihomo Party** | Windows（台账主记） | Mihomo | 免费开源 | **维护风险提示**：须单独核实该项目当前仓库维护活跃度与版本状态，不可未经确认即标为首选推荐 |
+| **Clash Meta for Android** | Android | Mihomo (Clash.Meta) | 免费开源 | 安卓端经典 Clash/Mihomo 规则客户端，完整兼容 YAML 配置与本地分流，安装前须确认 `arm64-v8a` / `armeabi-v7a` 架构 |
+| **Clash Mi** | Windows / Android / iOS/iPadOS / macOS / Linux | Mihomo | 待核实 | 覆盖全五端统一 Clash YAML 规则体系，iOS 端通过外区 App Store 分发 |
+| **OpenClash** | OpenWrt 软路由 | Mihomo | 免费开源 | 老牌功能最全的软路由插件，兼容 `fw3` 与 `fw4`；内存与闪存占用较高，安装前须核对固件版本、架构与剩余 `/overlay` 空间 |
+| **Nikki** | OpenWrt 软路由 | Mihomo | 免费开源 | 轻量化现代化透明代理插件；**硬性前提：要求 OpenWrt 24.10 及以上版本，旧版固件完全不兼容** |
+
+### 1. 桌面端与移动端外壳怎么选？
+
+- **通用桌面首选 `Clash Verge Rev` 或 `FlClash`**：两者同样驱动 Mihomo 内核，主要差异在于功能深度与界面取舍。`Clash Verge Rev` 拥有极为强大的「全局扩展配置（Merge）」与「JavaScript 覆写脚本（Script）」，非常适合需要自动为机场订阅前置注入 AI（ChatGPT / Claude / Gemini）与流媒体独立策略组的用户（详参 [Clash Verge Rev 专题](/clients/clash-verge-rev/) 与 [AI 与流媒体分流实战](/guides/articles/ai-streaming-geoip-routing/)）；`FlClash` 则以更现代简洁的跨平台 UI 见长，Windows 与 Android 之间操作逻辑几乎零切换成本。
+- **审慎对待 `Mihomo Party` 的历史推荐**：部分过往教程曾频繁提及 Mihomo Party，但开源项目的维护人精力与仓库状态会随时间变动。在未亲自核对仓库近期真实更新频率与发行安全签名之前，站内台账明确提醒不要盲目将其作为默认首选。
+- **苹果移动端补充选项**：由于 iOS 沙盒限制，原生 Mihomo 二进制无法直接侧载进 iPhone；苹果端用户若想复用 Mihomo 生态的 Clash YAML 规则，可在外区 App Store 选择原生兼容 Clash 规则与覆写的付费工具 `Stash`（详见 [Shadowrocket 与苹果生态专题](/clients/shadowrocket/)），或者考察 `Clash Mi`。
+
+### 2. OpenWrt 软路由双雄：`OpenClash` vs `Nikki`（24.10+ 硬门槛）
+
+将 Mihomo 内核直接跑在 OpenWrt 路由器上，可以让家里的电视盒子、游戏主机（PS5 / Switch / Xbox）与所有移动端无需单独开软件即可完成规则分流。但软路由操作不当极易引发全屋断网，选择 `OpenClash` 还是 `Nikki` 必须严格遵照硬件与固件底线：
+
+- **`Nikki` 的硬性版本红线（OpenWrt 24.10 及以上）**：站内台账明确强调，**Nikki 仅支持 OpenWrt 24.10 及以上版本**。如果你使用的软路由运行的是 OpenWrt 23.05、22.03、21.02，或者基于旧版分支打包的第三方集成固件，强行刷入 Nikki 会直接出现软件源依赖报错、防火墙 nftables 规则加载失败甚至网关断网。在 SSH 中务必先运行 `cat /etc/openwrt_release` 核对 `DISTRIB_RELEASE` 是否达到 24.10 及以上标准。
+- **`OpenClash` 的资源与防火墙兼容性**：对于还在运行 22.03 / 23.05 乃至更早基于 `iptables`（`fw3`）固件的设备，或者希望直接在 LuCI 界面开启丰富配置面板功能的用户，`OpenClash` 依然是适用范围最广的选项。但 OpenClash 连同 Mihomo 内核以及庞大的地理数据库（GeoIP / GeoSite），在磁盘与内存上开销较高——部署到低配置硬路由前，必须先通过 `df -h /overlay` 确认剩余闪存空间（通常建议预留充足冗余避免固件只读锁死），并确认防火墙类型是 `fw3` 还是 `fw4`。此外，在同一台 OpenWrt 设备上严禁同时启动两款代理插件（例如开启 OpenClash 就必须彻底停用 PassWall2 或 HomeProxy），否则本地 DNS 53 端口劫持与防火墙转发链冲突会立刻导致全屋网络瘫痪；家庭多设备接入场景下建议优先采用旁路由模式，先用单台测试设备验证分流无误后再放开全屋网关。完整软路由 SSH 自检命令与旁路由防断网步骤见 [Linux 与 OpenWrt 软路由实战指南](/guides/articles/linux-openwrt-clients-guide/)。
+- **跨设备配置与芯片架构一致性核查**：由于站内 `PROXY_CLIENTS` 台账中所有客户端的外部官方发布页均处于待联网核实状态，在下载 `Clash Verge Rev`、`FlClash`、`Clash Nyanpasu` 或 `Clash Meta for Android` 安装包时，切忌通过搜索引擎赞助商广告页获取所谓「中文增强整合版」。macOS 用户需按终端架构输出严格区分 Apple Silicon（`arm64`）与 Intel（`x64`），Linux 用户按发行版挑选 `.deb`、`.rpm` 或 `.AppImage` 并避免直接以 root 身份长期拉起图形界面，Android 用户需确认 `arm64-v8a` 架构并核对发布者签名指纹。
+
+### 3. 购买机场前的通用订阅前提
+
+无论外壳选得多顺手，Mihomo 生态的所有工具都高度依赖机场提供**标准 Clash/Mihomo YAML 订阅链接**。如果你选购的是 [飞猫云](/brands/feimao/)、[隐形人](/brands/yinxingren/)、[SOGO 云](/brands/sogo/)、[闪跃](/brands/shanyue/)、[全球云](/brands/quanqiu/)，或已转向专属客户端模式的 [Firefly](/brands/firefly/)、[灵猫网络](/brands/lingmao/) 与 [无忧链接](/brands/wuyou/)，由于这些品牌不向外部下发通用订阅 URL，任何基于 Mihomo 的客户端与软路由插件均无法直接接入。务必优先挑选明确开放通用订阅的双端或第三方兼容品牌（如 [光速云](/brands/guangsuyun/)、[一翻云](/brands/yifan/)、[梯子云](/brands/tiziyun/)、[极连云](/brands/jilian/)、[光年梯](/brands/guangnian/)、[可信云](/brands/kexin/)、[速界](/brands/sujie/) 等）。
+
+---
+
+## 三、Mihomo 核心配置四大支柱：`geodata-mode`、`rule-providers`、`dns` 与 `sniffer`
+
+许多用户在使用机场自带的订阅文件时，经常遇到「内存占用飙升（软路由 OOM 死机）」「Docker 容器或内网断网」「AI 工具明明写了规则还是走了香港 IP」等疑难杂症。这些问题几乎都可以通过调优 Mihomo 配置里的四大核心模块彻底根治。
+
+### 1. `geodata-mode` 与内存控制（`mrs` 二进制规则集时代）
+
+早期的 Clash 规则匹配国内 IP，只依赖传统的 `Country.mmdb` 数据库；而现代机场规则常常同时引用海量 `GEOSITE`（域名集合）与 `GEOIP`（IP 段集合）。
+
+- **`geodata-mode: true` 的意义与代价**：开启后，Mihomo 可以直接加载 `geosite.dat` 与 `geoip.dat` 完整地理数据库，使配置里写一句 `GEOSITE,cn,DIRECT` 或 `GEOSITE,openai,AI` 即可生效。但完整的 `.dat` 文件体积往往达到十几 MB，加载进内存后消耗非常可观——在只有 256MB 甚至 128MB 内存的嵌入式路由器上，或者受限于 50MB 内存上限的环境里，直接全量载入未经精简的 `.dat` 文件极易引发内存溢出（OOM）进程崩溃。
+- **进阶解法：`geodata-loader: memconservative` 与 `mrs` 二进制规则集**：如果必须在低内存设备上使用本地地理库，可以在配置顶层设置省内存加载模式；更好的现代实践是配合 `rule-providers` 中的 **`format: mrs`**（Mihomo 专属的紧凑型二进制规则集格式）。`mrs` 格式直接把域名后缀前缀树或 IP 区间段编译成紧凑二进制，加载速度与内存占用比传统文本型 `yaml` 或全量 `.dat` 降低一个数量级，而且只下载你真正需要的那几类规则集（如仅拉取 `cn`、`private`、`openai`、`youtube`），彻底告别体积膨胀。
+
+```yaml
+# Mihomo 核心地理数据库与省内存加载配置示意
+geodata-mode: true
+geodata-loader: memconservative
+geo-auto-update: true
+geo-update-interval: 24
+```
+
+### 2. `rule-providers` 外部规则集机制与格式区分
+
+机场面板生成的配置文件一旦遇到新域名需要补充（例如某个新出的 AI 平台或新流媒体域名），等机场后台统一修改模板往往很慢。借助 `rule-providers`，Mihomo 可以在不更换整份订阅的前提下，按设定周期（如每 `86400` 秒即 24 小时）独立拉取并热更新外部规则片段：
+
+| `behavior` 行为类型 | 适用内容 | 性能与格式兼容特点 | 常见用途示例 |
+| :--- | :--- | :--- | :--- |
+| **`domain`** | 纯域名列表（如单域名或泛子域名匹配） | 匹配效率极高（底层前缀树存储），支持编译为高效 **`mrs`** 二进制格式 | 国内外直连域名集合、AI 专用域名集合、广告拦截域名列表 |
+| **`ipcidr`** | 纯 IPv4 / IPv6 网段列表 | 底层基数树检索，同样完整支持 **`mrs`** 格式，几乎不占 CPU | `cncidr` 国内 IP 段直连、私有局域网 IP 段、流媒体或特定机房 ASN 网段 |
+| **`classical`** | 混合规则语法（可同时包含域名、关键字、IP CIDR、端口甚至进程名） | 灵活性最高但**无法转换为 `mrs` 二进制**，超大体积时内存开销明显高于前两者 | 包含复杂 `PROCESS-NAME` 或 `DST-PORT` 逻辑的定制合集规则 |
+
+**实用避坑提醒**：使用 `Clash Verge Rev` 等支持本地覆写（Overrides）的客户端时，务必用「前置规则（prepend-rules）」把你自定义的 AI 规则或 `rule-providers` 规则插入到机场自带通用规则（特别是 `MATCH` 兜底规则）之前；千万不要直接手动编辑缓存文件夹里的原始订阅文件，否则下次订阅自动更新时修改会被全部覆盖。
+
+### 3. `dns` 引擎深度解析：`fake-ip` vs `redir-host` 的抉择与避坑
+
+在所有 Mihomo 参数中，`dns` 模块是引发「浏览器能上网但开发容器断网」「关闭软件后全电脑失联」「国内网站解析到国外 CDN 变慢」的最核心环节。理解 `fake-ip` 与 `redir-host` 两种增强模式的底层差异，远比盲目复制网上的百行复杂 DNS 配置更重要（深入系统原理可同步参阅 [系统代理 vs TUN 虚拟网卡与 DNS 回退](/guides/articles/tun-vs-system-proxy-dns/)）：
+
+```yaml
+# Mihomo DNS 核心配置对照示意（Fake-IP 模式示例）
+dns:
+  enable: true
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - "*.lan"
+    - "*.local"
+    - "+.msftconnecttest.com"
+    - "+.msftncsi.com"
+    - "time.*.com"
+    - "ntp.*.com"
+    - "localhost.ptlogin2.qq.com"
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+```
+
+- **什么是 `fake-ip` 模式？**
+  当本机或局域网设备向 Mihomo 内置 DNS 发起解析请求时，除非域名命中了 `fake-ip-filter` 过滤列表，否则内核**根本不等待真实远端 DNS 返回**，而是瞬间在本地分配一个 `198.18.0.0/16` 保留网段里的虚拟 IP 给操作系统，并在内存里记下「该假 IP 对应哪一个原始域名」。随后流量到达代理内核时，内核再取出原始域名进行规则分流——若走直连才在本地解析真实 IP，若走代理则直接把域名打包交给远端机场节点去解析。
+  - **核心优势**：零本地解析等待，首包极快；彻底规避本地运营商 DNS 污染；绝对不会因为先拿到 IP 再按 GeoIP 匹配而漏掉域名规则，且能防止境外域名走本地 DNS 泄露。
+  - **典型短板**：如果本地程序缓存了 `198.18.x.x` 假地址，一旦异常退出代理客户端，在缓存过期前系统都会断网；在开发机同时跑 **WSL2 / Docker**、公司内网零信任客户端或某些网银/游戏反作弊控件时，假地址极易与虚拟网桥冲突；部分游戏联机也无法识别假 IP。
+- **什么是 `redir-host` 模式？**
+  内核真正向上游 DNS 服务器发起查询（借助 `nameserver-policy` 将国内域名送给国内加密 DNS、境外域名送给防污染安全 DNS 或经过代理查询），然后将**真实的公网 IP** 返回给操作系统。
+  - **核心优势**：操作系统与容器拿到的都是货真价实的公网或内网 IP，与 Docker 网桥、WSL2、企业 VPN 及传统软件的兼容性极好；即便退出代理，通常不会产生假 IP 缓存死锁。
+  - **典型短板**：首包必须等待 DNS 解析完成（弱网下略慢）；若缺乏合理分流配置（如未配合 `respect-rules` 与安全 DoH/DoT），配置不当容易造成 DNS 泄露或污染结果入库。
+- **选型铁律**：普通桌面日常上网、移动端及软路由追求极致响应优先用 **`fake-ip`**（并务必保留完善的 `fake-ip-filter` 避免系统网络小地球误报及微信扫码异常）；重度开发者（频繁使用 WSL2 / Docker / 内网穿透工具）或局域网内有特定直连设备无法适配假地址时，果断切回 **`redir-host`**。
+
+### 4. `sniffer`（域名嗅探）的工作原理与安全边界
+
+为什么明明在规则里写了让 `youtube.com` 或内网域名直连/走指定节点，日志里却显示它们命中了 `GEOIP` 或直接进了 `MATCH` 兜底？
+
+这是因为很多现代应用程序（或者使用 `redir-host` 模式且客户端预先缓存了 DNS 结果的浏览器）在发起连接时，直接拿着解析好的 IP 地址向代理端口或 TUN 网卡发起 TCP/TLS 请求——此时代理内核收到的数据包头部里只有目标 IP，没有域名，所有基于 `DOMAIN` 或 `GEOSITE` 的域名规则全部失效！
+
+开启 Mihomo 的 **`sniffer`（域名嗅探）** 模块后，内核会在握手阶段（未完成完整加密传输前）主动检查 TCP 端口 `443` 流量中的 **TLS ClientHello SNI（Server Name Indication）明文扩展字段**，以及端口 `80` HTTP 请求里的 `Host` 头部，从而还原出原始目标域名，再重新交给规则引擎精准匹配：
+
+```yaml
+# Mihomo sniffer 域名嗅探实用安全配置示意
+sniffer:
+  enable: true
+  force-dns-mapping: true
+  parse-pure-ip: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  skip-domain:
+    - "Mijia Cloud"
+    - "+.push.apple.com"
+```
+
+**避坑提醒**：`sniffer` 并不是开启选项越激进越好。第一，`QUIC` 嗅探与强制目的地址覆盖（`override-destination`）在部分使用自研非标准协议或特殊证书校验的物联网设备、苹果推送服务（`push.apple.com`）与特定内网服务上可能引起连接超时，务必保留 `skip-domain` 跳过名单；第二，如果节点本身采用 `fake-ip` 模式且前端应用老实走了系统 DNS，嗅探压力其实很低，只在需要识别直连 IP 或防绕过（如 `parse-pure-ip: true`）时发挥兜底作用。
+
+---
+
+## 四、高阶实战：多机场链式代理 `dialer-proxy` 场景与严格适用条件
+
+在需要访问极度看重「出口 IP 纯净度」（例如原生静态住宅 IP、独立自建落地 VPS 防止共享机场出口被 ChatGPT/Claude 频繁弹出 Cloudflare 验证）的场景中，很多用户希望把「高速机场线路」和「高纯净度落地节点」拼在一起：让**本地流量先走高速低延迟的专线机场（作为前置跳板），再经由该机场加密转发到另一台纯净度高但直连大陆极慢的海外落地节点**。
+
+在原版 Clash 时代，这种串联依赖繁琐且受限的 `relay` 策略组；而 Mihomo 内核引入了更加优雅灵活的 **`dialer-proxy`** 参数，允许直接在单个落地节点的定义中指定前置代理组或节点名称：
+
+```yaml
+# Mihomo dialer-proxy 链式代理节点配置示意
+proxies:
+  # 第一跳：从开放通用订阅的高速机场获取的中转节点（或直接使用策略组名）
+  - name: "机场高速中转出口"
+    type: vless
+    server: example-transit.invalid
+    port: 443
+    uuid: 00000000-0000-0000-0000-000000000000
+    # 其余传输参数省略
+
+  # 第二跳：纯净度高但直连较慢的远端独立落地节点
+  - name: "纯净落地出口-US"
+    type: socks5
+    server: example-landing.invalid
+    port: 1080
+    username: demo
+    password: secret
+    dialer-proxy: "🚀 机场中转选择"
+```
+
+### 链式代理 `dialer-proxy` 的五项硬性适用条件与风险边界
+
+`dialer-proxy` 虽然强大，但绝不是用来给普通用户「强行加速」的魔法。实际部署前必须逐一核对以下五项适用条件，任何一条不满足都不建议强行串联：
+
+1. **前置机场必须支持第三方通用 YAML 订阅**：只有允许将节点参数导入 Mihomo 客户端或软路由的开放订阅品牌（如 [光速云](/brands/guangsuyun/)、[一翻云](/brands/yifan/)、[梯子云](/brands/tiziyun/) 等），才能被 `dialer-proxy` 作为第一跳前置引用；所有「仅限专属客户端」机场（飞猫云、隐形人、SOGO 云等）完全无法参与任何链式编排。
+2. **延迟叠加与带宽木桶效应**：链式代理的端到端总延迟约等于「本地到前置机场入口延迟 + 前置机场出口到落地服务器物理延迟 + 落地到目标网站延迟」之和；总最大吞吐量则受制于两段链路中带宽更窄、加密更重的那一端。因此**用两个普通共享机场互相串联不仅不会变快，反而会同时承受双倍抖动与双倍丢包率**——链式代理唯一的合理用途是「高速中转 + 干净低速落地」，而不是「机场套机场」。
+3. **单点故障放大与流量双倍算账（按需求区分）**：前置跳板一旦维护或波动，后面的所有纯净落地节点全部失联；更要注意流量计费——虽然通过第一跳加密发送给第二跳的数据通常仍按前置机场的节点倍率计费（例如前置机场 1x 倍率，耗 10GB 扣 10GB），但如果在同一家机场内部自己套自己，相当于同一份流量同时消耗双倍配额，绝不可这样操作。
+4. **必须核查前置机场的使用条款与安全风控**：部分机场服务器会对高频访问冷门海外 VPS 特定非标端口、或类似中转扫描的流量特征触发风控拦截（甚至封禁账号）。此外，`dialer-proxy` 指向的名称必须保证**不能形成循环引用**（A 指向 B、B 又指回包含 A 的策略组），否则内核会立刻死循环或启动报错。
+5. **UDP 支持逐跳衰减风险**：如果第一跳前置节点不支持完整 UDP 转发或防火墙丢弃 UDP，那么哪怕第二跳落地节点支持 `FullCone`，整条链式隧道依然只能跑通 TCP 流量（除非外层传输协议支持基于 TCP 承载 UDP，且两端核心均已配置妥当）。对于需要稳定运行 ChatGPT/Claude 网页版与 API 的场景，TCP 链式已足够胜任；若打联机游戏则应避免多层链式叠加。
+
+---
+
+## 五、Mihomo 生态日常运维与排障五步自查表
+
+在 Windows、macOS、Linux 或 OpenWrt 上长期运行 Mihomo 内核，遇到连接异常时无需盲目重装软件或重刷路由器固件，依照「内核版本 → 配置文件 → 权限与模式 → DNS 与时间 → 连接面板」五步即可精准定位：
+
+1. **先查内置 Mihomo 内核版本**：遇到某个机场（如光速云 70 节点池底部样本）下发了包含 `AnyTLS`、`VLESS-Reality` 或新版 `Hysteria 2` 参数的节点却不显示或连不上，首先在 `Clash Verge Rev` / `FlClash` / `OpenClash` 设置页检查当前加载的 Mihomo 内核版本号，升级至最新稳定版内核。
+2. **核对机场订阅格式与返回内容**：当更新订阅报错或导入后节点数量为 0 时，检查机场是否属于仅限专属客户端阵营，或查看面板是否返回了 `200 OK` 空白文本（UA 拦截常见原因），详见 [订阅导入与 200 OK 空内容排查](/guides/articles/subscription-and-200ok-empty-fix/)。
+3. **系统时间校准防 TLS 拒绝**：现代协议（VLESS-Reality、Trojan）对两端系统时钟精度极度敏感，全节点显示 Timeout 时先校准电脑或软路由 NTP 时间，详见 [节点超时与时间漂移排查](/guides/articles/time-drift-timeout-troubleshooting/)。
+4. **检查系统代理与 TUN 双开冲突**：桌面端日常上网保留「系统代理」即可；只有当终端命令行、Docker、游戏进程无法走代理时，再开启「TUN 模式」并关闭系统代理开关。若出现 WSL2 或容器断网，先检查是否因 `fake-ip` 网段冲突引起，切换 `redir-host` 或开启 Win11 镜像网络即可安全回退。
+5. **善用「连接（Connections）」监控面板**：在软件日志或 Web 面板搜索目标域名（如 `openai`、`googlevideo`、`netflix`），直接看它究竟命中了哪一条规则（Rule）、最终走了哪一个出口节点（Chains），比任何猜测都更快锁定分流漏网之鱼。

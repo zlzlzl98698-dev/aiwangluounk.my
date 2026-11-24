@@ -1,0 +1,66 @@
+---
+export interface TocHeading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: TocHeading[];
+}
+
+const { headings } = Astro.props;
+const visible = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+---
+
+{visible.length > 0 && (
+  <nav class="article-toc" aria-label="文章目录">
+    <div class="article-toc__title">本页目录</div>
+    <ul>
+      {visible.map((h) => (
+        <li class={h.depth === 3 ? 'toc-sub' : ''}>
+          <a href={`#${h.slug}`}>{h.text}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<style>
+  .article-toc {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem;
+    font-size: 0.82rem;
+  }
+  .article-toc__title {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.45rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+  .article-toc ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .article-toc li {
+    margin-block: 0.24rem;
+  }
+  .article-toc li.toc-sub {
+    padding-left: 0.75rem;
+    font-size: 0.78rem;
+  }
+  .article-toc a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    line-height: 1.45;
+    display: block;
+  }
+  .article-toc a:hover {
+    color: var(--brand-primary);
+    text-decoration: underline;
+  }
+</style>

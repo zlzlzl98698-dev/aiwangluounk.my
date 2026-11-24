@@ -1,0 +1,60 @@
+---
+import type { BreadcrumbItem } from '../lib/schema';
+
+interface Props {
+  items: BreadcrumbItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<nav aria-label="面包屑导航" class="breadcrumbs">
+  <ol>
+    {items.map((item, index) => {
+      const isLast = index === items.length - 1;
+      return (
+        <li>
+          {isLast ? (
+            <span aria-current="page">{item.name}</span>
+          ) : (
+            <a href={item.href}>{item.name}</a>
+          )}
+        </li>
+      );
+    })}
+  </ol>
+</nav>
+
+<style>
+  .breadcrumbs {
+    margin-bottom: 1rem;
+    font-size: 0.84rem;
+    color: var(--text-muted);
+  }
+  .breadcrumbs ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.5rem;
+  }
+  .breadcrumbs li + li::before {
+    content: '/';
+    margin-right: 0.5rem;
+    color: var(--border-strong);
+  }
+  .breadcrumbs a {
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+  .breadcrumbs a:hover {
+    color: var(--brand-primary);
+    text-decoration: underline;
+  }
+  .breadcrumbs [aria-current='page'] {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+</style>

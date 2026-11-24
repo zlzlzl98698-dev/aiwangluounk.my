@@ -1,0 +1,312 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import AnswerSummary from '../../components/AnswerSummary.astro';
+import ArticleTOC, { type TocHeading } from '../../components/ArticleTOC.astro';
+import BrandFilter from '../../components/BrandFilter.astro';
+import BrandCard from '../../components/BrandCard.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { ALL_BRANDS } from '../../data/brands';
+import { NAV_PILLARS } from '../../data/navigation';
+import {
+  buildBreadcrumbSchema,
+  buildCollectionPageSchema,
+  buildFaqSchema,
+  buildItemListSchema,
+} from '../../lib/schema';
+import { PILLAR_CROSS_LINKS } from '../../lib/linkGraph';
+import { toBrandPath } from '../../lib/slug';
+
+const sorted = [...ALL_BRANDS].sort(
+  (a, b) => (a.editorPriorityCandidate ?? 99) - (b.editorPriorityCandidate ?? 99)
+);
+
+const brandsPillar = NAV_PILLARS.find((p) => p.id === 'brands')!;
+const pillarEntries = await getCollection('pillars');
+const pillarDoc = pillarEntries.find((entry) => entry.data.id === 'brands');
+const rendered = pillarDoc ? await render(pillarDoc) : null;
+const Content = rendered?.Content;
+const mdxHeadings = rendered?.headings ?? [];
+const faqs = pillarDoc?.data.faqs ?? [];
+
+const tocHeadings: TocHeading[] = [
+  { depth: 2, slug: 'brand-database-search', text: '31 家品牌数据库实时检索与筛选' },
+  ...mdxHeadings,
+  ...(faqs.length > 0 ? [{ depth: 2, slug: 'brands-faq', text: '机场品牌库常见问题解答（FAQ）' }] : []),
+];
+
+const seoTitle = pillarDoc?.data.title ?? '机场品牌库（31 家唯一品牌数据库与多维筛选）';
+const seoDesc =
+  pillarDoc?.data.description ??
+  '网络AI 收录并去重整理后的 31 家机场品牌结构化数据库，支持按客户端兼容、不限时包、资料完整度与入门价格筛选，绝不造假综合评分。';
+
+const seo = {
+  title: seoTitle,
+  description: seoDesc,
+  pathname: '/brands/',
+  modifiedTime: pillarDoc?.data.updatedDate ?? '2026-11-23',
+};
+
+const schemas = [
+  buildBreadcrumbSchema([
+    { name: '首页', href: '/' },
+    { name: '机场品牌库', href: '/brands/' },
+  ]),
+  buildCollectionPageSchema({
+    title: seoTitle,
+    description: seoDesc,
+    pathname: '/brands/',
+    dateModified: pillarDoc?.data.updatedDate ?? '2026-11-23',
+    about: pillarDoc?.data.entities ?? ['机场品牌库'],
+  }),
+  buildItemListSchema({
+    name: '网络AI 31 家机场品牌数据库',
+    pathname: '/brands/',
+    items: sorted.map((b) => ({ name: b.name, href: toBrandPath(b.slug) })),
+  }),
+  ...(faqs.length > 0 ? [buildFaqSchema(faqs)] : []),
+];
+---
+
+<BaseLayout seo={seo} schemas={schemas}>
+  <div class="container page-section">
+    <Breadcrumbs
+      items={[
+        { name: '首页', href: '/' },
+        { name: '机场品牌库', href: '/brands/' },
+      ]}
+    />
+
+    <header class="dir-head surface-card">
+      <div class="dir-meta">
+        <span class="mono dir-eyebrow">PILLAR 03 · /brands/ · 31 UNIQUE ENTITIES</span>
+        <span>搜索意图：{pillarDoc?.data.intent ?? '品牌检索与评测研究'}</span>
+        <span>最近更新：<time datetime={pillarDoc?.data.updatedDate ?? '2026-11-23'}>{pillarDoc?.data.updatedDate ?? '2026-11-23'}</time></span>
+      </div>
+      <h1>{pillarDoc?.data.h1 ?? '机场品牌库：31 家唯一实体档案与多维筛选'}</h1>
+      <p>
+        合并重复记录的 Firefly 与 Firefly 萤火虫后，本库共收录 <strong>{ALL_BRANDS.length} 个独立品牌</strong>。每家品牌仅设一个规范主评测页面，支持按关键词、客户端模式、不限时流量包及资料完整度实时筛选。
+      </p>
+      <div class="dir-subnav" aria-label="机场品牌专题子栏目">
+        {brandsPillar.children.map((c) => (
+          <a href={c.href} class="btn btn-secondary">{c.title}</a>
+        ))}
+      </div>
+    </header>
+
+    <AnswerSummary
+      eyebrow="数据库使用与核心结论 · Answer-First"
+      summary={
+        pillarDoc?.data.answerFirst ??
+        '“编辑候选顺位”仅反映本站资料梳理与编辑关注优先级，不代表统一网络环境下的晚高峰测速排名。部分品牌仅含早期历史记录或存在推广链接格式异常，均已在各自详情页亮灯标注。'
+      }
+      caveat="数据来源涵盖 2026-08-09 至 2026-11-17 归档材料；无独立实测字段一律保留待核实，不填造假数字。"
+    />
+
+    <section id="brand-database-search" class="section-anchor" style="margin-bottom: 2.25rem;">
+      <BrandFilter totalCount={sorted.length} />
+
+      <div id="brand-directory-grid" class="grid-cards grid-cards--3">
+        {sorted.map((brand) => (
+          <BrandCard brand={brand} />
+        ))}
+      </div>
+    </section>
+
+    {Content && (
+      <div class="brands-editorial-layout">
+        <aside class="brands-sidebar">
+          <ArticleTOC headings={tocHeadings} />
+        </aside>
+        <div class="brands-editorial-main">
+          <details class="mobile-toc surface-card">
+            <summary>展开机场品牌数据库研读目录</summary>
+            <ul>
+              {tocHeadings
+                .filter((h) => h.depth >= 2 && h.depth <= 3)
+                .map((h) => (
+                  <li class={h.depth === 3 ? 'mob-sub' : ''}>
+                    <a href={`#${h.slug}`}>{h.text}</a>
+                  </li>
+                ))}
+            </ul>
+          </details>
+
+          <article class="prose-article brands-prose">
+            <Content />
+          </article>
+
+          {pillarDoc?.data.ctaActions && pillarDoc.data.ctaActions.length > 0 && (
+            <section class="surface-card brands-cta">
+              <div>
+                <strong>{pillarDoc.data.ctaHeading}</strong>
+                <p style="margin:0.25rem 0 0; font-size:0.88rem; color:var(--text-secondary);">
+                  建议结合官网格式核查表与价格档案进一步校验后再注册：
+                </p>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:0.55rem;">
+                {pillarDoc.data.ctaActions.map((act) => (
+                  <a href={act.href} class={`btn ${act.style === 'primary' ? 'btn-primary' : 'btn-secondary'}`}>
+                    {act.label}
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {faqs.length > 0 && (
+            <section id="brands-faq" class="page-section section-anchor" aria-label="机场品牌库常见问题">
+              <div class="section-header">
+                <h2>机场品牌库常见问题解答（FAQ）</h2>
+                <span class="section-subtitle">共 {faqs.length} 条核查问答</span>
+              </div>
+              <div class="faq-list">
+                {faqs.map((f, idx) => (
+                  <article class="surface-card faq-item">
+                    <h3><span class="mono faq-idx">Q{idx + 1}.</span> {f.q}</h3>
+                    <p>{f.a}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <RelatedLinks
+            title="跨专题推荐阅读路径"
+            links={pillarDoc?.data.nextPillarLinks && pillarDoc.data.nextPillarLinks.length > 0
+              ? pillarDoc.data.nextPillarLinks
+              : PILLAR_CROSS_LINKS.brands}
+          />
+        </div>
+      </div>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .dir-head {
+    margin-bottom: 1.25rem;
+    padding: 1.35rem 1.4rem;
+  }
+  .dir-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 1.15rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+  }
+  .dir-eyebrow {
+    font-weight: 700;
+    color: var(--brand-cyan);
+  }
+  .dir-head h1 {
+    margin: 0.25rem 0 0.5rem;
+    font-size: clamp(1.5rem, 3vw, 2.08rem);
+    line-height: 1.25;
+  }
+  .dir-head p {
+    margin: 0;
+    color: var(--text-secondary);
+    max-width: 74ch;
+  }
+  .dir-subnav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .dir-subnav .btn {
+    padding: 0.38rem 0.78rem;
+    font-size: 0.82rem;
+  }
+  .brands-editorial-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.75rem;
+    align-items: start;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-hairline);
+  }
+  .brands-sidebar,
+  .brands-editorial-main {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .brands-sidebar {
+    display: none;
+  }
+  @media (min-width: 980px) {
+    .brands-editorial-layout {
+      grid-template-columns: 270px minmax(0, 1fr);
+    }
+    .brands-sidebar {
+      display: block;
+      position: sticky;
+      top: 76px;
+      max-height: calc(100dvh - 92px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: 0.25rem;
+    }
+    .mobile-toc {
+      display: none;
+    }
+  }
+  .mobile-toc {
+    margin-bottom: 1rem;
+    padding: 0.8rem 1rem;
+    font-size: 0.86rem;
+  }
+  .mobile-toc summary {
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .mobile-toc ul {
+    margin: 0.65rem 0 0;
+    padding-left: 1rem;
+    list-style: none;
+  }
+  .mobile-toc li {
+    margin-block: 0.28rem;
+  }
+  .mobile-toc li.mob-sub {
+    padding-left: 0.85rem;
+    font-size: 0.82rem;
+  }
+  .brands-prose {
+    max-width: min(82ch, 100%);
+  }
+  .brands-cta {
+    margin-top: 2rem;
+    background: var(--bg-subtle);
+    border: 1px solid rgba(29, 78, 216, 0.24);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .section-anchor {
+    scroll-margin-top: 5.5rem;
+  }
+  .faq-list {
+    display: grid;
+    gap: 0.85rem;
+  }
+  .faq-item h3 {
+    margin: 0 0 0.4rem;
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+  .faq-idx {
+    color: var(--brand-primary);
+    margin-right: 0.25rem;
+  }
+  .faq-item p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+</style>

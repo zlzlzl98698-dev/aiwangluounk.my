@@ -1,0 +1,200 @@
+<div id="search-modal" class="search-modal" hidden role="dialog" aria-modal="true" aria-labelledby="search-modal-title">
+  <div class="search-modal__backdrop" id="search-backdrop"></div>
+  <div class="search-modal__panel">
+    <div class="search-modal__head">
+      <strong id="search-modal-title">站内全文搜索（Pagefind 静态索引）</strong>
+      <button type="button" id="close-search-btn" class="btn btn-secondary">关闭 (Esc)</button>
+    </div>
+    <div class="search-modal__body">
+      <label for="pf-input" class="sr-only">输入搜索关键词</label>
+      <input
+        id="pf-input"
+        type="search"
+        placeholder="搜索品牌、客户端、错误现象（如：光速云、TUN、200 OK、VLESS）..."
+        autocomplete="off"
+      />
+      <div id="pf-status" class="pf-status">输入关键词开始检索全站已构建页面。</div>
+      <ul id="pf-results" class="pf-results"></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById('search-modal');
+  const openBtn = document.getElementById('open-search-btn');
+  const heroTrigger = document.getElementById('hero-search-trigger');
+  const closeBtn = document.getElementById('close-search-btn');
+  const backdrop = document.getElementById('search-backdrop');
+  const input = document.getElementById('pf-input') as HTMLInputElement | null;
+  const statusEl = document.getElementById('pf-status');
+  const resultsEl = document.getElementById('pf-results');
+
+  let pagefindInstance: any = null;
+
+  async function ensurePagefind() {
+    if (pagefindInstance) return pagefindInstance;
+    try {
+      const pfPath = '/pagefind/pagefind.js';
+      pagefindInstance = await import(/* @vite-ignore */ pfPath);
+      await pagefindInstance.init();
+      return pagefindInstance;
+    } catch {
+      return null;
+    }
+  }
+
+  function openModal(initialQuery = '') {
+    if (!modal) return;
+    modal.hidden = false;
+    if (input) {
+      if (initialQuery) input.value = initialQuery;
+      input.focus();
+      if (initialQuery) runSearch(initialQuery);
+    }
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.hidden = true;
+  }
+
+  async function runSearch(query: string) {
+    if (!resultsEl || !statusEl) return;
+    const q = query.trim();
+    if (!q) {
+      resultsEl.innerHTML = '';
+      statusEl.textContent = '输入关键词开始检索全站已构建页面。';
+      return;
+    }
+    const pf = await ensurePagefind();
+    if (!pf) {
+      statusEl.innerHTML =
+        '当前预览环境未加载静态 Pagefind 索引（请先构建 dist 或直接前往 <a href="/brands/?q=' +
+        encodeURIComponent(q) +
+        '">品牌库检索</a>）。';
+      resultsEl.innerHTML = '';
+      return;
+    }
+    statusEl.textContent = '正在检索...';
+    const search = await pf.search(q);
+    const hits = await Promise.all(search.results.slice(0, 10).map((r: any) => r.data()));
+    if (hits.length === 0) {
+      statusEl.textContent = `未找到与“${q}”相关的页面，可尝试更短关键词或前往品牌库筛选。`;
+      resultsEl.innerHTML = '';
+      return;
+    }
+    statusEl.textContent = `找到 ${search.results.length} 条相关结果（显示前 ${hits.length} 条）：`;
+    resultsEl.innerHTML = hits
+      .map(
+        (h: any) => `
+        <li>
+          <a href="${h.url}">
+            <strong>${h.meta?.title ?? h.url}</strong>
+            <span>${h.excerpt ?? ''}</span>
+          </a>
+        </li>`
+      )
+      .join('');
+  }
+
+  openBtn?.addEventListener('click', () => openModal());
+  heroTrigger?.addEventListener('click', () => openModal());
+  closeBtn?.addEventListener('click', closeModal);
+  backdrop?.addEventListener('click', closeModal);
+
+  let debounceTimer: number | undefined;
+  input?.addEventListener('input', () => {
+    window.clearTimeout(debounceTimer);
+    debounceTimer = window.setTimeout(() => runSearch(input.value), 160);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && !modal.hidden) closeModal();
+  });
+
+  (window as any).__openSiteSearch = openModal;
+</script>
+
+<style>
+  .search-modal[hidden] {
+    display: none;
+  }
+  .search-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: grid;
+    place-items: start center;
+    padding: 4rem 1rem 1rem;
+  }
+  .search-modal__backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+  }
+  .search-modal__panel {
+    position: relative;
+    width: min(680px, 100%);
+    max-height: 80dvh;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .search-modal__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.9rem 1.15rem;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+  .search-modal__body {
+    padding: 1rem 1.15rem;
+    overflow-y: auto;
+  }
+  #pf-input {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.96rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+  }
+  .pf-status {
+    margin: 0.65rem 0;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+  .pf-results {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.55rem;
+  }
+  .pf-results :global(li a) {
+    display: block;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    color: inherit;
+  }
+  .pf-results :global(li a:hover) {
+    border-color: var(--brand-primary);
+    background: var(--bg-subtle);
+  }
+  .pf-results :global(strong) {
+    display: block;
+    color: var(--brand-primary);
+    font-size: 0.92rem;
+  }
+  .pf-results :global(span) {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+</style>

@@ -1,0 +1,317 @@
+---
+pillarId: "troubleshooting"
+slug: "tun-proxy"
+title: "TUN 模式与系统代理互斥冲突排查：局域网/WSL2/Docker/公司 VPN 失灵、栈切换与适配器清理｜网络AI"
+description: "深度剖析 TUN 模式与系统代理双开冲突，解决局域网 NAS、打印机、Docker 网段及企业 VPN 互斥，并提供虚拟网卡彻底退出清理方法。"
+h1: "TUN 模式与系统代理冲突全解：双开回环、内网开发失灵、协议栈调优与适配器清理"
+intent: "底层网络排障与安全恢复型"
+targetKeyword: "TUN 模式与系统代理互斥冲突及内网失灵排查"
+secondaryKeywords:
+  - "TUN 模式和系统代理同时开启冲突"
+  - "开启 TUN 后 NAS 打印机 WSL2 Docker 断网"
+  - "TUN 与公司 VPN OpenConnect Cisco WireGuard 共存"
+  - "Mixed System gVisor TUN 栈 CPU 占用高 UDP 卡死"
+  - "退出代理后虚拟网卡残留和系统代理清理"
+longTailKeywords:
+  - "为什么开 TUN 后局域网 192.168 打印机和 NAS 连不上了"
+  - "开启 TUN 模式后 WSL2 和 Docker 容器怎么配置不冲突"
+  - "Clash Verge Rev TUN 栈选 Mixed 还是 System 或 gVisor"
+  - "代理软件和公司 OpenConnect WireGuard VPN 怎么避免打架"
+  - "关闭代理后电脑彻底断网怎么无损清理残留系统和虚拟网卡"
+entities:
+  - "TUN 模式"
+  - "System Proxy"
+  - "WSL2"
+  - "Docker Desktop"
+  - "OpenConnect"
+  - "Cisco AnyConnect"
+  - "WireGuard"
+  - "Mixed"
+  - "System"
+  - "gVisor"
+  - "skip-proxy"
+  - "route-exclude-address"
+keywordBoundary: "聚焦代理客户端 TUN 虚拟网卡模式与系统代理（System Proxy）的层级冲突与双开异常、局域网设备/WSL2/Docker/企业 VPN 路由抢占解决、Mixed/System/gVisor TUN 栈性能与 UDP 卡死切换、以及退出代理后的适配器与环境变量无损清理；纯 Fake-IP 缓存与浏览器 DoH 问题归入 /troubleshooting/dns/，客户端白屏闪退归入 /troubleshooting/app-startup/。"
+answerFirst: "TUN 模式与系统代理并非“双开更稳”的互补开关，而是工作在不同网络层级的互斥方案：系统代理在应用层暴露 HTTP/SOCKS 端口，TUN 则在操作系统三层创建虚拟网卡接管默认路由（0.0.0.0/0）。同时双开极易引发流量二次回环、DNS 状态打架与连接日志暴涨。开启 TUN 后，之所以会出现局域网 NAS/打印机（192.168.x.x）、WSL2、Docker 及公司内网 VPN（OpenConnect/Cisco/WireGuard）同时失灵，本质是虚拟网卡默认路由与 Fake-IP 198.18.0.0/16 截胡了原本发往私有网桥或企业隧道的数据包，且多张虚拟网卡无法同时抢占最高优先级的默认网关。解决核心在于严格恪守「单模式二选一」、配置 route-exclude-address / bypass 排除网段并开启 Allow LAN、在 Windows 11 启用 WSL2 镜像网络、按设备负载在 Mixed / System / gVisor 栈间切换，以及始终通过「先关开关、再正常退出」来安全回收虚拟适配器，严禁盲目运行破坏性全网卡重置脚本。"
+updatedDate: "2026-11-24"
+ctaHeading: "深入学习 TUN 底层机制与 DNS 协同回退"
+ctaActions:
+  - label: "系统代理 vs TUN 与 DNS 深度对比"
+    href: "/guides/articles/tun-vs-system-proxy-dns/"
+    style: "primary"
+  - label: "TUN 模式配置基础指南"
+    href: "/guides/tun/"
+    style: "secondary"
+  - label: "DNS 错误与 Fake-IP 排查"
+    href: "/troubleshooting/dns/"
+    style: "secondary"
+relatedLinks:
+  - title: "系统代理 vs TUN 虚拟网卡深度解析"
+    href: "/guides/articles/tun-vs-system-proxy-dns/"
+    category: "深度实操"
+    reason: "完整对照系统代理与 TUN 层级差异，以及 WSL2 mirrored 镜像模式配置参数"
+  - title: "TUN 模式专题指南"
+    href: "/guides/tun/"
+    category: "使用教程"
+    reason: "掌握 Windows Service Mode、macOS utun 与 Linux CAP_NET_ADMIN 提权规范"
+  - title: "连接不上与端口互抢排查"
+    href: "/troubleshooting/cannot-connect/"
+    category: "故障排查"
+    reason: "定位 Chrome/Edge 扩展锁死系统代理或 7890/10808 本地端口被占用问题"
+  - title: "客户端无法启动与服务失败排查"
+    href: "/troubleshooting/app-startup/"
+    category: "故障排查"
+    reason: "解决安装 Clash Verge Service Mode 失败、内核被杀软隔离引发的 TUN 无法拉起"
+faqs:
+  - q: "系统代理（System Proxy）和 TUN 模式可以同时打开当“双保险”吗？"
+    a: "强烈不建议同时双开。日常浏览网页时，双开会让浏览器先连向系统代理 HTTP 端口，而其余进程或部分底层请求直接进入 TUN 虚拟网卡；一旦遇到复杂规则、重定向或 Fake-IP 映射交错，极易触发流量二次回环、网页半加载转圈以及连接池暴涨。正确做法永远是二选一：平时普通浏览器办公只开系统代理；需要接管终端 CLI、游戏或 UWP 应用时，先关闭系统代理再开启 TUN。"
+  - q: "为什么一开启 TUN 模式，局域网里的 NAS、打印机和 192.168.x.x 路由器后台就打不开了？"
+    a: "虽然大部分规范订阅会在规则顶部内置局域网直连，但如果你的机场配置缺漏私有 IP 段直连、未将局域网域名或设备后缀加入 skip-proxy / bypass / fake-ip-filter，或者在开启 strict-route（严格路由）时部分广播与组播发现包被 TUN 虚拟网卡强行吞入隧道，就会出现访问局域网设备超时。排查方法是在 TUN 配置中显式加入 route-exclude-address 排除 192.168.0.0/16 等私有网段、开启 Allow LAN，并在必要时关闭 strict-route。"
+  - q: "开启 TUN 后，WSL2 和 Docker Desktop 为什么立刻断网或容器之间失联？"
+    a: "默认 NAT 模式下，WSL2 与 Docker 使用独立的虚拟交换机网桥（如 172.17.0.0/16 等私有子网）。当宿主机开启 TUN 与 Fake-IP 后，一方面虚拟网卡会把发往容器网桥的响应数据包误收进代理链路，另一方面容器跨越网桥拿到的 198.18.0.x 假地址无法被宿主机 TUN 正常路由回溯，且未开启 Allow LAN 时宿主机还会直接丢弃来自子网的入站包。Windows 11 推荐改用 WSL2 mirrored 镜像网络模式，或把容器网段加入 route-exclude-address 并切换为 Redir-Host；开发期间也可以暂时切回纯系统代理加环境变量。"
+  - q: "公司内网 VPN（OpenConnect / Cisco AnyConnect / WireGuard）和代理客户端 TUN 怎么共存？"
+    a: "两者默认都会往系统路由表写入最高优先级的默认网关或全局转发规则，直接双开几乎必然互相顶掉或形成路由环路。如果你需要同时访问公司内网与外网，最稳妥的方式是：不要双开两个虚拟网卡！可先连接公司 VPN 并确认企业路由网段，在代理客户端切回纯系统代理配合企业内网域名直连；若企业软件强制走全局且不允许本机开代理 TUN，则在使用企业 VPN 期间彻底退出代理客户端。"
+  - q: "TUN 配置里的 Mixed、System 和 gVisor 三种协议栈应该怎么选？什么时候要切换？"
+    a: "System 栈依赖操作系统原生 TCP/IP 协议栈性能最高、CPU 占用最低，但在部分 Windows 防火墙或特殊路由环境下可能出现兼容性波动；gVisor 是运行在用户态的完整网络栈，隔离性极好几乎不挑防火墙环境，但在高吞吐下载或高并发 UDP 下 CPU 占用偏高、部分场景易发 UDP 卡死；Mixed 则是混合折中方案（TCP 走 System、UDP 走 gVisor），是多数现代客户端的默认推荐。遇到高并发下载 CPU 飙升时可试切 System；遇到特定软件 UDP 断流或防火墙拦截时可在 Mixed 与 System 间对比切换。"
+  - q: "关掉代理客户端后电脑彻底断网，提示代理服务器没有响应或虚拟网卡还在怎么清理？"
+    a: "这通常是强杀进程、蓝屏或直接关机绕过了客户端退出清理钩子所致。切忌运行来路不明的破坏性网卡全重置批处理！安全清理四步走：第一，打开系统设置手工关闭系统代理勾选；第二，检查终端环境变量中是否残留 HTTP_PROXY / HTTPS_PROXY；第三，以管理员权限重新打开原代理客户端，先开一下 TUN 再正常手动关闭 TUN 并点击托盘「退出」，让服务自动卸载虚拟网卡；第四，仅在必要时于适配器设置中右键停用残留的 Meta / sing-tun 虚拟适配器并刷新 DNS 缓存。"
+  - q: "开启了「系统代理保护（Proxy Guard）」或 UWP 回环豁免后为什么换别的代理软件会失效？"
+    a: "系统代理保护会每隔几秒强制把系统的代理端口锁回当前软件监听的端口。如果你启用了该功能却忘了关闭，再去运行第二款代理工具或调试抓包软件时，就会出现端口不断被抢回去的打架现象。同时，如果系统代理模式下仅微软商店或 OneNote 等 UWP 应用断网，是因为 UWP 沙盒默认禁止访问 127.0.0.1 回环，可使用规范的 UWP 回环豁免工具或按需改用单开 TUN 模式解决。"
+---
+
+在所有桌面代理使用场景中，**TUN 模式（虚拟网卡模式）** 几乎是进阶用户的分水岭：打开它之前，浏览器以外的命令行工具（`git`、`curl`、`npm`、`pip`）、AI 终端 CLI、游戏客户端以及微软商店应用经常连接超时；可一旦点亮它之后，新的麻烦又接踵而至——家里局域网的 NAS 和无线打印机连不上了，WSL2 和 Docker 容器莫名其妙全线断网，公司内网的 OpenConnect 或 WireGuard VPN 一连就掉，笔记本风扇狂转 CPU 居高不下，甚至退出软件后整台电脑直接“假死断网”。
+
+要彻底制服这些看似玄学的网络故障，不能靠删软件重装，更不能在网上随便找一个会洗掉所有拨号凭据与虚拟交换机的重置脚本一跑了之。本指南将结合 [TUN 模式配置基础](/guides/tun/) 与 [系统代理 vs TUN 与 DNS 深度解析](/guides/articles/tun-vs-system-proxy-dns/)，从底层路由优先级出发，逐一拆解互斥冲突、内网容器失灵、企业 VPN 避让、`Mixed` / `System` / `gVisor` 三大协议栈调优，以及退出代理后的安全无损清理流程。
+
+> **排障前安全承诺**：动手调整任何网卡、子系统配置或路由器规则前，请先备份当前客户端配置目录与用户目录下的 `.wslconfig` 等文件；全程仅执行可逆、局部定位的操作，**严禁执行破坏性清空全部网络堆栈的第三方批处理脚本**。
+
+---
+
+## 一、工作层级本质差异与「双开冲突」机理
+
+之所以会出现“两个开关都开着反而打不开网页”，根本原因在于**系统代理（System Proxy）** 与 **TUN 模式（虚拟网卡）** 处于操作系统网络协议栈的完全不同层面上，各自承担不同的接管职责：
+
+| 核心维度 | 系统代理（System Proxy） | TUN 虚拟网卡模式（TUN Mode） |
+| :--- | :--- | :--- |
+| **工作层级** | 应用层：写入操作系统 HTTP / SOCKS 代理端口设置 | 网络层 / 传输层：在系统内注册虚拟网络接口（`wintun` / `utun` / `tun0`） |
+| **接管逻辑** | 只有主动向系统读取代理配置的应用（浏览器为主）才会把请求发给本地端口 | 通过向操作系统路由表注入低跃点数默认路由，强制截胡绝大部分进程发出的三层 IP 数据包 |
+| **UDP 与特殊应用** | 标准 HTTP 系统代理不支持 UDP；多数命令行与游戏默认忽略系统代理 | 原生接管 TCP 与 UDP（含 QUIC、DNS、游戏联机、终端工具、UWP 应用） |
+| **提权门槛** | 普通用户权限即可随时开关 | Windows 需 `Service Mode` 或管理员提权；macOS/Linux 需系统授权或 `CAP_NET_ADMIN` |
+| **最大冲突风险** | 异常强杀后端口残留，或与浏览器扩展抢权 | 改写系统路由表，极易与局域网子网、Docker 网桥、WSL2 及企业 VPN 抢夺路由 |
+
+### 为什么严禁同时双开「系统代理」与「TUN 模式」？
+
+很多新手误以为“系统代理管浏览器、TUN 管其他软件，两个同时打开相当于上了双保险”。在实际运行中，双开往往是制造故障的根源：
+
+1. **流量与 DNS 上下文双重割裂**：开启双开时，Chrome 或 Edge 遵循系统代理把 HTTP 请求发向 `127.0.0.1:7890`（走应用层代理端口，直接由客户端解析域名）；与此同时，同一页面下的 HTTP/3 (QUIC) UDP 请求、后台组件或另一款客户端进程却跳过系统代理，直接踩进了 TUN 虚拟网卡走三层 IP 拦截。
+2. **回环连接与策略状态打架**：如果某个客户端或中间件没有把自身出站端口与回环地址做好严谨的进程排除与路由回避，系统代理发往本地环回或外部入口的流量一旦与 TUN 网卡的路由表发生重叠，轻则在日志里刷出成百上千条重复嵌套连接导致网页转圈半加载，重则直接触发循环死锁和异常高 CPU 占用。
+3. **双客户端互抢系统控制权**：更隐蔽的双开发生在用户电脑里同时启动了两款代理工具（例如同时打开了 [Clash Verge Rev](/clients/clash-verge-rev/) 和 [v2rayN](/clients/v2rayn/)），而且各自开启了代理保护（Guard）或 TUN 接管，两张虚拟网卡与两个本地端口会每秒互相覆盖系统路由和注册表。
+
+**黄金铁律**：任何时刻坚持**“单工具、单模式”二选一**——日常只用浏览器和常规办公软件时，**只开系统代理、关闭 TUN**；需要接管终端、IDE CLI、游戏或不支持系统代理的桌面软件时，**先关系统代理（确认系统设置代理开关已关闭）、再单开 TUN**。
+
+---
+
+## 二、为什么开启 TUN 后局域网设备、WSL2、Docker 与公司 VPN 会同时失灵？
+
+一旦开启了 TUN 虚拟网卡，你的电脑就多了一张优先级极高的虚拟网口。如果配置不够精细，以下四类本地或内网环境几乎会第一时间“集体掉线”。
+
+### 1. 局域网设备失灵（NAS、打印机、`192.168.x.x` 路由器后台打不开）
+
+**三大真实成因**：
+- **私有网段路由被强行劫持（尤其是开启 `strict-route` 后）**：部分桌面客户端在 TUN 配置中开启了 `strict-route: true`（严格路由，原本用于防止系统通过物理网卡泄露流量或绕过隧道）。但在某些配置或防火墙组合下，严格路由会连带影响局域网广播发现（mDNS/NetBIOS 打印机自动搜寻）甚至拦截非标准私有子网的直接通信。
+- **内网域名或设备主机名被转成了 Fake-IP `198.18.0.x`**：很多用户习惯通过 `nas.local`、`router.asus.com` 或公司内网域名访问设备，如果订阅或覆写缺少完善的 `fake-ip-filter`（或 `skip-proxy`）排除规则，客户端会给你的内网设备返回一个 `198.18.0.x` 假地址；若规则又没置顶直连，数据包直接被送到海外节点去寻找你家客厅的打印机，自然全部超时。
+- **未开启 `Allow LAN` 或系统防火墙拦截跨网口响应**：当路由器、虚拟机或局域网设备主动回连宿主机提供的共享服务时，若客户端未放行局域网接入或 Windows 防火墙把 `Meta` / `sing-tun` 虚拟网卡归类为“公用网络”并开启了严格入站阻断，局域网互通即告中断。
+
+### 2. WSL2（Windows Linux 子系统）与 Docker Desktop 断网
+
+**三大底层冲突点**：
+- **NAT 虚拟网桥跨越隔离**：在经典的 WSL2 NAT 模式与 Docker Desktop 下，子系统拥有独立网段（例如 `172.16.0.0/12` 或 `192.168.x.x` 内部交换机）。发往外网的包先到达宿主机虚拟网卡 `vEthernet (WSL)`，在 Windows 看来它相当于“来自外部局域网设备发来的入站请求”。如果代理客户端没有开启 **允许局域网连接（Allow LAN）**，或者 Windows 防火墙拦住了从 `vEthernet (WSL)` 跨向 `Meta` / `sing-tun` 的转发，WSL2 和容器内部立刻全线断网！
+- **容器网桥内通信被 TUN 吞没**：当你宿主机开启 TUN 接管了全局路由却没有把 Docker 默认虚拟网桥网段（如 `172.17.0.0/16`、`172.18.0.0/16` 等）加入 `route-exclude-address` 排除列表时，宿主机与容器互访、或者容器与容器之间的内网数据包会被 TUN 网卡截胡并尝试丢给代理规则处理，导致数据库连不上容器、本地调试端口直接拒绝连接。
+- **`198.18.0.x` Fake-IP 在跨网桥下的解析死局**：WSL2 默认自动生成的 `/etc/resolv.conf` 指向宿主机虚拟网关。如果在 Fake-IP 模式下宿主机给 WSL2 返回了一个 `198.18.0.15`，该假地址在跨网桥路由转发至宿主机 TUN 核心时极易被防火墙策略或地址校验丢弃。
+
+### 3. 公司内网 VPN（OpenConnect / Cisco AnyConnect / WireGuard / EasyConnect）冲突
+
+企业零信任或远程办公 VPN（如 OpenConnect、Cisco AnyConnect、WireGuard、Pulse Secure、EasyConnect 等）本质上**自身也是一个高权限三层 TUN/TAP 虚拟网卡或全局加密隧道**：
+
+- **默认路由跃点数（Metric）互相覆盖**：两张虚拟网卡同时争抢操作系统的默认路由指向与 DNS 接管权。往往是谁后连上谁就强行篡改路由表，把前者的隧道出口流量也一起塞进自己的加密隧道里，瞬间形成**套娃死循环或隧道崩溃掉线**。
+- **企业客户端主动防分流校验**：Cisco AnyConnect、部分银行或大型企业零信任客户端带有严格的路由完整性监控（Non-split tunneling 检查），一旦检测到系统内存在其他劫持默认路由或修改本地代理的虚拟网卡，会直接强制断开办公 VPN 并弹出合规告警。
+
+---
+
+## 三、精准解法：用 `skip-proxy` / `route-exclude-address`、镜像网络与路由顺序解决冲突
+
+明白了为什么失灵，修复就不需要靠运气“重启试试”。针对上述四类常见环境，按场景逐一实施以下可逆配置：
+
+### 1. 局域网 NAS / 打印机 / Docker 网段：配置 `route-exclude-address`、`bypass` 与 `skip-proxy`
+
+在现代 Mihomo（Clash.Meta）与 sing-box 生态客户端中，解决 TUN 劫持内网最干净的武器不是去改操作系统路由表，而是**在代理核心的 TUN 配置块中声明排除网段**，从源头告诉虚拟网卡“这些地址的数据包不要吸进 TUN，原封不动交给物理网卡直连”：
+
+- **Mihomo 内核（Clash Verge Rev / FlClash / OpenClash 等）**：使用 `route-exclude-address`（以及传统的 `skip-proxy` 配合 `fake-ip-filter`），同时在常规场景下检查是否需要关闭过于激进的 `strict-route`，并确保规则最顶部置顶私有段直连。以下为配置覆写参考片段：
+
+```yaml
+# Mihomo (Clash Verge Rev Merge 覆写参考)
+allow-lan: true
+
+tun:
+  enable: true
+  stack: mixed
+  auto-route: true
+  auto-detect-interface: true
+  strict-route: false
+  route-exclude-address:
+    - 192.168.0.0/16
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - fc00::/7
+    - fe80::/10
+
+dns:
+  fake-ip-filter:
+    - "*.lan"
+    - "*.local"
+    - "*.internal"
+    - "*.home.arpa"
+```
+
+- **sing-box 内核（v2rayN Tun 模式 / Hiddify / Karing 等）**：sing-box 在底层 `tun` 入站配置中对应使用 `route_exclude_address`（部分客户端图形设置面板中直接简称为 **「绕过网段 / Bypass Subnets」** 或 **「跳过路由网段」**），同样把 `192.168.0.0/16`、`10.0.0.0/8` 和 Docker 容器占用的 `172.16.0.0/12` 填入即可。对于使用 macOS/iOS 系统代理与模块生态的工具，还可通过 `skip-proxy` 列表将 `192.168.0.0/16`、`10.0.0.0/8`、`172.16.0.0/12`、`localhost` 及 `*.local` 设为绕过代理直连。
+
+### 2. WSL2 与 Docker Desktop 兼顾方案（按推荐优先级排序）
+
+如果你的主力工作流离不开 WSL2 与 Docker，按下面三种方式之一调整即可彻底摆脱断网：
+
+1. **方案一（Windows 11 首选）：启用 WSL2 `mirrored` 镜像网络模式**
+   Windows 11 22H2 及以上版本提供了强大的镜像网络栈，让 WSL2 直接共享宿主机的物理网卡与 `127.0.0.1` 回环地址，从物理拓扑上消灭跨虚拟网桥隔离！配置前先备份用户目录 `%USERPROFILE%\.wslconfig`（若无则新建），写入如下内容并执行 `wsl --shutdown` 重启子系统：
+
+```ini
+[wsl2]
+networkingMode=mirrored
+dnsTunneling=true
+autoProxy=true
+```
+
+   配合开启客户端的 `Allow LAN` 以及上述 `route-exclude-address` 排除容器网段，大多数开发者在 TUN 模式下即可实现 WSL2 与宿主机无缝联网。
+2. **方案二（兼容所有 Windows 10/11 版本）：TUN 下切回 `Redir-Host` 替代 `Fake-IP`**
+   如果老版本 Windows 10 无法开启镜像模式，且容器始终因 `198.18.0.x` 假地址解析失败，在客户端配置覆写中将 `dns.enhanced-mode` 从 `fake-ip` 切换为 `redir-host`（并保留 `sniffer` 开启），同时确保 `Allow LAN` 开启并将 `172.17.0.0/16` 等 Docker 桥接段加入排除地址，即可让子系统拿到真实 IP 正常建连。
+3. **方案三（零风险开发模式）：开发容器期关闭 TUN、仅开系统代理**
+   如果只是为了 `docker pull`、`apt update` 或 `git clone` 走代理，最不容易干扰企业环境与复杂容器拓扑的办法其实是**关闭 TUN 模式，只开系统代理 + 允许局域网连接（Allow LAN）**，然后在 Docker Desktop 的 `Settings → Resources → Proxies` 或 WSL2 终端中显式配置指向宿主机代理端口的环境变量。
+
+### 3. 公司内网 VPN（OpenConnect / Cisco / WireGuard）的路由顺序与安全避让
+
+面对企业办公 VPN 与本地代理客户端共存诉求，切忌两者同时开启虚拟网卡互抢默认路由。请严格按以下三种现实情况分级处理：
+
+- **场景 A（公司 VPN 仅接管办公内网段，即 Split Tunneling）**：假设公司 OpenConnect 或 WireGuard 仅往路由表推送 `10.x.x.x` 或 `172.x.x.x` 内网路由，不抢默认网关 `0.0.0.0/0`。此时**不要开代理客户端的 TUN 模式**，只开启代理客户端的**系统代理**，并在顶部规则把公司内网域名与内网 IP 段设为 `DIRECT`；或者如果必须使用代理 TUN，先确保公司内网全部私有 IP 段已经列入 `route-exclude-address` 且 `strict-route` 处于关闭状态，再按先连公司 VPN、后测内网直连的顺序验证。
+- **场景 B（公司 VPN 为全局接管且带有严格路由审计，如部分 Cisco AnyConnect / 零信任端）**：此类软件在设计上就禁止并存第二张截胡默认路由的 TUN 网卡。**唯一安全规范的做法是互斥切换**：连接公司 VPN 办公前，彻底关闭并退出本地代理客户端（确认无虚拟网卡残留）；断开公司 VPN 回到个人网络环境后，再重新启动代理客户端。
+- **场景 C（只读查看当前系统路由优先级判断谁抢了网关）**：怀疑路由顺序错乱时，不要盲猜，用一条只读命令查看当前操作系统的路由表跃点数（Metric）：
+
+```powershell
+# Windows 只读查看 IPv4 路由表（重点看 0.0.0.0 默认路由走哪张网卡以及 Metric 跃点数）
+route print -4
+```
+
+```bash
+# macOS / Linux 只读查看默认路由出口接口
+netstat -rn -f inet | head -n 25
+```
+
+在默认路由 `0.0.0.0` 中，**Metric 数值越小的接口优先级越高**。如果发现同时存在两条 Metric 接近的 `0.0.0.0` 默认路由分别指向公司 VPN 适配器和代理 TUN 适配器，即可 100% 确诊双方正在路由层打架，必须立即停用其中一方的虚拟网卡接管。
+
+---
+
+## 四、`Mixed` vs `System` vs `gVisor` TUN 栈对比：高 CPU 占用与 UDP 卡死切换指南
+
+即便内网和 VPN 都没冲突，很多开启了 TUN 模式的用户也会发现两个令人抓狂的性能怪象：要么下载大文件或看 4K 视频时客户端进程（`mihomo.exe` / `sing-box.exe`）CPU 占用率瞬间飙升到 30%–60%、笔记本风扇起飞；要么普通网页很快，但依赖 UDP 的 QUIC 流量（如 Hysteria 2、YouTube HTTP/3、在线会议语音或部分游戏）用着用着突然彻底卡死。
+
+这往往不是节点线路卡，而是 **TUN 协议栈实现方式（`stack` 参数）** 与你当前系统环境不匹配导致的。
+
+### 1. 三大 TUN 协议栈底层工作机制对比
+
+在 Mihomo 与 sing-box 的虚拟网卡实现中，从操作系统网卡读取到的是一帧帧原始 IP 数据包，需要一个网络栈把 IP 包还原成 TCP 流或 UDP 会话才能交给代理核心转发。目前主流提供三种栈选择：
+
+| TUN `stack` 模式 | TCP 处理路径 | UDP 处理路径 | CPU 与内存开销 | 兼容性与典型优缺点 |
+| :--- | :--- | :--- | :--- | :--- |
+| **`system`（系统栈）** | 交由操作系统原生内核网络栈重组 | 交由操作系统原生网络栈或绑定转发 | **极低**：零额外用户态协议栈仿真开销，高带宽跑满千兆极省电 | 吞吐极限最高；但在部分 Windows 第三方防火墙/安全软件拦截或特定虚拟网桥环境下，偶尔出现端口回环绑定失败 |
+| **`gvisor`（用户态栈）** | 全部在代理进程用户态内由 Go 编写的 gVisor 网络栈模拟处理 | 全部由用户态 gVisor 栈处理 | **较高**：高并发或大流量吞吐时有明显用户态上下文切换与内存分配开销 | 环境兼容性极强，不挑剔系统防火墙或怪异网卡驱动；但高带宽下载风扇易响，且极少数高并发 UDP 场景易发卡顿 |
+| **`mixed`（混合栈，现代默认）** | 由高性能 `system` 栈处理 TCP | 由兼容性稳妥的 `gvisor` 处理 UDP | **适中均衡**：兼顾日常网页大流量的低 CPU 优势与 UDP 穿墙/NAT 稳定性 | 绝大多数桌面客户端（如 Clash Verge Rev）的推荐默认项，极少出现绑定冲突 |
+
+### 2. 何时应该切换 TUN `stack`？（对号入座）
+
+不要死守默认参数，遇到对应症状时按如下原则在配置或图形界面的 TUN 设置中切换测试：
+
+- **症状一：跑测速或下载大文件时，客户端 CPU 占用极高、系统卡顿发烫**
+  - **原因**：当前配置文件可能仍在使用旧模板默认的 `gvisor` 栈处理全部 TCP 流量，或者混合下载并发极大。
+  - **切换动作**：将 `stack` 从 `gvisor` 改为 **`mixed`**（推荐先试），若仍偏高可进一步切为 **`system`**（同时确认 Windows 防火墙已对代理核心程序放行专网/公网通信），CPU 占用通常会断崖式回落。
+- **症状二：网页正常，但使用 Hysteria 2、在线语音会议、联机游戏或大量 QUIC 网站时 UDP 频繁断流卡死**
+  - **原因**：部分环境下 `system` 栈的 UDP 转发或 NAT 映射处理与特定机场内核版本/本地网卡驱动存在微秒级超时丢包；另外，部分老版本中 `gvisor` 在极大并发 UDP 洪泛时缓冲区易积压卡死（游戏场景的 UDP 与 FullCone NAT 特性亦可延伸对照 [游戏加速器与 UDP 转发机制](/vpn/gaming/)）。
+  - **切换动作**：如果你原本用的是 `system`，切换回 **`mixed`** 往往能立刻恢复 UDP 稳定性；如果你原本用的是 `mixed` 或 `gvisor` 且在持续 UDP 传输中卡死，则尝试反过来切到 **`system`** 栈绕过用户态 UDP 模拟瓶颈，并排查是否因关闭 `udp: true` 导致代理节点本身未开启 UDP 转发。
+- **症状三：开启 TUN 后所有连接几乎同时报 `connection refused` 或完全无流量进入核心**
+  - **原因**：部分企业安全端点软件（EDR/杀毒防火墙）死锁了 `system` 栈在系统内核层面的套接字接管。
+  - **切换动作**：尝试将 `stack` 临时切向 **`gvisor`** 测试是否能绕过底层接管冲突。
+
+---
+
+## 四、彻底退出代理后的网络适配器残留与系统代理无损清理
+
+排障中最后一关也是最关键的一关，就是“用完之后如何安安静静退出来，不留任何断网后遗症”。很多电脑平时用着没问题，一重启或者退出软件就全网瘫痪，问题全出在**退出的姿势不对**。
+
+### 1. 标准安全退出顺序（预防 95% 的残留故障）
+
+在日常关机、重启、卸载软件或切换到公司 VPN 前，请养成这个三秒钟动作：
+1. 打开代理客户端主界面，**先手动关闭「TUN 模式」开关，再关闭「系统代理」开关**（观察几秒钟，确认状态灯均熄灭）。
+2. 在系统托盘区右键客户端图标，点击**「退出（Exit / Quit）」**。不要直接点右上角叉号（大多数客户端点叉号只是最小化到托盘），更不要在未关开关时直接用任务管理器「结束任务」或长按电源键强行关机！
+
+### 2. 强杀或异常重启后断网的五步无损清理法
+
+如果因为电脑意外蓝屏、强制断电或程序崩溃，导致打开代理时正常、退出后浏览器报 `ERR_PROXY_CONNECTION_FAILED` 或终端直接断网，请按以下步骤**精准清理残留，严禁下载运行重置全部网卡的第三方工具**：
+
+**第 1 步：清理系统级代理残留**
+- **Windows**：打开「设置」→「网络和 Internet」→「代理」，查看「手动设置代理」下的“使用代理服务器”是否仍停留在开启状态且指向 `127.0.0.1:7890`（或 `7897` / `10808` / `10809`）。如果是，手动把开关拨回**关闭**；同时检查上方“使用设置脚本”是否残留了未知旧 PAC 脚本（非公司强制脚本则关闭）。
+- **macOS**：打开「系统设置」→「网络」→ 选中当前使用的 Wi-Fi 或有线网 → 点击「详细信息」→ 切换到「代理」标签页，确认「网页代理（HTTP）」「安全网页代理（HTTPS）」「SOCKS 代理」与「自动代理配置」开关全部处于关闭状态并点「好」保存。
+
+**第 2 步：清理命令行终端残留环境变量**
+许多开发者修好了浏览器，却发现终端里的 `git`、`npm`、`pip`、`curl` 还在报错 `Failed to connect to 127.0.0.1 port 7890`。这是因为终端会话启动时读取了系统或配置文件里的代理环境变量。在命令行执行只读检查与清理：
+
+```powershell
+# Windows PowerShell 只读查看当前会话残留的代理变量
+Get-ChildItem Env: | Where-Object Name -match 'PROXY'
+
+# 临时清除当前 PowerShell 窗口中的代理变量
+Remove-Item Env:HTTP_PROXY, Env:HTTPS_PROXY, Env:ALL_PROXY -ErrorAction SilentlyContinue
+```
+
+```bash
+# macOS / Linux 只读检查当前终端代理环境变量
+env | grep -i proxy
+
+# 临时清除当前终端窗口代理变量
+unset http_proxy https_proxy all_proxy HTTP_PROXY HTTPS_PROXY ALL_PROXY
+```
+
+同时打开你本机的 `~/.zshrc`、`~/.bashrc`、`~/.gitconfig` 或 Windows「系统属性 → 高级 → 环境变量」的用户变量区，检查是否以前手动写死过 `HTTP_PROXY` 环境变量，备份对应文件后将死代理地址删除即可。
+
+**第 3 步：安全回收遗留的虚拟网络适配器（`Meta` / `sing-tun` / `wintun`）**
+如果异常退出后在 Windows `ncpa.cpl`（更改适配器设置）或设备管理器中仍然看到名为 `Meta`、`Clash` 或 `sing-tun` 的虚拟网卡，且导致网络状态图标报错：
+- **最优回收法（零风险）**：右键以正常流程重新启动刚才用过的那款代理客户端（如需要服务权限则确保 Service Mode 正常）→ 手动开启一次 TUN 模式等待 3 秒钟 → 再手动关闭 TUN 模式开关 → 右键托盘安全退出软件。客户端内核会在收到正常关闭指令时，自动向驱动层发出卸载信号并干净移除虚拟适配器。
+- **应急停用法（切勿乱删物理网卡）**：如果原软件已卸载无法再打开，仅在「控制面板 → 网络和共享中心 → 更改适配器设置」中，仔细辨认出名字明确带有 `Meta`、`Clash` 或 `sing-tun` 的虚拟适配器，**右键点击「禁用」**（观察网络恢复后，再在设备管理器对应虚拟网卡上安全卸载），**千万不要误禁或卸载你的 Intel/Realtek 物理有线网卡、WLAN 无线网卡以及 WSL/Hyper-V/Docker 虚拟交换机**。
+
+**第 4 步：核查物理网卡 DNS 与刷新缓存**
+如发现关闭软件后依然打不开网页，进入物理网卡 IPv4/IPv6 属性确认 DNS 已恢复为自动获取（DHCP），随后执行 `ipconfig /flushdns`（macOS 为 `sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder`）清除可能遗留的 `198.18.0.x` Fake-IP 缓存并彻底重开浏览器，详细步骤可随时查阅 [DNS 故障与 Fake-IP 残留排查](/troubleshooting/dns/)。
+
+**第 5 步：检查常见国产应用与浏览器扩展自身内置的独立代理**
+若系统与浏览器恢复直连，唯独微信、QQ、Telegram 或个别桌面客户端依然提示网络错误，依次打开这些软件自身的设置界面，检查其内部独立的“网络/代理设置”是否被手动填死成了 `127.0.0.1` 本地端口，将其改回「不使用代理」或「使用系统代理」；Chrome/Edge 则检查 Proxy SwitchyOmega / ZeroOmega 扩展是否误锁定在失效端口，切回「系统代理」即可完全还原。
+
+---
+
+## 五、TUN 与系统代理混合故障速查对照表
+
+日常排查时，按照现象对照以下速查表即可在两分钟内完成无损定位与修复：
+
+| 故障症状描述 | 根本原因判断 | 只读核查动作 | 标准可逆处理方案 |
+| :--- | :--- | :--- | :--- |
+| 开着客户端网页半加载转圈，日志连接数暴涨 | 系统代理与 TUN 同时双开，或两款客户端互斥抢权 | 检查客户端面板两开关是否同时亮起；检查托盘有无多款工具 | 严格二选一（关系统代理仅留 TUN，或反之）；退出第二款冲突客户端并关闭 Proxy Guard |
+| 开 TUN 后 NAS、打印机、`192.168.x.x` 失联 | 私有网段未排除、`strict-route` 过严或内网域名进了 Fake-IP | `nslookup` 看内网域名是否返回 `198.18.x.x`，查 `Connections` 命中规则 | 开启 `Allow LAN`，在 `route-exclude-address` 加私有网段，关 `strict-route`，补齐 `fake-ip-filter` |
+| 开 TUN 后 WSL2 或 Docker 容器立刻断网 | NAT 跨网桥被拦截、`172.x` 网段被吞或 Fake-IP 跨网桥失灵 | 在 WSL2 查 `/etc/resolv.conf` 与 `curl -I` 观测超时还是拒连 | Win11 启用 `WSL2 mirrored` 镜像模式 + `Allow LAN`；或将容器网段加入排除并切 `redir-host` |
+| 连上公司 OpenConnect / Cisco / WireGuard 就掉线 | 双虚拟网卡抢占默认网关 `0.0.0.0/0` 或触发企业合规审计 | `route print -4` 或 `netstat -rn` 看默认路由跃点数冲突 | 禁用代理 TUN 改用系统代理，或按场景严格互斥（连企业 VPN 时彻底退出本地代理客户端） |
+| TUN 下跑满带宽 CPU 飙高，或 QUIC / UDP 卡死 | `stack` 选择与当前驱动/防火墙特性不匹配 | 任务管理器观察 `mihomo` / `sing-box` 核心 CPU 占比与日志 UDP 状态 | CPU 高由 `gvisor` 切 `mixed`/`system`；UDP 卡死在 `system` 与 `mixed` 间对比切换 |
+| 彻底退出代理后电脑仍全网报错无响应 | 强杀进程导致系统代理地址、终端变量或虚拟网卡残留 | 看系统代理开关状态、`Get-ChildItem Env:` 与 `ncpa.cpl` 适配器 | 手动关闭系统代理、清理 `HTTP_PROXY`、正常开关一次客户端回收虚拟网卡并刷新 DNS |
+
+记住“不盲目双开、内网网段显式排除、退出前先关开关”这三条核心纪律，就能在充分享受 TUN 全进程接管便利的同时，保住本地局域网、开发容器与公司办公通道的绝对稳定。若遇到服务安装本身报错无法拉起虚拟网卡，或确认是特定浏览器扩展锁死端口，可联动查阅 [客户端无法启动排查](/troubleshooting/app-startup/) 与 [连接不上排查指南](/troubleshooting/cannot-connect/)。

@@ -1,0 +1,112 @@
+---
+slug: "clients--clash-verge-rev-install-guide"
+title: "Clash Verge Rev 完整安装与配置教程：内核选择、订阅导入、分流模式与常见报错修复"
+description: "从零上手主流桌面代理客户端 Clash Verge Rev。覆盖 Windows 与 macOS 安装包下载核验、Mihomo 内核切换、订阅一键导入、规则/全局模式选择及启动崩溃排查。"
+h1: "Clash Verge Rev 新手完整上手教程：从安装、导入订阅到智能分流"
+pillar: "clients"
+categoryLabel: "客户端教程"
+targetKeyword: "Clash Verge Rev教程 Clash Verge安装配置"
+secondaryKeywords:
+  - "Clash Verge订阅导入"
+  - "Mihomo内核设置"
+  - "Clash Verge分流规则"
+  - "Clash Verge启动失败"
+appliesTo: "Windows 10/11 与 macOS（Intel / Apple Silicon M系列芯片）电脑用户"
+prerequisites:
+  - "拥有有效的机场通用订阅链接（Clash / 原生链接格式）"
+  - "清楚区分官方开源项目与第三方加料二次打包的风险"
+pubDate: "2026-11-24"
+updatedDate: "2026-11-24"
+answerSummary: "Clash Verge Rev 是当前桌面端最主流、维护最活跃的跨平台代理客户端（基于 Mihomo / Clash.Meta 开源内核）。完整配置流程仅需四步：第一步从官方 GitHub Releases 仓库下载对应架构的安装包（Windows 选 x64-setup.exe，Mac 选 arm64.dmg 或 x64.dmg）；第二步打开软件进入「订阅（Profiles）」面板，粘贴机场提供的订阅链接并点击「保存并导入」；第三步进入「代理（Proxies）」面板，切换至「规则（Rule）」模式，选择一个低延迟的香港或日本节点；第四步在左侧控制栏打开「系统代理（System Proxy）」开关，浏览器即可立即实现国内外智能分流。"
+faqs:
+  - q: "原版 Clash for Windows（CFW）停更后，为什么推荐 Clash Verge Rev？"
+    a: "2023 年底原版 Clash 核心与 CFW 作者相继删库停更，原版不再修复安全漏洞与新的网络协议。Clash Verge Rev 由社区活跃维护，原生内置了功能更强大的 Mihomo（Clash.Meta）内核，不仅全面支持 VLESS、Reality、Hysteria2、TUIC 等新一代抗封锁协议，还在界面现代化、内存占用控制和 TUN 虚拟网卡模式上大幅领先旧版 CFW。"
+  - q: "下载安装包时，Windows 用户该选哪一个文件？"
+    a: "在官方 GitHub 发布页中，普通 64 位 Windows 用户应下载文件名形如 `Clash.Verge_x.x.x_x64-setup.exe` 的安装包。如果是极简便携需求，可下载 `_x64_portable.zip`；若是高通骁龙等 ARM 架构 Windows 设备，才需要选择 `_arm64-setup.exe`。不要随便从不知名的网盘或第三方软件下载站获取被二次篡改的安装包。"
+  - q: "粘贴订阅链接后提示「Network Error」或「403 Forbidden」怎么解决？"
+    a: "这通常有三种原因：第一是机场订阅链接被本地网络直接阻断，可尝试在连接手机热点的情况下重新点击刷新；第二是机场本身启用了防盗链风控，此时可以在订阅链接右键设置中，将 User-Agent 手动修改为 `clash.meta` 或 `clashverge`；第三是订阅链接已过期或账户欠费，需登录机场后台核查流量状态。"
+  - q: "「规则（Rule）」、「全局（Global）」与「直连（Direct）」有什么区别？"
+    a: "日常使用必须坚决选择「规则（Rule）」模式：该模式根据内置的 GeoIP 与域名清单自动判断，访问国内网站（百度、淘宝、B 站）直接走本地网络，访问国外受限网站（Google、YouTube）才自动走代理，兼顾了速度与隐私。「全局（Global）」模式会强制所有流量走海外节点，导致国内网站极其缓慢并误判异地；「直连（Direct）」模式相当于完全关闭代理功能。"
+  - q: "打开系统代理后，网页打不开且提示「代理服务器拒绝连接」是什么原因？"
+    a: "这说明 Clash 的核心进程没有正常工作或发生了端口冲突。先检查软件左下角的内核状态是否显示为绿色 Running；如果在设置中修改了混合端口（Mixed Port，默认 7897），需确保 Windows 系统代理设置中的端口与软件内部保持一致；同时排查电脑上是否同时运行了其他代理加速软件（如 v2rayN 或游戏加速器）占用了端口。"
+relatedLinks:
+  - title: "Clash Verge TUN 模式高级配置"
+    href: "/guides/articles/clients--clash-verge-tun-mode-setup/"
+    note: "接管全系统、游戏与局域网放行"
+  - title: "Windows 常用客户端生态全景"
+    href: "/guides/articles/windows-clients-guide/"
+    note: "v2rayN、FlClash 与 Verge 横向对比"
+  - title: "订阅导入返回 200 OK 为空故障排查"
+    href: "/guides/articles/subscription-and-200ok-empty-fix/"
+    note: "节点解析失败与空文件修复"
+  - title: "客户端软件分类专题"
+    href: "/clients/clash-verge-rev/"
+    note: "浏览各操作系统最新适配技巧"
+---
+
+## 认识新一代桌面神器：为什么必须拥抱 Mihomo 内核？
+
+对于广大习惯了旧版 Clash for Windows（CFW）的用户来说，切换到 **Clash Verge Rev** 不仅是一次界面的焕新，更是底层网络技术架构的彻底升级。
+
+旧版 CFW 依赖已停止维护的开源 Clash 原始核心，面对近两年兴起的 `VLESS`、`Reality`、`Hysteria2` 以及新版 `sing-box` 规则集时经常报错。Clash Verge Rev 原生搭载 **Mihomo（Clash.Meta）**，在以下四个方面带来了颠覆性体验：
+1. **全协议覆盖**：完美向下兼容 Shadowsocks、VMess、Trojan，向上无缝支持 Hysteria 2、TUIC v5 与 VLESS Reality；
+2. **轻量与现代化**：基于 Tauri 框架打造，内存占用仅为老版 Electron 架构的 1/3 左右；
+3. **原生 TUN 模式**：内置虚拟网卡驱动，不需要繁琐配置即可完美接管命令行终端、外服网游与不支持系统代理的软件；
+4. **规则集热更新**：支持直接引用 GitHub 社区维护的高频 GeoIP / GeoSite 规则文件。
+
+---
+
+## 四步极速上手作业指引
+
+### 第一步：获取与安装正版客户端
+
+访问 Clash Verge Rev 官方开源仓库（`clash-verge-rev/clash-verge-rev`），在 Releases 页面根据操作系统选择对应安装文件：
+- **Windows 用户**：推荐下载 `Clash.Verge_x.x.x_x64-setup.exe`。双击运行后按照提示安装至默认目录即可。
+- **macOS 用户**：苹果芯片（M1/M2/M3/M4）请务必下载 `_aarch64.dmg`（性能功耗最优），老款 Intel 芯片下载 `_x64.dmg`。将图标拖入 Applications 文件夹，初次打开若提示安全拦截，需在系统设置的「隐私与安全性」中点击「仍要打开」。
+
+### 第二步：导入机场订阅链接
+
+1. 登录你的机场服务商后台（如光速云、星岛梦等），在控制面板找到「便捷导入」或「一键订阅」选项；
+2. 复制你的专属 **Clash 订阅链接**；
+3. 打开 Clash Verge Rev，在左侧导航栏点击进入 **「订阅（Profiles）」**；
+4. 将复制的链接粘贴到顶部的输入框中，点击右侧的 **「保存并导入」**；
+5. 导入成功后，面板上会出现对应的订阅卡片，并显示剩余流量与到期时间。**鼠标左键单击该卡片**，使其边框高亮（表示当前生效该配置）。
+
+### 第三步：配置代理模式与节点选择
+
+1. 在左侧菜单点击进入 **「代理（Proxies）」** 面板；
+2. 在面板顶部，确认当前运行模式为 **「规则（Rule）」**；
+3. 在展开的策略组列表中（通常有「节点选择」「PROXY」等名称），点击右上角的延迟测试按钮（Wi-Fi 或闪电图标），刷新节点真实延迟；
+4. 选择一个延迟低于 80ms 且显示绿色数值的优质节点（如香港或日本节点）。
+
+### 第四步：启用系统代理
+
+在软件左侧导航栏底部，将 **「系统代理（System Proxy）」** 开关向右拨动开启。
+此时打开系统浏览器（Chrome、Edge 或 Safari），访问 Google、YouTube 或 GitHub，页面应立刻秒开，且国内百度、网易云等网站依然保持原速。
+
+---
+
+## 常用设置与优化项建议
+
+为了让软件运行更加顺手，建议在左侧 **「设置（Settings）」** 中完成以下三项调优：
+
+| 设置项目 | 推荐参数值 | 优化目的 |
+| :--- | :--- | :--- |
+| **开机自启动（Silent Start）** | **开启（建议勾选静默启动）** | 电脑开机自动在后台托盘静默运行，无需每次手动打开 |
+| **内核切换（Clash Core）** | **Mihomo (Meta)** | 确保启用所有最新抗封锁协议与高性能分流规则 |
+| **系统代理绕过（Bypass Domain）** | **保持默认国内局域网保留 IP** | 确保访问局域网打印机、NAS 私有云不走代理 |
+| **混合端口（Mixed Port）** | **默认 7897** | 记录该端口号，方便在 VS Code、Git 终端中配置本地代理 |
+
+---
+
+## 启动报错与排障急救包
+
+### 故障一：提示「端口 7897 已被占用，启动失败」
+
+**原因**：电脑后台有残留的旧版 Clash 进程，或者安装了其他占用相同端口的工具。
+**解法**：按 `Ctrl + Shift + Esc` 打开任务管理器，在“详细信息”中搜索 `clash` 或 `verge`，结束所有残留进程后重新打开软件；或者在 Verge 设置中把混合端口修改为 `7890` 或 `7899`。
+
+### 故障二：右下角图标开启了系统代理，但浏览器依然无法出境
+
+**原因**：浏览器的第三方代理插件（如 SwitchyOmega）冲突，或者系统 PAC 脚本被篡改。
+**解法**：关闭浏览器内的所有代理插件，设置为“使用系统代理”；在 Windows「网络和 Internet」设置中，检查「代理」页面的自动检测设置与手动代理服务器设置是否正常。

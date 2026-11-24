@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { buildBreadcrumbSchema } from '../lib/schema';
+
+const seo = {
+  title: '访客隐私与数据保护声明｜网络AI',
+  description: '网络AI 静态站点的访客隐私声明：无用户账户系统、无第三方广告跟踪器、本地分片检索及客户端安全提示。',
+  pathname: '/privacy/',
+};
+const schemas = [buildBreadcrumbSchema([{ name: '首页', href: '/' }, { name: '隐私说明', href: '/privacy/' }])];
+---
+
+<BaseLayout seo={seo} schemas={schemas}>
+  <div class="container page-section prose-article">
+    <Breadcrumbs items={[{ name: '首页', href: '/' }, { name: '隐私说明', href: '/privacy/' }]} />
+    <h1>访客隐私与数据保护声明</h1>
+    <p>
+      <strong>网络AI（aiwangluounk.my）</strong> 坚决捍卫每一位访客的数字隐私权与信息自决权。作为专注于网络安全与代理协议研究的技术站点，我们深知个人数据泄露与跨站追踪所带来的危害。本站采用现代纯静态架构（Astro Static Site Generation），在底层设计上彻底杜绝了绝大多数隐私安全隐患。
+    </p>
+
+    <h2>一、纯静态无状态架构：不收集敏感个人信息</h2>
+    <p>
+      与传统的动态网站不同，网络AI 拥有以下原生安全特性：
+    </p>
+    <ul>
+      <li><strong>无用户注册与登录系统</strong>：本站不设立任何形式的会员账号、密码数据库或个人中心，因此绝不存在任何用户邮箱、手机号或密码遭黑客拖库泄露的风险；</li>
+      <li><strong>无后台数据库存储</strong>：所有页面在部署前已完全编译为静态 HTML/CSS/JS 文件，服务器不建立持久化用户会话（Session）；</li>
+      <li><strong>不使用追踪 Cookie</strong>：本站页面不向您的浏览器植入任何用于跨站画像、行为追踪或再营销的持久化 Cookie。</li>
+    </ul>
+
+    <h2>二、Pagefind 客户端本地安全搜索</h2>
+    <p>
+      站内提供的全文检索功能完全依托开源的 <strong>Pagefind</strong> 离线静态索引技术。
+    </p>
+    <p>
+      当您在搜索框中输入任何技术术语、品牌名或错误代码时，您的浏览器仅从 CDN 静态下载对应的二进制预建索引分片，并在<strong>您的设备本地完成全文匹配与高亮计算</strong>。您的搜索关键词不会被发送至任何远程分析服务器，不会被记录在任何日志中，彻底杜绝了搜索历史被商业监控的风险。
+    </p>
+
+    <h2>三、零第三方追踪脚本与广告像素隔离</h2>
+    <p>
+      很多资讯类站点广泛嵌入 Google Analytics (GA4)、百度统计、Meta Pixel、AdSense 广告脚本等第三方代码，这些代码会在后台静默收集用户的 IP 地址、设备指纹与浏览轨迹。
+    </p>
+    <p>
+      网络AI 郑重承诺：<strong>全站未集成任何第三方用户行为追踪工具或广告 SDK 代码</strong>。我们通过底层日志完全实现了与第三方广告网络的绝对物理隔离。
+    </p>
+
+    <h2>四、外链跳转与第三方责任边界</h2>
+    <p>
+      当您点击本站的外部链接（例如前往某个品牌的官网注册入口、前往 GitHub 下载客户端或前往应用商店）离开本站后，您将进入第三方服务商或开发者的网络环境。第三方网站的数据收集、Cookie 政策与隐私保护均受其各自的《隐私政策》与用户协议约束。
+    </p>
+    <p>
+      <strong>安全建议</strong>：在第三方网站注册任何网络代理服务时，建议读者遵循“最小权限原则”，使用专用的独立安全邮箱与高强度的随机密码，并定期更新订阅密钥。
+    </p>
+
+    <h2>五、代理订阅使用与防泄密安全指引</h2>
+    <p>
+      为了保护您的网络资产安全，我们特别提醒：
+    </p>
+    <ol>
+      <li><strong>妥善保管订阅链接</strong>：带有 <code>token=</code> 的订阅链接等同于您账户的网络访问凭证，切勿在公开截图、群聊或未知来源的第三方“在线订阅转换工具”中粘贴完整链接；</li>
+      <li><strong>定期在后台重置密钥</strong>：一旦怀疑订阅链接泄露或发生异常流量消耗，请立即登录服务商后台执行“重置订阅信息”操作；</li>
+      <li><strong>防范木马仿冒客户端</strong>：下载 Clash Verge Rev、v2rayN、sing-box 等客户端软件时，请务必前往官方 GitHub 仓库核对 Release 签名与 SHA-256 哈希值，切勿下载网盘或第三方社群分享的被投毒安装包。</li>
+    </ol>
+  </div>
+</BaseLayout>

@@ -1,0 +1,27 @@
+User-agent: *
+Allow: /
+Disallow: /search/
+Disallow: /go/
+
+User-agent: Googlebot
+Allow: /
+Disallow: /search/
+Disallow: /go/
+
+User-agent: bingbot
+Allow: /
+Disallow: /search/
+Disallow: /go/
+
+User-agent: Baiduspider
+Allow: /
+Disallow: /search/
+Disallow: /go/
+
+User-agent: yisouspider
+Allow: /
+Disallow: /search/
+Disallow: /go/
+
+Sitemap: https://aiwangluounk.my/sitemap-index.xml
+Sitemap: https://aiwangluounk.my/sitemap.xml

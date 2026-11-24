@@ -1,0 +1,245 @@
+---
+pillarId: "guides"
+slug: "install"
+title: "跨平台客户端首次安装与安全核验教程：Win/Mac/Android/iOS/OpenWrt｜网络AI"
+description: "全平台梳理代理客户端正确安装路径、CPU 架构与开源 SHA-256 校验，提示 NekoBox 仿冒风险与 Nikki 系统要求，指导订阅导入与首次分流校准。"
+h1: "跨平台客户端安装与安全核验总教程：五端架构识别、校验和原则及首次分流校准"
+intent: "新手装机与安全核验实操型"
+targetKeyword: "跨平台代理客户端安装指南"
+secondaryKeywords:
+  - "Windows macOS Android iOS 客户端安装"
+  - "开源客户端 SHA-256 校验和核验"
+  - "NekoBox Google Play 仿冒警告"
+  - "Nikki OpenWrt 24.10 版本要求"
+  - "通用订阅与专属客户端安装区别"
+longTailKeywords:
+  - "初次使用机场怎么区分通用订阅三步走和专属客户端三步走"
+  - "为什么不能在 Google Play 下载 NekoBox 和用共享苹果 ID 登 iCloud"
+  - "macOS 和 Windows 安装 Clash Verge Rev 怎么区分芯片架构和核对哈希"
+  - "OpenWrt 软路由安装 Nikki 为什么必须 24.10 及以上版本"
+  - "装好客户端首次启动怎么设置开机自启和校准分流规则"
+entities:
+  - "Clash Verge Rev"
+  - "v2rayN"
+  - "FlClash"
+  - "v2rayNG"
+  - "Shadowrocket"
+  - "Stash"
+  - "Karing"
+  - "Hiddify"
+  - "NekoBox for Android"
+  - "Nikki"
+  - "OpenClash"
+  - "PassWall2"
+  - "HomeProxy"
+  - "SHA-256"
+keywordBoundary: "聚焦跨五端（Windows/macOS/Android/iOS/Linux & OpenWrt）首次装机选包、官方源与校验和核验原则、通用订阅 vs 专属端三步上手流程及首次启动校准；各系统详细矩阵延伸至四篇分平台系统文章，订阅链接 200 OK 空内容排障归入 /guides/articles/subscription-and-200ok-empty-fix/。"
+answerFirst: "首次安装代理客户端之所以频频出错，八成原因集中在「下错处理器架构」与「误入搜索引擎或商店仿冒渠道」。动手安装前必须先分清机场生态：支持通用订阅的品牌（如光速云、一翻云、梯子云、可信云、唯兔云、星岛梦等）走「装开源端 → 导订阅 → 校准规则分流」通用三步；仅限专属客户端的品牌（如飞猫云、隐形人、SOGO 云、闪跃、全球云，以及 2026 年 10 月后转向专属端的 Firefly、灵猫网络、无忧链接）则走「核验官网入口 → 下专属端 → 登录与最小权限授权」三步。下载开源端坚持从官方开源仓库核对发布者身份与 SHA-256 校验和，切勿在 Google Play 下载已被第三方控制的 NekoBox 同名应用，不要用未知共享账号登录苹果 iCloud，OpenWrt 部署 Nikki 须严格确认固件达到 24.10 及以上版本。"
+updatedDate: "2026-11-24"
+ctaHeading: "按设备查看分平台详尽矩阵或排查安装导入异常"
+ctaActions:
+  - label: "Windows 客户端全矩阵与哈希核验"
+    href: "/guides/articles/windows-clients-guide/"
+    style: "primary"
+  - label: "Android 选型与 NekoBox 仿冒避坑"
+    href: "/guides/articles/android-clients-guide/"
+    style: "secondary"
+  - label: "iOS/macOS 买断提示与架构对照"
+    href: "/guides/articles/ios-macos-clients-guide/"
+    style: "secondary"
+relatedLinks:
+  - title: "Linux 与 OpenWrt 软路由安装实战"
+    href: "/guides/articles/linux-openwrt-clients-guide/"
+    category: "系统指南"
+    reason: "核对 DEB/RPM/AppImage 格式、v2rayA 透明代理与 Nikki 对 OpenWrt 24.10 的硬性要求"
+  - title: "客户端无法启动与闪退排查"
+    href: "/troubleshooting/app-startup/"
+    category: "故障排查"
+    reason: "解决 WebView2 白屏、.NET 缺失、杀毒隔离核心与配置文件语法损坏"
+  - title: "订阅入门与 200 OK 空内容修复"
+    href: "/guides/articles/subscription-and-200ok-empty-fix/"
+    category: "故障排查"
+    reason: "处理订阅地址导入失败、User-Agent 被拦截与域名证书异常"
+  - title: "隐私边界与客户端安全审查"
+    href: "/risks/privacy/"
+    category: "安全准则"
+    reason: "理解开源端与闭源专属客户端权限差异，严防陌生系统根证书与仿冒包"
+faqs:
+  - q: "为什么你们的装机教程不直接放一个叫「GitHub」的一键下载直链按钮？"
+    a: "在站内客户端安全台账中，未经逐条实时在线核验的外部发行地址一律标记为待核实，绝不把 GitHub 或下载字样做成指向未知第三方加速站、网盘或空井号的假链接。搜索引擎竞价页与非官方搬运站是捆绑木马的高发区，用户必须自行确认进入项目官方开源仓库发布页，核对发布者身份与历史版本连续性后再下载。"
+  - q: "怎么判断我买的机场该走「通用订阅三步走」还是「品牌专属端三步走」？"
+    a: "查看机场官网面板是否存在「一键导入 Clash」「复制订阅链接」或「V2Ray 订阅」按钮，并结合站内品牌档案确认：光速云、一翻云、梯子云、可信云、唯兔云、星岛梦、大佬云、闪电鼠支持第三方通用订阅；而飞猫云、隐形人、SOGO 云、闪跃、全球云，以及 2026 年 10 月后转向专属端的 Firefly、灵猫网络、无忧链接不提供通用订阅，只能使用各自官方客户端。"
+  - q: "Android 手机安装代理客户端，为什么强烈警告不要在 Google Play 下载 NekoBox？"
+    a: "根据站内客户端安全台账，NekoBox for Android 原开源项目维护资源有限，且官方资料特别警告切勿下载 Google Play 商店中已被第三方控制的同名应用。此外第三方二次打包的 repack APK 也存在安全风险。安卓端建议优先从可信官方渠道获取并核对签名，选用维护活跃的 v2rayNG、FlClash、Clash Meta for Android、Hiddify 或 Karing。"
+  - q: "OpenWrt 软路由想装轻量化 Mihomo 插件 Nikki，需要注意什么硬性前提？"
+    a: "站内客户端台账明确提示 Nikki 必须运行在 OpenWrt 24.10 及以上版本固件之上。如果你的路由器还在使用 OpenWrt 22.03、23.05 或较老的第三方编译固件，强行安装 Nikki 会因内核模块、nftables 防火墙环境或软件源依赖不匹配而直接报错失效，旧固件用户应改用对应匹配版本的 OpenClash 或 PassWall2。"
+  - q: "苹果 iPhone 没有外区账号怎么装 Shadowrocket 或 Karing？能借用网上的共享账号吗？"
+    a: "绝对不要用任何陌生共享 Apple ID 登录手机主系统的 iCloud 设置，否则极易被对方远程锁机勒索。合规安全做法是自行注册或使用自己独立掌控的外区 Apple ID，且仅在 App Store 商店右上角切换登录下载（如外区付费买断的 Shadowrocket、Stash、Quantumult X，或 Karing、Clash Mi、Hiddify 等）。"
+  - q: "Windows 上下载 v2rayN 和 Clash Verge Rev 时，为什么有时双击打不开或白屏？"
+    a: "常见原因有三项：第一，v2rayN 若错下了不带底层核心的纯界面包，或者系统缺少对应的 .NET Desktop Runtime 运行库，会出现无法启动或无法建连；第二，Clash Verge Rev 在精简版 Windows 上如果缺少 Microsoft Edge WebView2 Runtime 会呈现白屏；第三，被系统安全中心误拦截了内核二进制文件。装机前核对架构和运行库即可避免。"
+  - q: "客户端装好并导入节点后，首次启动必须做哪些验证才算真正校准成功？"
+    a: "按四步验收：先核查电脑和手机系统时间是否已自动同步（误差超过 60 到 90 秒会导致节点全超时）；再将工作模式锁定在 Rule（规则分流）而非盲目开 Global 全局；接着打开一个国内常用站点确认走直连不消耗代理流量、再打开一个海外测试页确认走预期节点；最后若需使用 ChatGPT 或 Gemini，检查规则中是否已把它们从延迟最低的香港节点分离到美/日/新出口。"
+---
+
+初次配置网络代理工具，最容易让新手产生挫败感的往往不是“不会用”，而是**还没开始用就已经装错了软件**——要么在搜索引擎广告位下载了被人二次打包的伪装安装器，要么在 Apple Silicon 芯片的 Mac 上装成了老款 Intel 版本，要么买了仅限专属客户端的机场却对着 Clash 空面板反复粘贴面板网址。
+
+为了把装机阶段的试错成本降到最低，本篇总教程以实操安全核验为核心，带你按标准顺序走完「先定模式路径 → 五端架构与安装匹配 → 开源仓库与校验和防篡改原则 → 首次启动自启、权限与分流校准」四大关卡。
+
+---
+
+## 一、装机前先分清两条路径：通用订阅三步走 vs 品牌专属端三步走
+
+在下载任何客户端软件之前，第一步不是去搜软件名字，而是回到你采购服务的机场品牌档案或用户后台，确认它属于哪一种接入阵营。两者的安装软件、操作逻辑与后期迁移自由度完全不同。
+
+### 1. 通用订阅三步走（支持第三方开源客户端）
+
+绝大多数老牌及多协议兼容机场支持输出标准化的订阅 URL（如 Clash YAML、Base64 节点列表或 sing-box JSON）。在站内 31 家品牌档案中，明确支持或保留第三方导入的代表品牌包括 [光速云](/brands/guangsuyun/)、[一翻云](/brands/yifan/)、[梯子云](/brands/tiziyun/)、[可信云](/brands/kexin/)、[唯兔云](/brands/weitu/)、[星岛梦](/brands/xingdaomeng/)、[大佬云](/brands/dalaoyun/)、[闪电鼠](/brands/shandianshu/)、[极连云](/brands/jilian/) 与 [光年梯](/brands/guangnian/) 等（其中部分品牌同时提供官方自研端）。
+
+如果你的机场支持通用订阅，装机流程遵循标准的**通用三步走**：
+
+1. **按操作系统选定一款可信开源客户端**：例如桌面端用 [Clash Verge Rev](/clients/clash-verge-rev/) 或 [v2rayN](/clients/v2rayn/)，Android 用 `FlClash` 或 `v2rayNG`，iOS 用 [Shadowrocket](/clients/shadowrocket/) 或 `Stash`，软路由用 `OpenClash` 或 `HomeProxy`。
+2. **复制对应格式的订阅链接并导入**：如果用 Clash 系客户端，复制 Clash/Mihomo 订阅；如果用传统 `v2rayN` / `v2rayNG` 订阅分组，复制 V2Ray/通用 Base64 订阅；如果使用官方原生 `sing-box` 客户端，则确认是否提供原生 JSON 订阅或改用内置转换功能的 `Karing` / `Hiddify`（详细差异见 [sing-box 生态专题](/clients/sing-box/)）。
+3. **验证延迟、开启代理并校准分流**：保持规则模式（Rule），用系统代理（或移动端 VPN 扩展）接通后，验证国内直连与海外目标站点分流是否符合预期。
+
+### 2. 品牌专属端三步走（不提供通用订阅链接）
+
+近年来，越来越多机场为了简化纯新手上手门槛或强化自身线路与协议保护，彻底关闭了第三方订阅导出接口。根据站内最新台账记录，**彻底仅限专属客户端的品牌**包括 [飞猫云](/brands/feimao/)、[隐形人](/brands/yinxingren/)、[SOGO 云](/brands/sogo/)、[闪跃](/brands/shanyue/)、[全球云](/brands/quanqiu/)，以及资料注明自 2026 年 10 月后转向专属客户端模式的 [Firefly](/brands/firefly/)、[灵猫网络](/brands/lingmao/) 与 [无忧链接](/brands/wuyou/)。
+
+如果你使用的是上述品牌，千万不要去折腾 Clash Verge Rev 或 Shadowrocket（它们无法解析没有订阅接口的官网地址），而应当执行**专属端三步走**：
+
+1. **核验官网真伪与下载页入口**：通过已知可信记录核对品牌当前有效主站与发布页（如对入口存在疑问或遇推广路径格式异常，可先在 [官网识别与链接异常审计](/brands/official-sites/) 交叉核实），避开搜索结果里的仿冒站点。
+2. **确认专属端是否覆盖你的全部设备**：在付款和装机前确认目标品牌是否真有你手上全部设备的官方包（例如部分专属端仅支持 Windows/Mac/Android，缺乏 Apple TV 或主流 OpenWrt 软路由包；档案中仅 SOGO 云在文案里宣称提供主流软路由自研端，但具体安装包形式仍标注待核实）。
+3. **下载安装、账号登录并审查本地权限**：由于专属客户端属于闭源软件，安装前务必做本地杀毒扫描；安装后在手机端拒绝通讯录、相册或定位等非网络权限，且**绝不安装任何要求额外信任陌生系统根证书的提示**（详见 [隐私与安全边界](/risks/privacy/)）。
+
+---
+
+## 二、五端架构识别、安装路径与风险红线
+
+确定走通用订阅路线后，下面先通过一张总览表对比 **Windows、macOS、Android、iOS/iPadOS、Linux & OpenWrt** 五大终端的推荐软件、架构识别、系统权限与校验重点，再按平台逐一拆解实操细节。更详尽的软件对比表，可直接联动四篇分平台深度指南阅读。
+
+### 跨平台五端安装路线、权限需求与校验重点总览表
+
+| 平台终端 | 主力推荐客户端（仅通用订阅） | 处理器架构与包格式识别 | 安装所需权限与核心运行依赖 | 安全核验与核心避坑重点 |
+| :--- | :--- | :--- | :--- | :--- |
+| **Windows** | [Clash Verge Rev](/clients/clash-verge-rev/)、[v2rayN](/clients/v2rayn/)、`FlClash`、`Hiddify`、`Karing` | 常规 PC 选 `x64`（`amd64`），骁龙 ARM 本选 `arm64`；可选 `.exe` 安装包或便携压缩包 | 日常系统代理无需管理员；开 `TUN` 需服务模式提权；依赖 `WebView2` 或 `.NET` 运行库 | `v2rayN` 认准含核心的 `With-Core` 整合包；`Mihomo Party` 需单独核实维护活跃度；压缩包须完整解压后运行 |
+| **macOS** | [Clash Verge Rev](/clients/clash-verge-rev/)、`FlClash`、`Karing`、`Clash Mi`、`SFM` | 自研 M 系列芯片严格选 `arm64`（`aarch64`），老款 Intel Mac 选 `x64`（`x86_64`）的 `.dmg` 包 | 系统代理在「系统设置」授权修改代理；启用虚拟网卡需管理员密码授权系统网络扩展 | 严禁混用 Intel 与 M 芯片架构；核对 SHA-256 后仅在隐私设置放行或对单应用执行 `xattr` 清理，禁关全局 Gatekeeper |
+| **Android** | `v2rayNG`、`Clash Meta for Android`、`FlClash`、`Hiddify`、`Karing` | 近七年主流手机选 `arm64-v8a` `.apk`；老旧 32 位机选 `armeabi-v7a`；不明机型选 `universal` | 无需 Root；首次连接通过系统标准 `VpnService` 弹窗建立本地隧道，需设电池优化无限制 | **严禁在 Google Play 下载已被第三方控制的 `NekoBox` 同名应用**；拒绝汉化破解 repack 包并核验官方包名与签名 |
+| **iOS / iPadOS** | [Shadowrocket](/clients/shadowrocket/)、`Stash`、`Quantumult X`、`Karing`、`Clash Mi`、`SFI` | 通过外区 App Store 自动匹配苹果设备芯片分发安装 | 仅需首次连接授权「添加 VPN 配置」并输入锁屏密码，无需越狱与非网络权限 | **外区付费买断提示**：价格以登录商店实时显示为准；**严禁在系统设置 iCloud 登录陌生共享 Apple ID 防远程锁机** |
+| **Linux & OpenWrt** | `Clash Verge Rev`、`v2rayA`、`OpenClash`、`PassWall2`、`HomeProxy`、`Nikki` | Linux 依发行版选 `.deb` / `.rpm` / `.AppImage`；软路由核对固件架构及 `fw3`（`iptables`）与 `fw4`（`nftables`） | 桌面端 `.AppImage` 需加执行权限与 `libfuse2`；服务器透明代理或软路由插件需 `root` 与防火墙权限 | **硬性红线：`Nikki` 仅兼容 OpenWrt `24.10` 及以上版本**；硬路由部署前务必检查剩余 Flash 与 `/overlay` 空间防变砖 |
+
+使用上表时有一条通用原则：如果你跨多台设备使用同一套配置逻辑，建议优先统一为基于 [Mihomo](/clients/mihomo/) 内核或 [sing-box](/clients/sing-box/) 内核的客户端阵营，这样后续无论是做规则覆写还是排障，都能沿用同一套订阅与策略思维。
+
+### 1. Windows 端：区分 x64 / ARM64、含核心整合包与运行库
+
+Windows 桌面端主力首选基于 Mihomo 内核的 **Clash Verge Rev**（规则分流、配置覆写与 Service Mode 成熟），或支持 Xray/sing-box 多核心调度的经典工具 **v2rayN**；追求与手机端一致的极简操作可选 **FlClash**、**Hiddify** 或 **Karing**，需要切换多版内核调试可选 **Clash Nyanpasu**。针对老教程里常见的 **Mihomo Party**，务必记住站内台账明确给出的风险提示：**选用前必须单独核实当前项目维护活跃度，不可未经确认即作为默认首选推荐**。
+
+在 Windows 下载安装包前，先确认三件事（完整矩阵见 [Windows 代理客户端全矩阵指南](/guides/articles/windows-clients-guide/)）：
+
+1. **核对处理器架构**：绝大多数台式机与笔记本为 Intel 或 AMD 处理器，选择 **`x64`**（或 `amd64`）；仅高通骁龙平台 ARM 笔记本选择 **`arm64`**。在 PowerShell 中输入环境变量 `$env:PROCESSOR_ARCHITECTURE` 即可立即确认（显示 `AMD64` 即选 `x64`）。
+2. **安装版（Setup）vs 便携压缩包（Portable）**：普通家用或固定主力电脑可选 `.exe` 安装向导，能自动注册桌面快捷方式与卸载入口；需要装在 U 盘或放在纯英文目录避免写入系统盘的用户可选便携压缩包，但**严禁直接在 WinRAR 或 7-Zip 压缩包预览窗口里双击运行程序**，必须完整解压到非中文、无特殊符号的独立文件夹（例如独立工具目录）再启动。
+3. **补齐关键运行库与核心包**：`Clash Verge Rev` 界面渲染依赖系统的 `Microsoft Edge WebView2 Runtime`，若在精简版 Windows 上遇到启动白屏，请从微软官方渠道补装 WebView2；`v2rayN` 下载时务必认准包含底层核心（如 Xray/sing-box）的整合包（通常标注 `With-Core`），且本机需具备对应的 `.NET Desktop Runtime`。
+
+### 2. macOS 端：Apple Silicon 与 Intel 架构分流及安全放行
+
+macOS 桌面端主流工具同样覆盖 **Clash Verge Rev**、**v2rayN**、**FlClash**、**Hiddify**、**Karing**、**Clash Mi** 以及官方 **SFM**（原生 sing-box）和进阶付费调试工具 **Surge Mac**。苹果电脑装机最大的坑在于处理器架构切换与系统公证弹窗（完整矩阵见 [iOS/macOS 苹果生态客户端指南](/guides/articles/ios-macos-clients-guide/)）：
+
+1. **严禁混用 Apple Silicon 与 Intel 安装包**：点击屏幕左上角苹果图标「关于本机」，查看处理器/芯片名称。搭载 M1、M2、M3、M4 等自研芯片的 Mac 必须下载 **`arm64`**（或 **`aarch64`**）后缀的 `.dmg` 安装包；早期搭载 Intel 处理器的老款 Mac 必须下载 **`x64`**（或 **`x86_64`**）安装包。虽然 macOS 自带 Rosetta 2 可以转译部分 Intel 界面程序，但网络代理涉及虚拟网卡与底层转发，混用架构极易引起高耗电、卡死或提权失败。
+2. **正确处理「无法验证开发者」或「已损坏」提示**：部分开源客户端未购买苹果付费开发者公证签名，从 GitHub 下载拖入「应用程序」文件夹后首次双击可能被系统拦截。正确安全做法是在「系统设置 — 隐私与安全性」底部找到拦截提示点击「仍要打开」；如果提示文件损坏且你已经核对过官方发布的 SHA-256 校验和确认文件完整无篡改，可在终端仅对该单一应用执行一次隔离属性清理命令：
+
+```bash
+# 仅在已验证官方 SHA-256 校验和完全匹配的前提下，清除该单一应用的下载隔离属性
+xattr -dr com.apple.quarantine "/Applications/Clash Verge.app"
+```
+
+**安全底线**：绝对不要为了图省事在网上找教程把全系统的 Gatekeeper 保护永久关闭，更不要对未经校验和比对的文件执行放行命令。
+
+### 3. Android 端：ABI 架构匹配与 `NekoBox` Play 商店仿冒高危警告
+
+Android 系统无需 Root 权限，所有客户端均通过系统标准 `VpnService` 接口建立本地隧道。主流工具包括轻量单节点与 Xray 主力 **v2rayNG**、规则分流主力 **Clash Meta for Android**、跨端极简工具 **FlClash**、多格式自动识别工具 **Hiddify** 与 **Karing**，以及官方原生 **SFA**（sing-box for Android）。
+
+安卓端首次装机必须牢记两条硬性准则（完整选型与签名核验见 [Android 客户端选型与安全指南](/guides/articles/android-clients-guide/) 及 [安卓 VPN 安全专题](/vpn/android/)）：
+
+1. **精准匹配 CPU ABI 架构**：近七年发布的主流手机均属于 64 位 ARM 架构，下载 `.apk` 时首选 **`arm64-v8a`**，包体更小且运行效率最高；只有极其老旧的 32 位安卓设备才选 `armeabi-v7a`；实在无法判断硬件参数时再选择体积较大的 `universal` 通用混合包。
+2. **重点安全警示：`NekoBox` Google Play 仿冒风险**：根据站内 `PROXY_CLIENTS` 安全台账明确记录，**`NekoBox for Android` 官方资料提示项目维护资源有限，并特别警告切勿下载 Google Play 商店上已被第三方控制的同名应用**。同理，从各类中文论坛或非官方导航站下载的所谓“去广告汉化破解版”“内部优化 repack 包”也存在极高的注入风险。安装 APK 时务必核对发布者数字签名与版本更新来源，如今新装机直接优先选择 **v2rayNG**、**FlClash**、**Clash Meta for Android** 或 **Hiddify** 更加稳妥安全。
+
+### 4. iOS / iPadOS 端：外区商店买断提示与防锁机红线
+
+受限于苹果移动端沙盒政策，所有正规第三方代理工具均无法从中国大陆区 App Store 搜索获取，必须切换至美区、港区或日区等外区商店下载（详见 [iOS/macOS 苹果生态客户端指南](/guides/articles/ios-macos-clients-guide/)）：
+
+- **外区付费买断阵营**：**Shadowrocket（小火箭）** 泛用性最强、兼容协议极广，是多数新手与多机场用户的首选；**Stash** 原生兼容 Clash YAML 策略组，适合桌面端 Clash 用户无缝同步；**Quantumult X（圈 X）** 擅长 HTTP 重写与高级脚本，但机场仅给 Clash 格式时往往需要额外配置适配；**Surge 5** 功能最强大但含高门槛内购/授权，偏向专业网络调试。注意站内仅记录其在美区等外区显示为付费应用，**实际售价与上架可用性一律以你登录时所在地区 App Store 实时页面显示为准**。
+- **跨端轻量及免费可选阵营**：**Karing**、**Clash Mi**、**Hiddify** 以及官方原生 **SFI**（sing-box for iOS，仅认原生 JSON 配置）均在对应地区 App Store 分发，适合预算敏感或追求跨端体验统一的用户。
+- **防锁机安全铁律**：下载外区应用时，**只允许在 App Store 应用商店内切换登录你自己注册掌控的外区 Apple ID**，下载完成后即可切回原账号；**严禁在「系统设置」顶部的 iCloud 账户栏登录任何网上找来的“免费共享苹果账号”**，否则对方可瞬间开启丢失模式锁定你的手机硬件！
+
+### 5. Linux 与 OpenWrt 端：包格式选择、`fw3`/`fw4` 与 `Nikki` 24.10 硬门槛
+
+Linux 与家庭软路由面向技术进阶与全屋代理需求，装机前若选错包格式或固件版本，极易导致依赖崩溃甚至路由器失联（完整命令与操作见 [Linux 与 OpenWrt 软路由实战指南](/guides/articles/linux-openwrt-clients-guide/)）：
+
+- **Linux 桌面与无桌面服务器**：Debian/Ubuntu/Mint 系选 `.deb` 包，Fedora/RHEL 系选 `.rpm` 包，跨发行版通用选 `.AppImage`（运行前需赋予可执行权限，新系统如 Ubuntu 24.04 可能需要补充 `libfuse2`）；无图形界面的云服务器、NAS 宿主机或旁路由网关推荐部署提供 Web 控制面板与透明代理的 **v2rayA**，操作前务必备份原网络及防火墙配置。
+- **OpenWrt 软路由四大插件选型与硬性版本红线**：
+  - **OpenClash**（Mihomo 内核）：功能最丰富，适合习惯 Clash 规则订阅的玩家，部署前须核对固件架构（`x86_64`、`aarch64` 等）与防火墙类型（传统 `iptables` 即 `fw3`，还是现代 `nftables` 即 `fw4`）。
+  - **PassWall2**（Xray / sing-box 双核心）：分流直观，适合需要混合调度多核心节点的设备，硬路由装机前须检查剩余 Flash 与 `/overlay` 空间防止写满变砖。
+  - **HomeProxy**（sing-box 原生）：面向现代 OpenWrt `fw4`（`nftables`）生态设计，结构干净轻量，前提是固件版本与软件源内 `sing-box` 内核包匹配。
+  - **Nikki**（轻量化 Mihomo 透明代理）：**硬性前提——站内台账明确提示 Nikki 要求 OpenWrt 24.10 及以上版本固件，旧版固件（如 22.03 或 23.05）不兼容**，切勿在老旧固件上强行安装以免触发规则报错断网。
+
+---
+
+## 三、开源仓库核验与校验和（Checksum）防篡改原则
+
+为什么在网络代理领域，「怎么下载安装包」和「怎么配置规则」同样重要？因为代理客户端拥有接管整机网络流量、读写系统代理甚至注册底层服务的权限，一旦下载到被第三方植入木马或恶意重定向规则的篡改包，你的登录凭据、订阅链接 Token 乃至日常数据都会处于风险之中。
+
+根据站内 [客户端总览](/clients/) 的合规准则，在未逐条完成实时联网探测前，站内台账对客户端官网链接均保留为待核实状态，且**绝不拼凑猜测网址、绝不使用无效占位符充当下载地址**。你在自行前往项目官方开源仓库或应用商店获取安装文件时，请严格执行以下四步核验流程：
+
+1. **三要素识别真官方仓库**：在开源代码托管平台查找项目时，核对仓库所有者（Owner）是否与社区长期公认的维护者一致、Star 数量与历史 Release 提交时间线是否连续自然、以及版本发布说明的排版风格与以往版本是否吻合。警惕名称极度相似但近期才突然新建、仅靠搜索引擎广告排在第一的克隆仓库。
+2. **绝不点击「本地高速下载器」与密码解压包**：正规开源项目只会提供干净的 `.exe`、`.zip`、`.dmg`、`.apk`、`.deb`、`.rpm` 或 `.AppImage` 发行文件。凡是引导你先下载某下载管理器、或者把压缩包加密并要求关注公众号/关闭 Windows 安全中心再解压的渠道，一律视为高危风险直接放弃。
+3. **下载后必核对 SHA-256 校验和**：正规开源发行页的 Releases 底部通常会附带一个 `checksums.txt` / `.sha256` 文件，或者在每个二进制包旁直接列出官方计算好的 SHA-256 摘要值。文件下载到本地后，花十秒钟在终端计算一次本地哈希进行比对：
+
+在 **Windows PowerShell** 中计算安装包哈希值：
+
+```powershell
+Get-FileHash -Path "$HOME\Downloads\v2rayN-windows-64-With-Core.zip" -Algorithm SHA256
+```
+
+在 **macOS 或 Linux** 终端中计算安装包哈希值：
+
+```bash
+# macOS 系统使用自带命令
+shasum -a 256 ~/Downloads/Clash.Verge_arm64.dmg
+
+# Linux 系统使用通用校验命令
+sha256sum ~/Downloads/clash-verge_amd64.deb
+```
+
+将终端输出的那串 64 位十六进制字符与官方发布页公布的对应文件校验值逐段核对（重点看前 8 位与后 8 位是否完全一致）。只要哪怕有一位字符不符，说明安装包在传输中损坏或已被中间环节调包，立即删除绝不双击运行。
+4. **移动商店核对开发者与发行历史**：在 App Store 下载 `Shadowrocket`、`Stash`、`Quantumult X`、`Karing`、`Clash Mi` 或 `SFI` 时，点进详情页确认开发者名称与历史版本更新记录，避开名称故意多加空格、前缀或后缀的山寨付费仿冒 App。
+
+---
+
+## 四、首次启动必做四步验收：开机自启、权限授权与分流校准
+
+把经过安全核验的客户端安装进设备、并成功导入订阅（如遇导入返回 `200 OK` 但节点为空或证书报错，可即时查阅 [订阅导入失败排查指南](/guides/articles/subscription-and-200ok-empty-fix/)），并不意味着装机任务就此结束。第一次启动后，请务必依次完成以下四步校准验收，才能保证日后长期顺畅不踩坑：
+
+### 1. 第一步：校准系统时间与时区（防连接全超时）
+
+几乎所有现代代理协议（VMess、VLESS-Reality、Trojan、Hysteria 2）在服务端进行握手验证时，都会校验客户端设备的时间戳以防止重放攻击，其中 VMess 允许的误差通常不超过 90 秒。许多刚重装系统、双系统切换（Windows 与 Linux 硬件时钟冲突）或长时间关机重启的设备，本地时间可能与标准网络时间差了几分钟，结果就是节点全部测出 Timeout 超时。在第一次开启代理前，先确保操作系统设置里的「自动设置时间」和「自动设置时区」处于开启状态并手动点击一次立即同步（更多细节参考 [节点全超时与时间漂移排查](/guides/articles/time-drift-timeout-troubleshooting/)）。
+
+### 2. 第二步：正确配置开机自启与退出清理（桌面端重点）
+
+在 Windows 与 macOS 上，如果开启了「系统代理」，一旦电脑非正常关机或休眠，注册表里残余的 `127.0.0.1` 本地代理地址会导致下次开机时浏览器打不开任何国内网页。首次配置时建议同步检查客户端设置中的两个保护选项：
+
+- **是否开启开机自启**：对于每天开机都需要查资料的主力电脑，开启客户端「开机自启」并在状态正常后自动接管，可以显著减少遗忘开启带来的困扰；若只是偶尔使用或与公司内网 VPN 交替使用，则保持关闭开机自启，但务必在客户端设置中确认开启了**退出时自动重置系统代理**的清理选项。
+- **Android 后台保活授权**：国内定制安卓系统默认激进杀后台，首次连接后请在手机「电池优化」里将该客户端设为「无限制/不优化」，并在多任务卡片上加锁，防止锁屏五分钟后 VPN 断开。
+
+### 3. 第三步：最小权限原则授权（系统代理 vs 虚拟网卡）
+
+首次启动接入时，遵循**默认系统代理优先，按需再开 TUN** 的原则：
+
+- 桌面端首次连接，先在软件里打开「系统代理」，暂不安装或开启 TUN 服务模式；只有当你确认需要在终端运行命令行工具、使用 WSL2 或需要接管不支持代理变量的应用时，再参考 [TUN 模式深度教程](/guides/tun/) 提权配置虚拟网卡。
+- 手机端（iOS / Android）首次点亮连接开关时，系统会弹出「是否允许添加 VPN 配置 / 创建网络连接请求」，这是建立本地分流隧道的必需正常权限，点击「允许」并输入锁屏密码即可，但**不要随意授予任何非网络相关的敏感隐私权限**。
+
+### 4. 第四步：分流规则与 AI 地区出口校准验证
+
+切勿在第一次接通后就把模式长期留在 `Global（全局代理）`！全局模式不仅会让百度、微信、国内网银和本地视频软件全部绕道海外节点变慢，还会白白耗尽你的月付甚至不限时流量配额。请按以下清单完成最后校准：
+
+1. **确认核心模式为 `Rule（规则模式）`**：在主界面把路由模式切换至 `Rule`（在 v2rayN 中则核对底部路由模式处于 `绕过大陆`），随后观察客户端的「连接（Connections）」日志页。
+2. **分别测试国内站与海外站分流**：打开一个常规国内网站，确认连接日志中该域名的出站显示为 **`DIRECT（直连）`**；再打开一个常用海外站点，确认它走了你选中的节点分组且网页秒开。
+3. **校准 AI 工具专属节点地区（关键避坑）**：根据站内实测样本（例如光速云 2026-08-19 实测显示，香港节点延迟虽低，但 ChatGPT 多限仅 APP 使用、Gemini 多区失败，而新加坡解锁表现更广），如果你的机场默认把延迟最低的香港节点自动排在首位，打开网页版 ChatGPT、Claude 或 Gemini 很可能会瞬间报错地区不支持。首次使用前，建议直接在客户端策略组或参考 [分流规则配置专题](/guides/routing-rules/)，把 AI 工具域名手动指向日本、新加坡或美国出口节点，完成一次真实对话验证，整套跨平台装机与校准即告圆满完成。

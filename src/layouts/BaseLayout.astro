@@ -1,0 +1,69 @@
+---
+import '../styles/global.css';
+import { buildSEO, SITE_VERIFICATIONS, type SEOInput } from '../lib/seo';
+import { safeJsonLd } from '../lib/schema';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import SearchModal from '../components/SearchModal.astro';
+
+interface Props {
+  seo: SEOInput;
+  schemas?: unknown[];
+  pagefindIgnore?: boolean;
+}
+
+const { seo: seoInput, schemas = [], pagefindIgnore = false } = Astro.props;
+const meta = buildSEO(seoInput);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{meta.title}</title>
+    <meta name="description" content={meta.description} />
+    <link rel="canonical" href={meta.canonical} />
+    {meta.noindex && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3" />
+    <link rel="icon" type="image/png" href="/favicon.png?v=3" />
+    <link rel="icon" type="image/webp" href="/avatar.webp?v=3" />
+    <link rel="apple-touch-icon" href="/avatar.webp?v=3" />
+    <link rel="alternate" type="application/rss+xml" title="网络AI RSS" href="/rss.xml" />
+
+    {/* 搜索引擎站长平台验证 Meta 插槽 */}
+    {SITE_VERIFICATIONS.google && <meta name="google-site-verification" content={SITE_VERIFICATIONS.google} />}
+    {SITE_VERIFICATIONS.bing && <meta name="msvalidate.01" content={SITE_VERIFICATIONS.bing} />}
+    {SITE_VERIFICATIONS.shenma && <meta name="shenma-site-verification" content={SITE_VERIFICATIONS.shenma} />}
+    {SITE_VERIFICATIONS.baidu && <meta name="baidu-site-verification" content={SITE_VERIFICATIONS.baidu} />}
+
+    <meta property="og:type" content={meta.type} />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:site_name" content="网络AI" />
+    <meta property="og:title" content={meta.title} />
+    <meta property="og:description" content={meta.description} />
+    <meta property="og:url" content={meta.canonical} />
+    <meta property="og:image" content={meta.ogImage} />
+    {meta.publishedTime && <meta property="article:published_time" content={meta.publishedTime} />}
+    {meta.modifiedTime && <meta property="article:modified_time" content={meta.modifiedTime} />}
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={meta.title} />
+    <meta name="twitter:description" content={meta.description} />
+    <meta name="twitter:image" content={meta.ogImage} />
+
+    {schemas.map((schema) => (
+      <script type="application/ld+json" set:html={safeJsonLd(schema)} />
+    ))}
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">跳到正文内容</a>
+    <SiteHeader currentPath={seoInput.pathname} />
+    <main id="main-content" data-pagefind-body={pagefindIgnore ? undefined : true}>
+      <slot />
+    </main>
+    <SiteFooter />
+    <SearchModal />
+  </body>
+</html>

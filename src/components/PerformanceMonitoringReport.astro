@@ -1,0 +1,192 @@
+---
+import type { SpeedTestSession } from '../data/brandSchema';
+
+interface Props {
+  brandName: string;
+  accentColor: string;
+  sessions: SpeedTestSession[];
+}
+
+const { brandName, accentColor, sessions } = Astro.props;
+---
+
+<section class="obs-panel" style={`--accent: ${accentColor};`} aria-label={`${brandName} 测速与延迟监测报告`}>
+  <div class="obs-panel__head">
+    <div>
+      <div class="obs-panel__eyebrow">PERFORMANCE MONITORING REPORT · NON-PEAK / HISTORICAL AUDIT</div>
+      <h3 class="obs-panel__title">{brandName} 速度与延迟记录面板</h3>
+    </div>
+  </div>
+
+  {sessions.length === 0 ? (
+    <div class="obs-subcard">
+      <div class="pmr-empty">
+        <span class="dot dot--pending"></span>
+        <div>
+          <strong>暂无可验证测速数据（Not Tested / Pending）</strong>
+          <p>原始品牌资料未提供逐地区延迟或下载带宽数据。本站坚持不编造测速、不画虚假 0% 丢包率进度条；待完成晚高峰实测后再行补录。</p>
+        </div>
+      </div>
+    </div>
+  ) : (
+    sessions.map((session) => {
+      const maxMbps = Math.max(
+        ...session.rows.map((r) => r.downloadMbps ?? 0),
+        100
+      );
+      return (
+        <div class="obs-subcard pmr-session">
+          <div class="pmr-meta">
+            <div>
+              <strong>{session.label}</strong>
+              <div class="pmr-sub">
+                日期：<span class="mono">{session.date}</span> ·
+                时段：{session.isPeakHour === true ? '晚高峰' : session.isPeakHour === false ? '非晚高峰（原文标注）' : '未注明是否晚高峰'} ·
+                工具：{session.tool} ·
+                样本：{session.sampleSize}
+              </div>
+              <div class="pmr-sub">网络环境：{session.environment}</div>
+            </div>
+            <span class={`obs-tag obs-tag--${session.sourceStatus}`}>
+              {session.sourceStatus === 'measured'
+                ? 'MEASURED'
+                : session.sourceStatus === 'not_tested'
+                  ? 'NOT TESTED'
+                  : 'HISTORICAL RECORD'}
+            </span>
+          </div>
+
+          {session.rows.length === 0 ? (
+            <p class="pmr-nodata">{session.sourceNote}</p>
+          ) : (
+            <div class="pmr-rows" role="table" aria-label={`${session.label} 测速数值`}>
+              {session.rows.map((row) => {
+                const widthPct = row.downloadMbps
+                  ? Math.max(6, Math.min(100, Math.round((row.downloadMbps / maxMbps) * 100)))
+                  : 0;
+                return (
+                  <div class="pmr-row" role="row">
+                    <div class="pmr-region" role="cell">{row.region}</div>
+                    <div class="pmr-latency mono" role="cell">
+                      {row.latencyMs !== null ? `${row.latencyMs} ms` : '延迟未录'}
+                    </div>
+                    <div class="pmr-bar-wrap" role="cell" aria-label={row.downloadMbps ? `${row.downloadMbps} Mbps` : '未测'}>
+                      {row.downloadMbps !== null ? (
+                        <div class="pmr-bar" style={`width: ${widthPct}%; background: ${accentColor};`}></div>
+                      ) : (
+                        <span class="pmr-untested">未测</span>
+                      )}
+                    </div>
+                    <div class="pmr-speed mono" role="cell">
+                      {row.downloadMbps !== null ? `${row.downloadMbps} Mbps` : '—'}
+                      {row.downloadMBs ? ` (${row.downloadMBs} MB/s)` : ''}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <p class="obs-note">{session.sourceNote}</p>
+        </div>
+      );
+    })
+  )}
+</section>
+
+<style>
+  .pmr-session + .pmr-session {
+    margin-top: 0.9rem;
+  }
+  .pmr-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid var(--obs-border);
+  }
+  .pmr-sub {
+    font-size: 0.78rem;
+    color: var(--obs-text-muted);
+    margin-top: 0.15rem;
+  }
+  .obs-tag {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 0.18rem 0.55rem;
+    border-radius: 4px;
+    border: 1px solid var(--obs-border);
+    background: rgba(30, 41, 59, 0.8);
+    color: #93c5fd;
+  }
+  .obs-tag--not_tested { color: #cbd5e1; }
+  .pmr-rows {
+    display: grid;
+    gap: 0.55rem;
+  }
+  .pmr-row {
+    display: grid;
+    grid-template-columns: minmax(90px, 1.4fr) 82px 2fr 135px;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.84rem;
+  }
+  @media (max-width: 640px) {
+    .pmr-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.25rem 0.6rem;
+    }
+    .pmr-bar-wrap,
+    .pmr-speed {
+      grid-column: 1 / -1;
+      text-align: left;
+    }
+  }
+  .pmr-region {
+    color: #f8fafc;
+    font-weight: 600;
+    min-width: 0;
+  }
+  .pmr-latency {
+    color: #cbd5e1;
+    text-align: right;
+  }
+  .pmr-bar-wrap {
+    height: 10px;
+    background: rgba(148, 163, 184, 0.15);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .pmr-bar {
+    height: 100%;
+    border-radius: 999px;
+    opacity: 0.9;
+  }
+  .pmr-speed {
+    color: #e2e8f0;
+    text-align: right;
+    font-weight: 600;
+  }
+  .pmr-empty {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .pmr-empty .dot {
+    margin-top: 0.45rem;
+    flex-shrink: 0;
+  }
+  .pmr-empty p,
+  .pmr-nodata {
+    margin: 0.25rem 0 0;
+    font-size: 0.84rem;
+    color: var(--obs-text-muted);
+  }
+  .pmr-untested {
+    font-size: 0.72rem;
+    color: var(--obs-text-muted);
+  }
+</style>

@@ -1,0 +1,60 @@
+---
+import type { LinkRecommendation } from '../lib/linkGraph';
+
+interface Props {
+  title?: string;
+  links: LinkRecommendation[];
+}
+
+const { title = '下一步阅读与相关专题', links } = Astro.props;
+---
+
+<section class="related-links" aria-label={title}>
+  <h2>{title}</h2>
+  <div class="grid-cards grid-cards--3">
+    {links.map((item) => (
+      <a href={item.href} class="related-card surface-card">
+        <span class="related-card__cat">{item.category}</span>
+        <strong>{item.title}</strong>
+        <p>{item.reason}</p>
+      </a>
+    ))}
+  </div>
+</section>
+
+<style>
+  .related-links {
+    margin-top: 2.25rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-hairline);
+  }
+  .related-links h2 {
+    margin: 0 0 1rem;
+    font-size: 1.2rem;
+  }
+  .related-card {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .related-card:hover {
+    border-color: var(--brand-primary);
+  }
+  .related-card__cat {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--brand-cyan);
+  }
+  .related-card strong {
+    font-size: 0.98rem;
+    color: var(--text-primary);
+  }
+  .related-card p {
+    margin: 0;
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+</style>

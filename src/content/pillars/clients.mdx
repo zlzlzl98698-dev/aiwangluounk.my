@@ -1,0 +1,359 @@
+---
+id: "clients"
+title: "代理客户端全平台选型指南（2026）：Clash Verge、v2rayN与sing-box"
+description: "覆盖 Windows、macOS、Android、iOS 等六大系统代理客户端选型矩阵：解析通用订阅与专属客户端差异、Mihomo 与 sing-box 内核原理及官方防伪校验指南。"
+h1: "代理客户端软件选型与操作全指南：内核原理、六平台兼容矩阵与安全部署规范"
+intent: "工具选择与操作型（客户端选型、内核辨析、安全下载核验与跨平台部署实操）"
+targetKeyword: "代理客户端下载与选型"
+secondaryKeywords:
+  - "Clash Verge Rev"
+  - "v2rayN 与 v2rayNG"
+  - "Shadowrocket Stash Quantumult X"
+  - "Mihomo 与 sing-box 对比"
+  - "OpenWrt Nikki OpenClash"
+longTailKeywords:
+  - "Windows macOS 代理客户端推荐与架构区分"
+  - "Android NekoBox Google Play 仿冒警告"
+  - "iOS 外区 App Store 代理软件区别"
+  - "Nikki OpenWrt 24.10 版本要求"
+  - "专属客户端与通用订阅机场区别"
+entities:
+  - "Clash Verge Rev"
+  - "Mihomo (Clash.Meta)"
+  - "sing-box"
+  - "v2rayN / v2rayNG"
+  - "Shadowrocket / Stash / Quantumult X / Surge 5"
+  - "FlClash / Hiddify / Karing"
+  - "OpenClash / PassWall2 / Nikki / HomeProxy"
+  - "v2rayA"
+keywordBoundary: "聚焦开源与主流第三方代理客户端及软路由插件的内核原理、平台选型、协议兼容、安装校验与安全配置；具体机场品牌套餐定价归属「价格与套餐」与「机场品牌」，AI 与流媒体落地解锁测试归属「AI 与流媒体」专题。"
+answerFirst: "选择代理客户端前必须先完成两项前置判断：第一，确认你所选的机场是否提供标准第三方通用订阅（仅支持专属客户端的飞猫云、隐形人、SOGO 云等无法导入开源软件，双端兼容的光速云、梯子云等则不受限制）；第二，确认设备操作系统与 CPU 架构。2026 年主流格局已由已停止维护的原版 Clash 全面转向 Mihomo（Clash.Meta）与 sing-box / Xray 生态：桌面端规则分流首选 Clash Verge Rev 或 FlClash，多协议/单链调试选 v2rayN（注意 Mihomo Party 须先独立核实维护活跃度）；Android 端首选 Clash Meta for Android、FlClash 或 v2rayNG（严禁在 Google Play 下载已被第三方控制的同名 NekoBox）；iOS 端付费生态按需求区分 Shadowrocket、Stash、Quantumult X 与 Surge 5（以所在外区商店实时售价为准），跨端免付费门槛可考察 Karing、Clash Mi、Hiddify 或 SFI；Linux 与 OpenWrt 则需严守防火墙类型（fw3/fw4）与 Nikki 要求 OpenWrt 24.10 及以上版本的硬性门槛。所有客户端在站内外部真实发布链接均处于待核实状态，严禁轻信搜索广告下载站与二次打包包。"
+updatedDate: "2026-11-23"
+ctaHeading: "按你的主力设备直接进入对应安装与排障路径"
+ctaActions:
+  - label: "Windows 客户端矩阵与哈希校验"
+    href: "/guides/articles/windows-clients-guide/"
+    style: "primary"
+  - label: "专属客户端 vs 通用订阅深度对照"
+    href: "/compare/dedicated-client-vs-universal-sub/"
+    style: "secondary"
+  - label: "订阅导入与 200 OK 空内容排障"
+    href: "/guides/articles/subscription-and-200ok-empty-fix/"
+    style: "secondary"
+faqs:
+  - q: "为什么不能再使用早期教程推荐的原版 Clash for Windows 或 Clash Core？"
+    a: "原版 Clash 内核及相关经典桌面前端已在多年前停止维护更新，无法识别 VLESS-Reality、Hysteria 2、AnyTLS 等现代高抗封锁与弱网优化协议。当你导入包含这些节点的现代机场订阅时（如一翻云的 Hysteria 2/VLESS-Reality 或光速云 70 节点池中的 Vless/AnyTLS），旧内核会直接报错、丢弃节点或解析失败。当前应全面迁移至基于 Mihomo（原 Clash.Meta）或 sing-box / Xray 的活跃生态。"
+  - q: "买了只提供「专属客户端」的机场，还能自己换用 Clash Verge Rev 或 Shadowrocket 吗？"
+    a: "不能。像飞猫云、隐形人、SOGO 云、闪跃、全球云，以及资料记录自 2026 年 10 月后转向专属端模式的 Firefly、灵猫网络、无忧链接，均明确不提供标准第三方订阅链接。这类服务无法导入 Clash Verge Rev、v2rayN、Shadowrocket 或 OpenWrt 软路由插件。如果需要跨设备自由分流或配置软路由，购买前务必选择光速云、梯子云、一翻云、可信云等支持第三方订阅的品牌。"
+  - q: "Clash Verge Rev 与 Mihomo Party 怎么选？为什么站内对 Mihomo Party 提出风险提示？"
+    a: "Clash Verge Rev 是目前 Windows、macOS 与 Linux 上保持较高社区关注度的 Mihomo 桌面端之一，集成订阅覆写与 TUN 服务模式，适合作为主力规则代理端。而对于 Mihomo Party，站内客户端台账专门标注了风险提示：由于开源维护者的更新节奏与仓库权属会随时间变化，在未独立核实该项目近期维护活跃度、提交记录与发布签名状态之前，不可盲目沿用早期教程将其标为首选推荐客户端。"
+  - q: "为什么特别警告绝对不要在 Google Play 商店下载 NekoBox？"
+    a: "站内客户端台账明确记录了两重风险：一是 NekoBox for Android 原开源项目维护资源有限；二是官方资料特别警告切勿下载 Google Play 上已被第三方控制的同名应用。商店同名包与原开源项目之间存在控制权与分发链路变更隐患，可能夹带多余广告或可疑网络行为。Android 用户更稳妥的选择是核实签名后的 v2rayNG、Clash Meta for Android、FlClash 或 Hiddify。"
+  - q: "Shadowrocket、Stash、Quantumult X 和 Surge 5 都是美区付费软件，分别适合谁？"
+    a: "四款软件均需在美区等外区 App Store 核实实时售价后获取（站内不写死历史美元标价）：Shadowrocket（小火箭）泛用性最高、教程最全且几乎兼容所有机场一键导入，最适合新手和日常多协议切换；Stash 原生兼容 Clash YAML 规则体系与配置覆写，适合桌面端已用 Clash 的用户直接迁移规则；Quantumult X（圈 X）长于 HTTP 重写与 JS 脚本，但机场仅给 Clash 订阅时常需额外规则转换；Surge 5 偏向重度抓包与企业级网络调试，订阅/授权成本明显最高，普通用户不必盲目跟风。"
+  - q: "sing-box 官方客户端（SFA/SFI/SFM）和 Hiddify、Karing 同属 sing-box 内核，使用难度差在哪？"
+    a: "差异在于配置文件的兼容层与封装程度。sing-box 官方原生客户端（SFA/SFI/SFM）直接读取标准 sing-box JSON 配置，不直接兼容 Clash YAML 订阅；若机场未提供 sing-box 专用下发格式，普通用户自行转换 JSON 规则的门槛较高。而 Hiddify 与 Karing 虽然底层同样驱动 sing-box，但在前端内置了多订阅格式自动识别与转换适配逻辑，新手可以直接导入常规链接并完成分流选点。"
+  - q: "Mac 上下载 Clash Verge Rev 或 v2rayN 时，arm64 和 x64 有什么区别？"
+    a: "搭载 M1/M2/M3/M4 系列自研芯片的 Mac 属于 Apple Silicon 架构，必须下载后缀为 arm64 或 aarch64 的原生安装包；早期采用 Intel Core 处理器的 Mac 才选择 x64（或 x86_64）版本。由于网络代理客户端在开启 TUN 虚拟网卡或系统扩展时需要贴近内核转发，使用原生匹配架构能避免转译损耗与底层权限异常。"
+  - q: "OpenWrt 软路由想装轻量化的 Nikki 插件，为什么很多老固件装不上？"
+    a: "站内客户端台账明确写明了 Nikki 的硬性前置条件：要求 OpenWrt 24.10 及以上版本，旧版固件（如 23.05、22.03 或更早魔改版）因缺乏对应内核网络特性、nftables（fw4）环境与软件源依赖而完全不兼容。安装任何软路由代理插件前，务必通过 SSH 检查 /etc/openwrt_release、剩余闪存空间 /overlay 以及防火墙后端（fw3 还是 fw4）。"
+  - q: "为什么站内客户端总览表不直接给出 GitHub 下载直链？我该如何确认下载的是正版？"
+    a: "因为代理工具属于高频被仿冒重灾区，站内所有客户端的外部官方网址目前均严格标注为 pending_verification（官方地址待联网核实），绝不使用未经实时核验或猜测拼凑的 GitHub 下载链接，防止读者误点失效仓库或被恶意接管的域名。核实正版的标准流程是：比对项目开源仓库发布者与历史提交连续性、下载后本地计算 SHA-256 哈希与 Release 校验值核对、Android 核对 APK 签名指纹、绝对避开搜索引擎竞价广告中的所谓「中文汉化增强版」。"
+  - q: "订阅链接导入后提示成功，但节点列表为空（或 200 OK 零字节）是什么原因？"
+    a: "最常见的原因有三类：第一，机场仅支持专属客户端而不输出通用格式，或订阅链接未附带对应客户端参数导致面板返回空文本；第二，机场后台对请求 User-Agent（UA）做了白名单限制，旧客户端或错误工具 UA 被直接拦截；第三，本地网络劫持、代理未彻底关闭导致拉取订阅时陷入回环超时。可参照站内「订阅导入与 200 OK 空内容排查」指南逐项定位。"
+  - q: "为什么所有节点在客户端测速都显示 Timeout（超时），但官网面板显示机场一切正常？"
+    a: "排除本地完全断网后，首要检查项目是电脑或手机的系统时钟。VLESS（尤其是 TLS/Reality）与 Trojan 等现代协议依赖精确的时间戳进行安全握手验证，若本地系统时间与标准网络时间偏差超过数十秒，握手会直接被服务端拒绝并表现为全节点超时。其次需排查是否存在多个代理客户端抢占本地端口（如 7890/7897/10808）或旧内核不识别新协议的问题。"
+nextPillarLinks:
+  - title: "专属客户端 vs 通用订阅机场深度对照"
+    href: "/compare/dedicated-client-vs-universal-sub/"
+    category: "横向对比"
+    reason: "通过飞猫云、隐形人、梯子云与光速云四个样本看清订阅锁死边界"
+  - title: "AI 与流媒体场景兼容及分流验证"
+    href: "/ai-media/"
+    category: "核心专题 06"
+    reason: "客户端配置就绪后，按节点地区与检测规则解决 ChatGPT、Gemini 与 YouTube 送中"
+  - title: "系统代理、TUN 虚拟网卡与 DNS 回退"
+    href: "/guides/articles/tun-vs-system-proxy-dns/"
+    category: "深度实操"
+    reason: "解决终端命令行、WSL2、Docker 与游戏不走代理或局域网异常"
+  - title: "订阅失败与故障排查决策树"
+    href: "/troubleshooting/subscription-failed/"
+    category: "故障排查"
+    reason: "按症状定位 200 OK 空返回、TLS 证书异常与端口冲突"
+---
+
+选择并正确配置代理客户端，是打通跨境网络体验的「最后一公里」。在日常咨询与排障中，大量用户遇到连不上、速度慢、ChatGPT 报错或电脑部分软件不走代理的问题，根源并不完全在机场线路本身，而在于**选错了与套餐形态不匹配的客户端、装错了 CPU 架构安装包、沿用了早已淘汰的旧内核，或者直接把系统网络交给了来源不明的二次打包软件**。
+
+本专题作为站内工具选择与操作枢纽，系统拆解代理客户端的底层工作原理、机场订阅阵营的硬性分界、六大操作系统（Windows、macOS、Android、iOS/iPadOS、Linux、OpenWrt）的完整兼容矩阵、核心引擎（Mihomo vs sing-box vs Xray）与苹果全家桶差异、主流协议支持边界、官方来源安全核验准则，以及从订阅导入到异常排查的标准操作链路。
+
+---
+
+## 一、代理客户端的本质：外壳、内核与系统流量接管机制
+
+初学者常把「代理客户端」和「机场服务」混为一谈，其实两者属于完全解耦的两层组件：**机场提供的是远端中转入口与海外落地服务器资源（以及承载节点参数的订阅链接或专属登录账号）；而客户端是你安装在本地电脑、手机或路由器上的流量调度程序**。同一个机场节点池，换用不同内核或不同接管模式的客户端，在协议兼容性、终端软件穿透力、耗电与安全性上会产生截然不同的结果。
+
+### 1. 图形界面（GUI Shell）与底层代理内核（Core）的分离
+
+绝大多数现代开源桌面与移动客户端，本质上都是「图形交互外壳 + 底层网络转发内核」的组合架构：
+
+- **图形界面外壳（GUI Shell）**：负责提供可视化的节点列表、订阅定时拉取、延迟测速按钮、策略组切换面板以及规则编辑器。例如 `Clash Verge Rev`、`FlClash`、`Clash Nyanpasu` 使用不同的前端框架（如 Tauri、Flutter 等）构建操作界面，但它们真正处理数据包加解密与分流匹配的引擎，都是同一个底层内核。
+- **底层转发内核（Core Engine）**：负责监听本地端口或虚拟网卡、解析分流规则（Domain/GeoSite/GeoIP/Process）、执行传输层握手（TLS/Reality/QUIC）并把加密流量发往机场入口。目前开源社区的三大底层核心分别是 **Mihomo（原 Clash.Meta）**、**sing-box** 与 **Xray-core**；而在 iOS 商业生态中，`Shadowrocket`、`Quantumult X` 和 `Surge` 则各自维护闭源的自研网络引擎。
+
+理解「壳与核分离」有两个直接的实操价值：第一，当机场启用了较新的传输协议（例如 `VLESS-Reality`、`Hysteria 2` 或 `AnyTLS`）时，决定你能不能连上的不是软件界面有多好看，而是**底层内核版本是否支持该协议**；第二，遇到疑难断流时，查看日志需要区分是前端订阅解析失败，还是底层内核报出的 TLS 握手超时或路由死循环。
+
+### 2. 系统代理（System Proxy）与虚拟网卡（TUN / VpnService）的接管边界
+
+安装好客户端并点击连接后，软件究竟如何把你的网络请求拦截并送进代理隧道？主要依靠两种截然不同的工作模式：
+
+| 对比维度 | 系统代理模式（System Proxy） | 虚拟网卡 / 透明代理模式（TUN / VpnService / NetworkExtension） |
+| :--- | :--- | :--- |
+| **实现机制** | 在操作系统中写入一个本地 HTTP/SOCKS5 监听地址（常见如 `127.0.0.1:7897` 或 `10808`），告知应用程序主动把流量发往该端口 | 在系统网络栈中注册一张虚拟网卡（Windows 常见 `wintun`，macOS/Linux 为 `utun`/`tun`，Android 为 `VpnService`，iOS 为 `NetworkExtension`） |
+| **流量接管范围** | 仅对「遵守系统代理设置」的软件有效，主要是主流浏览器与部分桌面常规软件 | **全量接管三层 IP 数据包（TCP/UDP/ICMP）**，几乎所有不走特定底层绕过的程序都会经过内核规则引擎 |
+| **典型盲区与短板** | 终端 CLI（Git、curl、npm、Claude Code CLI）、Docker、WSL2、多数游戏与部分桌面框架程序默认无视系统代理，导致浏览器能上但终端超时 | 需要更高的系统权限（Windows 需服务模式或管理员权限，Linux 需 `CAP_NET_ADMIN`）；若规则配置不当易与公司内网 VPN、Docker 网桥或局域网地址产生路由冲突 |
+| **适用建议** | 仅日常网页浏览与轻量办公时默认首选，资源开销最低、最不易干扰本地局域网开发容器 | 需要终端工具、游戏联机、UWP 应用或全设备稳定分流时按需开启；使用前需了解回退方法 |
+
+关于两种模式在 DNS 泄漏、`Fake-IP` 与 `Redir-Host` 解析以及 WSL2/Docker 兼容上的深入实操，可以延伸阅读 [系统代理与 TUN 虚拟网卡、DNS 与安全回退指南](/guides/articles/tun-vs-system-proxy-dns/)。
+
+---
+
+## 二、客户端与机场订阅的关系：通用订阅 vs 仅限专属客户端阵营
+
+在花钱购买机场或下载客户端之前，必须先核对服务商的**客户端分发模式**。站内收录的 31 家机场品牌在接入形态上已经明显分化为「支持第三方通用订阅」与「仅限官方专属客户端」两大阵营，这直接决定了你在软件层面的自由度上限。更多品牌个案对照可参阅 [专属客户端 vs 通用订阅机场深度对照](/compare/dedicated-client-vs-universal-sub/)。
+
+### 1. 两大阵营与双兼容模式对比
+
+- **阵营 A：仅限官方专属客户端（封闭生态）**
+  - **站内代表品牌**：[飞猫云](/brands/feimao/)、[隐形人](/brands/yinxingren/)、[SOGO 云](/brands/sogo/)、[闪跃](/brands/shanyue/)、[全球云](/brands/quanqiu/)，以及归档资料提示自 2026 年 10 月起转向专属客户端登录即用的 [Firefly（萤火虫）](/brands/firefly/)、[灵猫网络](/brands/lingmao/) 与 [无忧链接](/brands/wuyou/)（注：无忧链接与 SOGO 云在档案内部还存在细节冲突，如无忧链接表内另有「订阅无需转换」旧描述、SOGO 云文案提及软路由自研端但安装包形式待核实，下单前须向客服确认当期状态）。
+  - **特点与代价**：优点是真正实现「下载 App、登录账号密码就能连」，完全免去新手理解 YAML、Base64、策略组和分流规则的心智负担；但代价极为明确——**不提供第三方订阅链接**，这意味着你彻底无法使用 `Clash Verge Rev`、`v2rayN`、`Shadowrocket`、`Stash`、`Quantumult X`，也无法将节点放进 `OpenWrt` 软路由或 Apple TV 中，更无法通过自定义前置规则精准解决香港 ChatGPT 受限或 YouTube 送中问题。此外，闭源专属软件的内部网络请求逻辑无法像开源项目那样接受社区代码审计。
+
+- **阵营 B：支持第三方通用订阅（或双端兼容开放生态）**
+  - **站内代表品牌**：[光速云](/brands/guangsuyun/)、[梯子云](/brands/tiziyun/)、[极连云](/brands/jilian/)、[光年梯](/brands/guangnian/)、[大佬云](/brands/dalaoyun/)、[闪电鼠](/brands/shandianshu/)、[神行加速](/brands/shenxing/)、[云界线](/brands/yunjiexian/)、[榴莲云](/brands/liulianyun/)、[环球梯](/brands/huanqiuti/) 均在资料中明确支持自研客户端与第三方订阅双路线；[一翻云](/brands/yifan/)、[可信云](/brands/kexin/)、[星岛梦](/brands/xingdaomeng/)、[唯兔云](/brands/weitu/) 则明确兼容第三方通用客户端（另如暮光加速、微风网络、二猫云、宇宙云、灵动云等部分品牌目前 `supportsSubscription` 在台账中标注为 `pending` 待核实，购前建议按单月起步核对面板是否提供订阅导入入口）。
+  - **特点与优势**：提供标准订阅 URL（或节点链接），允许你在任意支持对应协议的开源或第三方客户端上运行。无论你是想在 Windows 用 `Clash Verge Rev` 写独立 AI 分流脚本，还是在 iPhone 用 `Shadowrocket`、在软路由部署 `OpenClash` 或 `HomeProxy`，通用订阅都能无缝承接；而像光速云和梯子云这种「既提供官方自研端保底、又开放第三方订阅」的双兼容模式，则能同时兼顾新手零门槛起步与老手后续进阶迁移的需求。
+
+> **选型硬规则**：只要你的设备清单中包含 **OpenWrt 软路由、Linux 无头服务器、Apple TV、或者重度依赖 ChatGPT/Claude/Gemini 独立域名分流**，请在买机场前直接排除所有「仅限专属客户端」的品牌；如果你完全排斥一切配置步骤、只在常规电脑或手机轻度浏览网页，才考虑纯专属端或双端兼容品牌。
+
+---
+
+## 三、六大操作系统 × 代理客户端完整兼容矩阵
+
+以下总览矩阵严格依据站内 `PROXY_CLIENTS` 客户端安全台账整理，覆盖 Windows、macOS、Android、iOS/iPadOS、Linux 与 OpenWrt 六大运行环境。所有客户端的外部官方下载地址当前均标记为「官方地址待联网核实（`pending_verification`）」，实际获取请遵照本文第六章的官方来源核实准则。
+
+| 客户端名称 | 适用平台 | 底层核心引擎 | 收费模式 | 核心定位与架构 / 安全红线提醒 |
+| :--- | :--- | :--- | :--- | :--- |
+| **Clash Verge Rev** | Windows / macOS / Linux | Mihomo (Clash.Meta) | 免费开源 | 跨平台桌面规则分流主力，macOS 须区分 Intel/Apple Silicon，Linux 提供 DEB/RPM/AppImage |
+| **v2rayN** | Windows / macOS / Linux | Xray / sing-box 多核心 | 免费开源 | 经典协议与多核心切换工具，下载需区分是否含核心依赖包 |
+| **FlClash** | Windows / Android / macOS / Linux | Mihomo | 免费开源 | 四大系统界面高度统一，适合轻量跨端体验，需核对 CPU 架构 |
+| **Clash Nyanpasu** | Windows / macOS / Linux | 多内核（Mihomo 等） | 免费开源 | 面向进阶桌面端，支持多内核版本切换与配置增强 |
+| **Hiddify** | Windows / Android / iOS/iPadOS / macOS / Linux | sing-box | 免费开源 | 自动识别多格式订阅、自动选点，新手友好；须核对开源端与商店版一致性 |
+| **Karing** | Windows / Android / iOS/iPadOS / macOS / Linux | sing-box | 待核实 | 面向新手的跨端配置方案，iOS 主走 App Store 分发，其他平台渠道待补全核实 |
+| **Clash Mi** | Windows / Android / iOS/iPadOS / macOS / Linux | Mihomo | 待核实 | 统一 Clash YAML 规则体系的多端工具，iOS 端在 App Store 分发 |
+| **Mihomo Party** | Windows（资料台账主记） | Mihomo | 免费开源 | **维护风险提示：必须单独核实当前项目活跃度，不可未经确认即标为首选推荐** |
+| **v2rayNG** | Android | Xray | 免费开源 | 安卓经典轻量主力；安装 APK 前必须核对发布者签名，警惕第三方 repack 包 |
+| **Clash Meta for Android** | Android | Mihomo (Clash.Meta) | 免费开源 | 安卓端 Clash/Mihomo 规则生态标准客户端，须匹配 ARM64/ARMv7 架构 |
+| **NekoBox for Android** | Android | sing-box | 免费开源 | **高危安全警告：原项目维护资源有限，严禁下载 Google Play 已被第三方控制的同名应用** |
+| **sing-box 官方客户端 (SFA/SFI/SFM)** | Android / iOS/iPadOS / macOS / Linux | sing-box 原生 | 免费开源 | 高性能原生转发，**不直接兼容 Clash YAML**，需原生 JSON 或订阅转换 |
+| **Shadowrocket（小火箭）** | iOS/iPadOS | 自研多协议内核 | 外区付费应用 | 苹果移动端泛用性极强，实时售价与上架区以所在区 App Store 为准 |
+| **Stash** | iOS/iPadOS | Clash 规则兼容引擎 | 外区付费应用 | 原生兼容 Clash 规则、策略组与配置覆写，适合桌面 Clash 用户迁移 |
+| **Quantumult X（圈 X）** | iOS/iPadOS | 自定义规则与脚本引擎 | 外区付费应用 | 强于 HTTP 请求重写与 JS 脚本，仅提供 Clash 订阅时常需额外规则适配 |
+| **Surge 5 / Surge Mac** | iOS/iPadOS / macOS | Surge 高级网络引擎 | 免费/内购授权 | 深度抓包、模块覆写与专业调试，价格门槛较高 |
+| **v2rayA** | Linux / OpenWrt | v2ray-core / Xray | 免费开源 | Web 面板 + 透明代理，适合无桌面服务器与网关；开启前须了解并备份 `iptables`/`nftables` |
+| **OpenClash** | OpenWrt | Mihomo | 免费开源 | 软路由 Clash 规则全能插件，安装前须核对固件版本、CPU 架构与 `fw3`/`fw4` 防火墙 |
+| **PassWall2** | OpenWrt | Xray / sing-box | 免费开源 | 多核心节点管理与透明代理，低闪存硬路由需检查 `/overlay` 空间与依赖包完整性 |
+| **Nikki** | OpenWrt | Mihomo | 免费开源 | **硬性版本红线：仅支持 OpenWrt 24.10 及以上版本，旧版固件完全不兼容** |
+| **HomeProxy** | OpenWrt | sing-box | 免费开源 | 现代 OpenWrt `nftables` (`fw4`) 架构原生插件，需确认软件源 sing-box 内核版本 |
+
+### 3.1 Windows 平台（x64 与 ARM64 架构分界）
+
+在 Windows 10 与 Windows 11 上，选型核心非常清晰：日常依赖机场 Clash 订阅与分流规则的用户首选 **Clash Verge Rev**（或轻量统一的 **FlClash**）；需要频繁导入单条 `vless://` / `hysteria2://` 节点或自由切换 Xray 与 sing-box 内核的用户则选 **v2rayN**。
+
+操作时首先需避免「装错架构」与「下错精简包」两类基础失误：
+1. **CPU 架构核对**：在 PowerShell 运行 `$env:PROCESSOR_ARCHITECTURE`。绝大多数 Intel/AMD 台式机与笔记本返回 `AMD64`，应选择带 `x64`、`amd64` 或 `win64` 标识的安装包；仅高通骁龙芯片的 Windows 笔记本返回 `ARM64`，须匹配 `arm64` 构建包。通常无需下载老旧的 32 位 `x86` 版本。
+2. **核心依赖完整性**：下载 `v2rayN` 时务必留意发布说明里是否标注「包含核心依赖包（With-Core）」，新手若下载了仅含主界面的精简包，启动代理时会因缺少 `xray.exe` 或 `sing-box.exe` 而无法连接。
+3. **服务模式与 TUN 权限**：使用 `Clash Verge Rev` 开启 TUN 模式接管终端或 WSL2 流量时，需要先在设置中安装并启动内置系统服务（Service Mode），且切勿在未核对文件哈希前随意关闭 Windows Defender。更多细节与 PowerShell 校验命令见 [Windows 代理客户端全矩阵选型与安装指南](/guides/articles/windows-clients-guide/)。
+
+### 3.2 macOS 平台（严格区分 Intel 与 Apple Silicon）
+
+macOS 的难点不在于客户端少，而在于芯片硬件代际切换与系统安全机制（Gatekeeper）的放行规范：
+
+- **Apple Silicon（M1/M2/M3/M4 系列） vs Intel 芯片**：在终端执行 `uname -m` 或查看「关于本机」。输出 `arm64` 的 M 系列芯片 Mac 必须选择 `arm64` 或 `aarch64` 安装包；输出 `x86_64` 的老款 Intel Mac 则选择 `x64` / `x86_64` 安装包。**强烈建议不要依赖 Rosetta 2 去转译运行 Intel 版的代理客户端**，因为开启 TUN 虚拟网卡涉及系统网络扩展接口，原生架构在内存占用、唤醒稳定性和网卡驱动兼容上明显更可靠。
+- **App Store 分发 vs 独立 `.dmg` 安装包**：如果不想处理开发签名拦截，可以直接通过外区 App Store 安装 `Karing`、`Clash Mi`、`Hiddify`、`SFM` 或 `Surge Mac`；若使用功能更完整的开源桌面端 `Clash Verge Rev`、`v2rayN` 或 `FlClash`，则需获取官方 `.dmg` 安装包。
+- **Gatekeeper 安全放行原则**：部分开源构建版首次打开时可能提示「无法验证开发者」或因隔离标记（Quarantine）提示「已损坏」。**前提是你已通过官方渠道核对过 SHA-256 哈希**，方可在「系统设置 — 隐私与安全性」点击「仍要打开」，或仅针对已拖入 `/Applications` 的单个应用执行 `xattr -cr` 移除隔离属性，**切勿为了省事关闭系统全局完整性保护（SIP）**。详尽步骤见 [iOS/iPadOS 与 macOS 苹果生态客户端指南](/guides/articles/ios-macos-clients-guide/)。
+
+### 3.3 Android 平台（ABI 架构识别与 NekoBox Google Play 高危警告）
+
+Android 端所有合规代理软件均调用系统 `VpnService` 创建本地虚拟网卡接管设备流量（无需 Root），但碎片化的手机处理器架构、国产系统杀后台机制以及应用商店仿冒问题构成了三大门槛：
+
+- **ABI 架构选包**：通过 `getprop ro.product.cpu.abi` 或手机上市年份识别。过去七年间发布的绝大部分主流安卓机（骁龙、天玑、麒麟、Exynos）均为 64 位 **`arm64-v8a`**，体积小且效率高；仅极老旧 32 位百元机或旧电视盒子使用 **`armeabi-v7a`**；x86 架构平板或电脑安卓模拟器（如 WSA/MuMu）才选 **`x86_64`**；实在无法判断时以 `universal` 通用多架构包兜底。
+- **主力客户端分工**：追求完全兼容机场 Clash 规则与直观分流体验，首选 **Clash Meta for Android** 或界面更现代的 **FlClash**；偏爱轻量单链接导入、快速切换节点或使用 Base64 订阅，首选 **v2rayNG**；希望跨设备统一操作或自动兼容多种协议订阅，可看 **Hiddify**、**Karing** 或官方原生 **SFA**。
+- **NekoBox for Android 安全红线警示**：在站内客户端安全台账中，针对 `NekoBox for Android` 记录了明确的双重提醒——一方面该项目维护资源有限，另一方面**官方资料特别警告切勿下载 Google Play 上已被第三方控制的同名应用**。同理，中文搜索结果里常见各类「v2rayNG 加速修改版」「Clash 免费节点内置版」APK，这些二次打包（repack）包极易植入劫持模块并窃取你的机场订阅链接。安装前务必核对官方发布者签名指纹。
+- **国产系统后台保活与 `VpnService` 互斥**：在 MIUI/HyperOS、ColorOS、OriginOS、HarmonyOS 上使用代理，必须把客户端设为「无限制后台耗电」「允许自启动」并在多任务界面卡片加锁，防止锁屏数分钟后隧道被省电策略强杀；同时 Android 同一时刻只允许一个应用占用 `VpnService`，切勿同时开启公司 VPN、广告过滤本地 VPN 与代理客户端。完整指南见 [Android 客户端选型、APK 架构识别与仿冒风险警示](/guides/articles/android-clients-guide/)。
+
+### 3.4 iOS / iPadOS 平台（外区付费地区差异与 Apple ID 防锁机准则）
+
+受限于 iOS 严格的应用签名与沙盒策略，中国大陆区 App Store 下架了绝大多数主流代理工具，用户必须准备合规外区（如美区、港区、日区、台区）Apple ID 才能在商店中获取。
+
+- **付费价格实时核实原则**：`Shadowrocket`、`Stash`、`Quantumult X` 均属于外区 App Store 买断制付费软件，`Surge 5` 属于免费下载叠加高额内购/授权订阅。**站内严格禁止写死历史美元价格**（因为不同地区商店汇率、税率及开发者调价策略随时变动），实际售价与购买条款请以你登录所在地区 App Store 商店页实时显示为准。
+- **零成本门槛替代路径**：若暂时不便购入外区付费应用，可考察在合规外区 App Store 上架的 **Karing**、**Clash Mi**、**Hiddify** 或原生 **SFI（sing-box for iOS）**，它们同样基于现代 `Mihomo` 或 `sing-box` 引擎工作。
+- **防锁机安全铁律**：使用外区 Apple ID 下载代理软件时，**只允许在「App Store」应用内右上角切换登录，绝对禁止在手机「系统设置顶部」登录他人的 iCloud 账号！** 一旦将不明来源的共享账号登录到系统 iCloud，对方可瞬间通过「查找我的 iPhone」远程锁定设备。最佳实践是自行注册专属外区账号并通过正规渠道礼品卡充值购买，确保后续应用更新不受制于他人。详细比较见 [iOS/iPadOS 与 macOS 苹果生态客户端指南](/guides/articles/ios-macos-clients-guide/)。
+
+### 3.5 Linux 平台（DEB/RPM/AppImage 与无头主机 v2rayA）
+
+Linux 生态需要按「带图形界面的桌面工作站」和「无显示器终端服务器 / 家庭旁路由主机」两类场景区分部署：
+
+- **桌面端三种安装包格式**：`Clash Verge Rev`、`v2rayN`、`FlClash`、`Clash Nyanpasu`、`Hiddify` 等桌面工具通常提供三种构建产物：
+  1. **`.deb`**：适用 Debian、Ubuntu、Linux Mint、Pop!_OS 等 APT 发行版，便于包管理器追踪卸载与注册桌面图标。
+  2. **`.rpm`**：适用 Fedora、RHEL、AlmaLinux、Rocky Linux、openSUSE 等 DNF/RPM 发行版。
+  3. **`.AppImage`**：适用 Arch Linux 或不愿改动系统库依赖的便携运行场景，运行前须执行 `chmod +x`，在较新 Ubuntu（如 22.04/24.04）上若遇 FUSE 加载报错，需按需安装 `libfuse2`。
+  - **Linux 权限最小化提醒**：桌面客户端开启 TUN 虚拟网卡模式时，只需为底层内核二进制文件授予 `CAP_NET_ADMIN` 能力或启用配套 systemd 服务即可，**切勿图省事长期使用 `sudo` 直接以 root 权限拉起整个 Electron/Tauri 图形界面**，以免浏览器内核渲染漏洞被提权利用。
+- **无桌面主机与透明代理：`v2rayA`**：对于 Ubuntu Server、Debian 软路由容器或树莓派，驱动 `v2ray-core`/`Xray` 的 **v2rayA** 提供了非常直观的 Web 管理面板（默认 `2017` 端口），可在局域网浏览器内完成订阅导入与透明代理控制。**但台账明确提示：在 Linux 主机开启 v2rayA 透明代理前，必须先搞清系统底层防火墙架构（`iptables` 还是 `nftables`）并完整备份原有网络与防火墙规则**，防止规则下发错误导致远程 SSH 连接当场断联锁死。实操命令见 [Linux 与 OpenWrt 软路由客户端实战指南](/guides/articles/linux-openwrt-clients-guide/)。
+
+### 3.6 OpenWrt 软路由平台（含 Nikki 24.10+ 硬性版本红线）
+
+将代理运行在 OpenWrt 主路由或旁路由上，可让客厅电视（Apple TV / Android TV）、游戏主机与全屋设备无感分流。但路由器同时承担全屋网关职责，安装任何代理插件前必须先在 SSH 终端完成四项硬件与系统自检：固件发行版本号（`cat /etc/openwrt_release`）、CPU 指令集架构（`x86_64`、`aarch64`、`mipsel` 等）、`/overlay` 剩余闪存空间（`df -h /overlay`），以及防火墙后端是旧版 **`fw3`（iptables）** 还是新版 **`fw4`（nftables）**。
+
+OpenWrt 四大主流插件的分工与红线如下：
+1. **OpenClash（Mihomo 内核）**：功能最为庞大，支持策略组、配置覆写、规则集与兼容 `fw3`/`fw4`。但对内存与 `/overlay` 闪存占用较高（加上内核与 GeoIP 数据库往往需要 15MB–30MB 以上），低闪存硬路由极易因空间耗尽导致固件只读锁死。
+2. **PassWall2（Xray / sing-box 双核心）**：节点与分流列表直观，支持双核心按节点或场景切换，资源开销较 OpenClash 更克制；部署到低闪存设备前同样必须核对剩余空间与内核依赖包是否齐全。
+3. **Nikki（Mihomo 轻量化插件）**：现代化的 Mihomo 透明代理管理方案，**存在不可妥协的硬性系统要求：必须运行在 OpenWrt 24.10 及以上版本固件上**。任何 OpenWrt 23.05、22.03 或更早的第三方旧固件均完全不兼容，强行安装会因内核组件、nftables 规则及软件源依赖缺失而直接失效甚至断网。
+4. **HomeProxy（sing-box 原生插件）**：专为现代 OpenWrt `fw4`（`nftables`）环境设计的 sing-box 路由管理界面，结构简洁、性能出色，安装前需核对软件源中 `sing-box` 核心包版本匹配度。
+
+**软路由铁律**：同一台 OpenWrt 设备同一时刻**只允许启用一个**代理插件（例如开 OpenClash 就必须彻底停止并禁用 PassWall2），防止 DNS 53 端口劫持与防火墙转发链互掐；动手前务必在 LuCI 导出系统配置备份，首次测试时先仅代理单台测试设备 IP，确认正常后再放开全屋局域网。完整排雷步骤见 [Linux 与 OpenWrt 软路由客户端实战指南](/guides/articles/linux-openwrt-clients-guide/)。
+
+---
+
+## 四、主力客户端深度入口与苹果全家桶、双核生态精解
+
+了解平台分布之后，我们进一步下钻到具体主力软件的技术选型与避坑细节，帮助你从众多名字相似的工具中选出最顺手的一套组合。
+
+### 1. Clash Verge Rev 深度解析与 Mihomo Party 维护状态警示
+
+在原版 Clash 生态退出历史舞台后，[Clash Verge Rev](/clients/clash-verge-rev/) 承接了最广泛的桌面端规则代理需求。它基于 `Mihomo` 内核构建，相比早期仅能简单切换节点的工具，其核心竞争力体现在三处：
+
+- **无损配置覆写（Merge & Script）**：机场每次更新订阅都会覆盖原始节点与规则列表。如果你手动在 YAML 文件里修改了 AI 分流策略组，下次更新就会归零。Clash Verge Rev 允许你编写独立的 YAML Merge 合并规则或 JavaScript 覆写脚本，在订阅每次拉取完成后自动前置注入 `ChatGPT`、`Claude`、`Gemini` 或 `YouTube` 专用策略组，一劳永逸解决规则被重置的痛点。
+- **集成化 TUN 服务模式**：无需自己手写复杂的系统网卡路由脚本，通过图形化授权安装轻量系统服务后即可一键切换系统代理与 TUN 全局虚拟网卡接管，轻松穿透终端工具与容器环境。
+- **跨三端统一操作**：Windows、macOS（区分 Intel 与 Apple Silicon）与 Linux（DEB/RPM/AppImage）界面逻辑保持高度一致，降低多电脑办公用户的切换摩擦。
+
+> **Mihomo Party 维护状态风险提醒**：在许多 2024–2025 年间的历史教程和视频攻略中，`Mihomo Party` 曾因功能丰富而被频繁推荐。但开源软件的维护活跃度并不是一成不变的。站内客户端台账对 `Mihomo Party` 明确发出了风险提示：**当前必须单独核实其开源仓库的近期提交频率、安全补丁响应以及发行版签名状态，绝不可在未经独立核查的情况下，仅凭过往教程记忆就将其标为首选推荐客户端**。对于追求长期安全更新的桌面端新用户，建议优先考察当前生态活跃度更清晰的 `Clash Verge Rev` 或 `FlClash`（同属 [Clash Meta / Mihomo 生态](/clients/clash-meta/)）。
+
+### 2. v2rayN 与 v2rayNG 双核生态：协议兼容性与多核调度
+
+如果说 Clash 系客户端是以「订阅配置文件 + 复杂规则树」为中心，那么桌面端的 [v2rayN](/clients/v2rayn/) 与安卓端的 `v2rayNG` 则是以「**单节点链接与多协议底层核心**」为中心。
+
+- **为什么许多进阶用户电脑里同时备着 v2rayN？** 当机场刚刚上线一项非常前沿的协议（例如早期刚普及时的 `VLESS-Reality`、某些特殊传输参数组合或新版 `Hysteria 2`），或者当你手头有自建服务器、单条分享链接（`vless://`、`vmess://`、`trojan://`、`ss://`、`hy2://`）需要零配置文件快速测试时，`v2rayN` 只需复制链接按下 `Ctrl+V` 即可入库运行，不需要先去写一份复杂的 Clash YAML。
+- **Xray 与 sing-box 双核心切换**：现代版 `v2rayN` 早已不再局限于早年的 `v2ray-core`，而是支持在核心设置里按协议或全局调度 `Xray` 与 `sing-box` 两大主流引擎。这样即使面对同一机场内混杂的不同协议节点，也能分别匹配兼容性最好的底层核心运行。
+- **Android 端 v2rayNG 与安全边界**：`v2rayNG` 是 Android 平台上资源占用极低、稳定性极高的经典 Xray 工具，配合「绕过局域网及中国大陆地址」路由模式即可满足绝大多数日常需求。需要再次强调的是：**下载 v2rayNG 的 APK 时，必须严格核对 GitHub 官方开源项目的发布者签名指纹**，严防下载到名称相近的第三方二次打包（repack）恶意包。
+
+### 3. 苹果全家桶差异对照：Shadowrocket vs Stash vs Quantumult X vs Surge 5
+
+iOS 与 iPadOS 上四款知名度最高的付费代理工具经常让新手纠结「到底买哪一个」。其实四者在定位上几乎没有直接重叠，各自对应了完全不同的使用习惯与预算层级（详参 [Shadowrocket 与苹果客户端专题](/clients/shadowrocket/)）：
+
+| 苹果客户端 | 核心引擎与配置文件范式 | 最大强项与最适合人群 | 导入机场订阅的真实门槛 | 付费形态提示 |
+| :--- | :--- | :--- | :--- | :--- |
+| **Shadowrocket（小火箭）** | 自研多协议内核；兼容单链、通用订阅与基础规则模块 | **兼容性之王**：支持几乎所有主流协议，几乎 100% 开放订阅机场面板都直接内置一键导入按钮；最适合新手与只求稳定连接的用户 | **极低**：复制订阅 URL 添加即可，内置基础分流配置 | 外区 App Store 买断制（以所在区实时标价为准） |
+| **Stash** | Clash 规则兼容引擎；原生读取 **Clash YAML** | **跨端规则无缝迁移**：支持远程规则集（Rule Providers）与配置覆写（Overrides）；最适合电脑端已经在用 Clash Verge Rev 的用户 | **低**：直接导入机场标准的 Clash 订阅地址即可复用策略组 | 外区 App Store 买断制（以所在区实时标价为准） |
+| **Quantumult X（圈 X）** | 自定义规则与脚本引擎（QX 专属配置格式） | **HTTP 重写与 JS 脚本极客神器**：适合深度定制去广告规则、MITM 解密与自动化任务 | **中高**：若机场后台仅提供 Clash 格式订阅，直接粘贴常无法识别，**通常需要借助订阅转换或适配模板** | 外区 App Store 买断制（以所在区实时标价为准） |
+| **Surge 5 / Surge Mac** | Surge 高级网络引擎；模块（Module）与抓包体系 | **专业开发者与企业级调试**：全量 HTTPS 请求精细抓包、断点重写、Ponte 内网穿透组网与极高稳定性 | **中**：支持策略组与托管配置，但高阶模块需一定网络基础 | 外区免费下载 + 高额内购或订阅授权（价格门槛高） |
+
+**苹果端快速决策口诀**：只想省心连网不折腾规则选 **Shadowrocket**；电脑用 Clash 想把覆写分流带到手机上选 **Stash**；专门为了跑圈 X 圈内重写脚本选 **Quantumult X**；自己是网络工程师或需要长期深度抓包调试才考虑 **Surge**；暂时不想在外区花钱买断则先试 **Karing**、**Clash Mi** 或 **Hiddify**。
+
+### 4. Mihomo 与 sing-box 内核原理深度对比（SFA/SFI/SFM vs Hiddify/Karing）
+
+在底层的技术演进上，2026 年的开源代理圈主要围绕 [Mihomo（原 Clash.Meta）](/clients/mihomo/) 与 [sing-box](/clients/sing-box/) 两大现代核心展开。两者的设计哲学截然不同，也直接影响了基于它们开发的上层客户端体验：
+
+| 对比维度 | Mihomo (Clash.Meta) 内核生态 | sing-box 内核生态 |
+| :--- | :--- | :--- |
+| **原生配置格式** | **YAML**（延续 Clash 语法，人类可读性强，注释友好） | **JSON**（结构严谨，适合程序自动化生成与精确序列化） |
+| **配置架构逻辑** | 以 `proxies` + `proxy-groups` + `rules` 为主轴，配合 `rule-providers` 与 `sniffer` 嗅探 | 采用高度解耦的 `inbounds`（入站）、`outbounds`（出站）与 `route`（统一路由管线）模型，DNS 亦作为独立出站模块参与路由 |
+| **机场生态直连度** | **极高**：当前绝大多数支持通用订阅的机场后台默认下发的就是 Clash YAML 格式 | **分化**：部分机场尚未单独提供原生 sing-box JSON 订阅下发，需依赖客户端内置转换或第三方转换器 |
+| **生态代表客户端** | `Clash Verge Rev`、`FlClash`、`Clash Meta for Android`、`Clash Mi`、`OpenClash`、`Nikki` | 官方原生：`SFA` (Android) / `SFI` (iOS) / `SFM` (macOS)；跨端适配：`Hiddify`、`Karing`、`NekoBox`、`HomeProxy` |
+
+这里有一个新手极易踩中的坑：**同样叫 sing-box 内核，官方客户端（SFA/SFI/SFM）和第三方封装客户端（Hiddify/Karing）的上手难度完全是两个世界**：
+
+- **sing-box 官方客户端（SFA / SFI / SFM）**：定位为「纯净原生引擎前端」。它极其轻量、转发效率高且对新协议支持极快，但**官方前端坚决只认原生 sing-box JSON 配置文件，不直接兼容机场下发的 Clash YAML 订阅**。如果你拿着只提供 Clash 链接或 Base64 链接的机场订阅直接往 SFA/SFI 里填，会当场解析报错；你必须确认机场单独提供了 `sing-box` 专用配置下发，或者自己维护本地转换规则。
+- **Hiddify 与 Karing（基于 sing-box 的友好封装）**：这两款跨平台工具虽然底层同样运行 `sing-box` 内核，但它们在应用层内置了**多订阅格式自动探测与转换引擎**。不管机场下发的是 Base64 节点合集、Clash YAML 还是 sing-box 配置，Hiddify 与 Karing 都能自动解析并转换成底层 sing-box 可执行的 JSON 路由，同时提供图形化的自动选点、分流向导与极简开关。因此对于想体验 sing-box 高性能又不想手写 JSON 的普通用户，**Hiddify 与 Karing 才是正确的入门入口**，而不是直接硬上 SFA/SFI/SFM。
+
+---
+
+## 五、主流代理协议 × 客户端支持矩阵
+
+机场服务端部署的传输协议决定了抗干扰能力与弱网穿透力，而客户端内核则决定了你能不能把这些节点正常跑起来。结合站内 31 家品牌档案中明确披露的协议分布（例如 [一翻云](/brands/yifan/) 提供 `Hysteria 2` + `VLESS-Reality` + `Shadowsocks` 三协议可选，[光速云](/brands/guangsuyun/) 归档同时记录了 `Shadowsocks` 与 `Vless` + `AnyTLS` 快照，[星岛梦](/brands/xingdaomeng/) 与 [唯兔云](/brands/weitu/) 主打 `Trojan`），整理协议与客户端支持对照如下：
+
+| 传输协议 | 技术特点与适用网络场景 | Mihomo 系 (`Clash Verge Rev` / `FlClash` / `Clash Meta` / `OpenClash` / `Nikki`) | sing-box 系 (`SFA/SFI/SFM` / `Hiddify` / `Karing` / `HomeProxy`) | Xray 系 (`v2rayN` / `v2rayNG` / `PassWall2`) | 苹果系 (`Shadowrocket` / `Stash` / `Surge`) | 已停更原版 Clash Core |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **VLESS-Reality** | 无自签证书特征、防主动探测、抗阻断能力强 | **支持**（需较新内核版本） | **支持** | **原生支持** | Shadowrocket/Stash 支持；Surge 需核实版本模块 | **不支持** |
+| **Hysteria 2** | 基于 QUIC (UDP) 拥塞控制，弱网/高丢包环境提速显著 | **支持** | **原生支持** | v2rayN 可切 sing-box/hy2 核心支持 | Shadowrocket/Stash 支持；部分工具视版本 | **不支持** |
+| **Trojan** | 伪装标准 TLS 流量，成熟稳定、跨端兼容性极好 | **支持** | **支持** | **支持** | **全面支持** | 支持基础形态 |
+| **Shadowsocks (SS)** | 传统轻量流加密协议，CPU 占用极低（多配合中转专线使用） | **支持**（含常见 AEAD/2022 扩展） | **支持** | **支持** | **全面支持** | 支持基础形态 |
+| **AnyTLS** | 针对 TLS 握手与复用特征优化的新型轻量协议（如光速云 70 节点电信入口样本） | **需最新 Mihomo 内核**（使用前须确认客户端内置内核版本） | **需新版 sing-box**（特定版本后逐步合入支持） | 视核心跟进版本而定（多建议走 sing-box/Mihomo 新核） | Shadowrocket 新版支持（Quantumult X/旧端常不兼容） | **不支持** |
+
+**协议选型实操建议**：
+1. 如果你的家庭宽带在晚高峰丢包严重或跨运营商访问不稳定，可优先在支持多协议的机场（如一翻云）中测试 **Hysteria 2** 或 **VLESS-Reality**；若所处校园网/企业网对 UDP 流量做了严厉 QoS 限速（表现为 Hysteria 2 无法连通或速度极慢），则应立刻切回基于 TCP/TLS 的 **VLESS** 或 **Trojan**。
+2. 当机场下发了包含 **`AnyTLS`** 的新型节点（如光速云 2026-08-19 70 节点截图底部的 10 个电信入口节点），如果你使用的是较早之前安装的客户端，可能会发现列表里唯独少了这 10 个节点或连接报错——此时不要急着找机场客服，先在 `Clash Verge Rev` 设置中升级内置的 Mihomo 内核版本，或更新最新版客户端核心即可解决。
+
+---
+
+## 六、官方来源核实准则：拒绝虚假链接与二次打包陷阱
+
+代理软件直接接管设备所有的网络明文与加密隧道请求，且本地保存着含身份凭证（Token）的订阅地址。一旦下载到被篡改的安装包，轻则机场流量被偷跑、浏览器被劫持插入广告，重则剪贴板钱包地址遭替换或敏感凭据泄露。
+
+由于站内 `PROXY_CLIENTS` 台账中所有客户端的 `officialUrl` 当前均处于 `pending_verification`（官方地址待联网核实）状态，本站**绝不在文中编造、猜测或拼凑任何未经过实时核验的 GitHub 下载直链或网盘链接**，而是要求每位用户掌握以下五项可独立执行的官方来源核实准则：
+
+### 1. 核对 GitHub 开源仓库作者身份与提交连续性
+对于 `Clash Verge Rev`、`v2rayN`、`v2rayNG`、`FlClash`、`Clash Meta for Android`、`v2rayA`、`OpenClash`、`PassWall2`、`Nikki`、`HomeProxy` 与 `sing-box` 等开源项目：
+- 不要通过百度、必应或谷歌搜索结果的顶部「赞助商广告（Ad）」点击进入所谓「XX 中文官网」，大量仿冒站购买了开源软件名字的竞价广告专门分发木马安装包。
+- 进入开源代码托管平台后，务必检查仓库的 **Star 数量、历史 Commit 提交时间线、Contributors 贡献者列表以及 Issues 讨论活跃度**。真正的官方主力仓库往往有持续数月乃至数年的版本迭代（Releases）与完整的源代码树，而钓鱼仓库通常只有寥寥几个空壳提交或直接只挂了编译好的 `.exe`/`.apk` 二进制文件。
+
+### 2. 下载后强制比对 SHA-256 校验和与发布者数字签名
+几乎所有正规开源项目在 Release 页面都会附带 `checksums.txt`、`sha256sums` 或在描述正文列出每个安装包的哈希值。下载到本地后：
+- **Windows**：在 PowerShell 运行 `Get-FileHash -Path "安装包路径" -Algorithm SHA256`，逐位核对输出字符串是否与发布页完全一致。
+- **macOS / Linux**：在终端运行 `shasum -a 256 安装包路径` 或 `sha256sum 安装包路径`。
+- **Android APK**：对于 `v2rayNG` 等高频被山寨的应用，除核对 SHA-256 外，还应警惕包名或签名指纹变动。当正常升级版本提示「签名不一致无法覆盖安装」时，先停下来核实是项目官方更换了签名、还是你误下载了第三方篡改的 repack 包。
+
+### 3. 苹果 App Store 核验开发者主体与版本记录
+在美区等外区 App Store 下载 `Shadowrocket`、`Stash`、`Quantumult X`、`Surge 5`、`Karing`、`Clash Mi`、`Hiddify` 或 `SFI` 时，搜索结果里偶尔也会出现名称极其近似、图标高仿的「山寨收费软件」（如名字多一个空格、标榜免费实则诱导高额周订阅）。购买前务必点击进入详情页：
+- 核对**开发者名称（Developer）**、**历史版本更新记录（Version History）**以及评价区反馈；
+- 正规工具的更新记录通常跨越多年且详细列出支持的新协议（如 Reality、Hysteria 2、AnyTLS），而山寨应用往往只有最近几周的上线记录却刷满了无关好评。
+
+### 4. 对闭源「汉化版 / 绿色增强版 / 内置节点版」保持零容忍
+任何个人博客、网盘分享群或短视频评论区提供的「Clash Verge 汉化免安装整合版」「小火箭免费共享已购账号安装包」「NekoBox 商店直装版」，全部视为高危不可信来源。正规开源软件自身早已内置完善的简体中文语言切换，完全不需要第三方提供「汉化增强版」。
+
+### 5. 机场自研专属客户端的安全隔离原则
+如果因业务或上手习惯选用了仅提供自研客户端的品牌（或双端品牌提供的官方 App），请务必仅从**品牌官网用户中心后台内嵌的下载入口**获取安装程序，不要在非官网第三方下载站搜索品牌名字下载。同时遵守「环境隔离原则」：尽量避免在存有核心生产代码、SSH 私钥、财务凭据的工作主力机上运行闭源不明安装包。
+
+---
+
+## 七、订阅导入核心路径与常见配置错误排查
+
+完成客户端安全安装后，从拿到机场订阅到顺畅连通网络，标准操作只有五步，但每一步都有新手高频踩坑点。以下梳理标准化路径与常见错误对照：
+
+### 1. 通用订阅导入标准五步流程
+1. **核对订阅格式与面板入口**：登录机场用户后台，寻找「一键导入」或「复制订阅链接」。如果后台明确区分了「Clash 订阅」「V2Ray/Base64 订阅」「sing-box 订阅」，请严格对应你当前使用的客户端内核复制（例如 `Clash Verge Rev` / `FlClash` / `Stash` / `OpenClash` 复制 Clash 格式；`v2rayN` / `v2rayNG` 复制通用/V2Ray 格式；`SFA`/`SFI` 寻找 sing-box 格式）。
+2. **关闭已有代理防止拉取回环**：导入订阅前，确保电脑或手机上没有开启旧的全局代理或残余系统代理设置，否则客户端本身去请求机场订阅服务器时可能因路由死循环而失败。
+3. **粘贴 URL 并设定合理自动更新周期**：在客户端「配置 / Profiles / 订阅管理」粘贴链接导入，并设置自动更新间隔为 **12 至 24 小时**（如 `1440` 分钟）。**切勿设置每几分钟自动拉取**，否则极易被机场面板防火墙判定为恶意高频采集而临时拉黑你的 IP。
+4. **测试真连接延迟而非仅看 ICMP Ping**：导入成功并看到节点列表后，执行一次 URL-Test（基于 HTTPS 204 请求的真连接测速），确认主力地区（香港、日本、新加坡、美国）返回正常毫秒数。
+5. **切换「规则模式（Rule）」并核对国内外分流**：将运行模式保持在 `Rule（规则模式）` 而非 `Global（全局模式）`。打开浏览器访问国内常用网站确认直连迅速，再访问目标海外网站确认代理生效。
+
+### 2. 六类常见配置错误与对应修复指引
+
+| 错误现象 | 常见底层原因定位 | 立即执行修复步骤 |
+| :--- | :--- | :--- |
+| **导入订阅报错，或提示 `200 OK` 但节点列表为空（0 节点）** | ① 所选机场为纯专属客户端品牌，链接本身非标准订阅；② 客户端请求的 `User-Agent` 被机场后端拦截；③ 订阅格式（如 YAML vs Base64）与客户端不匹配 | 核对机场是否支持通用订阅；在客户端开启「自定义 UA」（如填写常见 Clash/v2rayN 标识）或切换订阅格式参数；详见 [订阅导入与 200 OK 空内容排查](/guides/articles/subscription-and-200ok-empty-fix/) |
+| **全部节点延迟显示 `-1` / `Timeout`，但同一时间机场群聊里别人正常** | ① 本地系统时间与标准时间偏差超过数十秒，导致 TLS/VLESS/Trojan 握手验证失败；② 客户端内核过旧不支持 Reality/AnyTLS；③ 流量耗尽或套餐过期 | 立即在操作系统日期与时间设置中执行「与 Internet 时间服务器自动同步」；核对内核版本与账户余量；详见 [节点超时与时间漂移排查步骤](/guides/articles/time-drift-timeout-troubleshooting/) |
+| **浏览器能翻墙，但终端（Git / curl / npm / Claude CLI）或 WSL2 全部超时** | 仅开启了「系统代理」，命令行程序与容器不读取系统 HTTP 代理变量 | 在桌面客户端开启 **TUN 模式**，或在终端临时导出 `http_proxy` / `https_proxy` 环境变量（端口号以客户端面板为准，勿照抄默认值）；详见 [系统代理与 TUN 虚拟网卡对比](/guides/articles/tun-vs-system-proxy-dns/) |
+| **关闭客户端后整个电脑突然彻底断网（连国内网站都打不开）** | 异常退出（如直接强杀进程或电脑死机重启）导致系统代理注册表/网络配置残留 `127.0.0.1` 死端口 | 重新打开代理客户端开启再正常点击关闭，或手动进入 Windows/macOS 系统「网络代理设置」关闭手动 HTTP/HTTPS 代理开关 |
+| **两款代理客户端或公司 VPN 同时开着，互相顶掉或彻底无网络** | 本地 `127.0.0.1` 混合端口（7890/7897/10808）被抢占，或 TUN/VpnService 虚拟网卡路由表冲突 | 任何时刻同一台设备只保留**唯一一个**代理程序处于激活状态，其余工具彻底退出进程 |
+| **国内百度网盘下载或 P2P 软件把机场每月几十 GB 流量瞬间跑光** | 错误开启了「全局模式（Global）」，或开了 TUN 模式但分流规则缺少国内直连 / 未拦截 BT/PT 流量 | 切回 `Rule（规则模式）`，确保 `GEOIP,CN` 与国内直连规则生效，并在下载 P2P 资源时暂停全局 TUN 接管 |
+
+---
+
+## 八、客户端本地安全规范与长期运维习惯
+
+用好代理客户端不仅追求「快」和「通」，更要守住本地设备安全与账号资产边界：
+
+1. **严格保护订阅链接本身**：机场的订阅 URL 等同于你的账号通行证和密码——任何拿到这条 URL 的人都可以拉取你的节点配置并消耗你的套餐流量，甚至因多 IP 并发把你的账号触发封禁。切勿将原始订阅链接直接发到公开论坛、GitHub 仓库、或者不可信的第三方在线「订阅转换网站」。如需转换格式（如转给 Quantumult X 或 SFA），尽量使用客户端内置转换能力（如 Hiddify/Karing）或自己本地部署的转换工具。
+2. **谨慎对待「允许局域网连接（Allow LAN）」**：除非你需要让同一家庭 Wi-Fi 下的手机、游戏机或另一台电脑通过这台主机的代理端口上网，否则保持「允许局域网连接」处于关闭状态（仅监听 `127.0.0.1` 本机回环）。如果在咖啡馆、机场等公共 Wi-Fi 下开启 Allow LAN，同局域网内的陌生设备就能直接扫描并蹭用你的代理端口，甚至通过本地流量窥探或触发机场滥用封号。
+3. **不随意安装不明 MITM 根证书与远程 JS 脚本**：在 Surge、Quantumult X 或 Clash 部分调试工具中，启用 HTTPS 解密（MITM）需要向系统安装并信任本地自签 CA 根证书。**仅对你自己完全看懂逻辑的本地抓包需求开启极少数限定域名解密，绝不导入他人打包好的含全局 `*` 通配符解密与不明外部远程 JS 的「懒人增强包」**——否则你的所有加密网页通信都将暴露在未知脚本面前。
+4. **控制自动测速频率与规则集来源**：在配置自动故障转移（`url-test` / `fallback`）时，测速间隔建议设为 `300` 秒（5 分钟）以上，不要设为 `10` 秒一次高频并发检测全节点，避免对机场服务器制造无意义的探测压力或触发高频风控。同样，引用的外部 `Rule-Provider` 规则集应选用长期知名且结构透明的社区仓库，定期检查本地覆写脚本内容。
+5. **建立「主力 + 备份」跨端容灾配置**：对于需要稳定开展远程办公或开发的用户，建议将当前可用的机场订阅（如支持通用订阅的双端品牌或主流月付方案）配置在开源客户端内，同时妥善导出并加密备份一份个人配置覆写规则与小容量不限时备用订阅，避免单一客户端故障或系统重装后从零重构分流逻辑。
+
+当你已经完成客户端选型并顺利导入节点之后，下一步往往会立刻遇到「为什么连着香港节点打不开网页版 ChatGPT」「为什么 Gemini 提示地区不支持」或「为什么 YouTube 推荐变成了国内区域」等场景兼容问题——此时请直接进入 [AI 与流媒体场景兼容专题](/ai-media/) 与 [AI 与流媒体 GeoIP 分流实战](/guides/articles/ai-streaming-geoip-routing/)，用分流策略组把不同地区的节点用到刀刃上。

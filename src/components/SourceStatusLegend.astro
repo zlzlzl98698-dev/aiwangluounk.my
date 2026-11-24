@@ -1,0 +1,40 @@
+<div class="obs-legend" aria-label="数据来源状态图例">
+  <span class="obs-legend__item"><i class="dot dot--measured"></i> Measured 实测数据</span>
+  <span class="obs-legend__item"><i class="dot dot--historical"></i> Historical 历史归档</span>
+  <span class="obs-legend__item"><i class="dot dot--vendor"></i> Vendor 品牌宣称</span>
+  <span class="obs-legend__item"><i class="dot dot--partial"></i> Partial 视节点而定</span>
+  <span class="obs-legend__item"><i class="dot dot--pending"></i> Not Tested / Pending 未测或待核实</span>
+  <span class="obs-legend__item"><i class="dot dot--bad"></i> Unavailable 不可用/失败</span>
+</div>
+
+<style>
+  .obs-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 1rem;
+    padding: 0.65rem 0.9rem;
+    background: var(--obs-card);
+    border: 1px solid var(--obs-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.78rem;
+    color: #cbd5e1;
+    margin-bottom: 1rem;
+  }
+  .obs-legend__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    display: inline-block;
+  }
+  .dot--measured { background: #10b981; }
+  .dot--historical { background: #60a5fa; }
+  .dot--vendor { background: #f59e0b; }
+  .dot--partial { background: #fbbf24; }
+  .dot--pending { background: #64748b; }
+  .dot--bad { background: #ef4444; }
+</style>

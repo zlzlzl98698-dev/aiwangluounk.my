@@ -1,0 +1,224 @@
+---
+pillarId: "clients"
+slug: "shadowrocket"
+title: "Shadowrocket小火箭全指南：iOS配置、规则分流与Stash迁移"
+description: "系统解析 Shadowrocket iOS 生态操作：覆盖通用订阅导入、GEOIP 规则分流、UDP 转发配置，以及向 Stash、Loon、Surge 迁移的完整操作指南。"
+h1: "Shadowrocket（小火箭）完全指南：苹果生态获取安全、Config 规则分流、UDP 与延迟调优及迁移决策"
+intent: "工具实操与苹果生态选型对比型"
+targetKeyword: "Shadowrocket 小火箭使用与苹果客户端对比"
+secondaryKeywords:
+  - "Shadowrocket 美区购买防锁机"
+  - "小火箭 Config 规则分流与延迟测试"
+  - "Shadowrocket UDP 转发设置"
+  - "Shadowrocket 迁移 Stash Loon Surge"
+  - "iOS 通用订阅与专属客户端区别"
+longTailKeywords:
+  - "Shadowrocket 为什么不能用网上免费共享 Apple ID 登录 iCloud"
+  - "Shadowrocket 本地 Config 模式和 Proxy 模式有什么区别"
+  - "Shadowrocket 连通性测试和 TCP Ping 延迟差多少怎么设置"
+  - "Mac M1 M2 M3 M4 芯片可以安装 Shadowrocket 吗"
+  - "什么时候应该从 Shadowrocket 换到 Stash、Loon、Surge 或 Karing"
+entities:
+  - "Shadowrocket"
+  - "Stash"
+  - "Loon"
+  - "Surge 5"
+  - "Quantumult X"
+  - "Karing"
+  - "Clash Mi"
+  - "Apple Silicon"
+  - "NetworkExtension"
+  - "URL Scheme"
+keywordBoundary: "聚焦 Shadowrocket（小火箭）在 iOS/iPadOS 与 Apple Silicon macOS 的获取安全边界、订阅添加、本地 Config 分流、协议与 UDP/延迟调优及迁移至 Stash/Loon/Surge/Karing 的决策条件；其他跨平台内核专题归入 /clients/mihomo/ 与 /clients/sing-box/，macOS 桌面独立安装包架构辨析归入 /guides/articles/ios-macos-clients-guide/。"
+answerFirst: "Shadowrocket（俗称「小火箭」）是 iOS/iPadOS 平台通用度最高的第三方规则代理客户端，兼容 Shadowsocks、VMess、VLESS-Reality、Trojan、Hysteria 2 与新版 AnyTLS 等主流协议，且在搭载 M 系列芯片的 Apple Silicon Mac 上也可直接运行 iOS 商店版本。购买时必须使用本人注册管理的非国区（如美区、港区、日区）App Store 账号实时核价买断，严禁在系统设置 iCloud 中登录他人共享账号或下载网页来历不明的安装包。导入通用订阅后，将全局路由设为「配置（Config）」并搭配合理的 URL 连通性测试与 UDP 转发策略即可兼顾国内直连与海外分流；当你需要直接复用桌面 Clash YAML 覆写时可迁移至 Stash，追求插件脚本生态可看 Loon 或 Quantumult X，需要深度抓包与团队调试才考虑 Surge，若希望暂免付费买断则可先尝试 Karing 或 Clash Mi。"
+updatedDate: "2026-11-24"
+ctaHeading: "核对苹果生态兼容客户端与订阅排障路径"
+ctaActions:
+  - label: "iOS 与 macOS 苹果生态选型全攻略"
+    href: "/guides/articles/ios-macos-clients-guide/"
+    style: "primary"
+  - label: "解决小火箭订阅导入失败与空白返回"
+    href: "/guides/articles/subscription-and-200ok-empty-fix/"
+    style: "secondary"
+  - label: "对照支持通用订阅与专属端机场阵营"
+    href: "/compare/dedicated-client-vs-universal-sub/"
+    style: "secondary"
+relatedLinks:
+  - title: "iOS/iPadOS 与 macOS 客户端指南"
+    href: "/guides/articles/ios-macos-clients-guide/"
+    category: "操作指南"
+    reason: "对比 Shadowrocket、Stash、Quantumult X、Surge 与 Apple Silicon 架构细节"
+  - title: "手机 VPN 与移动端保活差异"
+    href: "/vpn/mobile/"
+    category: "移动端对比"
+    reason: "了解 iOS NetworkExtension 50MB 内存上限与按需连接机制"
+  - title: "AI 与流媒体 GeoIP 分流实战"
+    href: "/guides/articles/ai-streaming-geoip-routing/"
+    category: "场景分流"
+    reason: "解决连接香港低延迟节点时 ChatGPT 仅 APP(HK) 与 Gemini 受限问题"
+  - title: "Mihomo 内核全平台生态"
+    href: "/clients/mihomo/"
+    category: "客户端内核"
+    reason: "当你在桌面端使用 Clash Verge Rev 并计划通过 Stash 或 Clash Mi 统一配置时参考"
+faqs:
+  - q: "为什么不能在淘宝买共享 Apple ID 或用网页提供的免费账号去下载 Shadowrocket？"
+    a: "风险极高。如果把他人共享 Apple ID 登录进手机「设置」顶部的 iCloud 账户，对方可随时通过「查找我的 iPhone」远程擦除数据并锁定设备实施勒索；即便仅在 App Store 商店内登录，后续应用每次更新都会弹窗索要原购买者密码且存在密码失效、账号封控风险。最安全的方式是自行注册专属非国区 Apple ID 并通过正规礼品卡充值购买。"
+  - q: "Shadowrocket 的价格为什么不固定？在美区和港区商店买有区别吗？"
+    a: "由于汇率浮动、各地税率政策及开发者调整策略，不同地区 App Store 标价与结算币种不同，站内遵循不写死历史标价的原则，实际售价以你登录所在地区商店页实时显示为准。应用本身功能与后续协议更新在各已上架外区商店通常一致，建议绑定自己最常用且方便购买正规礼品卡的地区账号。"
+  - q: "Apple Silicon（M1/M2/M3/M4）Mac 能直接用 iOS 买的 Shadowrocket 吗？"
+    a: "可以。在搭载 Apple Silicon 芯片的 Mac 上，使用同一购买过 Shadowrocket 的外区 Apple ID 登录 Mac App Store，在已购项目或搜索页面切换至「iPhone 与 iPad App」栏目即可安装运行。但如果是早期 Intel 芯片的 Mac，则无法直接运行 iOS 跨平台应用，需改用 macOS 原生客户端如 Clash Verge Rev 或 v2rayN。"
+  - q: "买了机场套餐却找不到 Shadowrocket 一键导入按钮，或者导入后节点为空怎么办？"
+    a: "首先要核对机场是否属于「仅限官方专属客户端」阵营（如飞猫云、隐形人、SOGO 云、闪跃、全球云，以及归档资料提示转向专属客户端的 Firefly、灵猫网络、无忧链接），这类服务不提供第三方通用订阅链接，小火箭无法导入。若确认品牌支持通用订阅（如光速云、一翻云、极连云等）却仍空白，需检查系统是否开启了旧代理导致请求回环，或排查机场后台 User-Agent 拦截。"
+  - q: "Shadowrocket 的全局路由「配置（Config）」和「代理（Proxy）」有什么本质区别？"
+    a: "选择「代理（Proxy）」相当于全局强制代理，国内微信、淘宝、网银与大文件下载全部经由海外节点绕行，不仅拖慢国内访问速度还会浪费套餐流量；选择「配置（Config）」才会真正加载本地规则文件，自动实现国内域名与 CN IP 直连、海外域名与 AI 服务按规则分流，是日常唯一推荐的常驻模式。"
+  - q: "日常使用应该开启还是关闭 Shadowrocket 里的 UDP 转发？延迟测试选 TCP 还是连通性？"
+    a: "如果使用 Hysteria 2 协议、QUIC 网页加速、语音通话或主机/游戏联机，需保持「UDP 转发」开启；如果所处校园网或企业内网对 UDP 严重限速，或排查某些特殊连接异常时可按需测试调整。延迟测速强烈建议设为「连通性（CONNECT / HTTPS 204）」而非纯 TCP Ping，因为 TCP Ping 仅测量到国内中转入口的握手时间，无法反映海外落地端真实响应速度。"
+  - q: "什么时候应该从 Shadowrocket 迁移到 Stash、Loon、Surge 或 Karing？"
+    a: "如果只是稳定接入通用订阅与基础规则分流，Shadowrocket 完全够用无需迁移。当你电脑端重度使用 Clash Verge Rev 且希望手机端无损复用同一套 YAML 策略组和 Overrides 覆写时，可考虑 Stash；需要丰富的轻量插件脚本生态可关注 Loon；从事专业网络抓包、模块调试且预算充足再考虑 Surge；若不想在外区购买付费软件或追求跨五端免费统一配置，可先尝试 Karing 或 Clash Mi。"
+---
+
+在苹果移动设备（iPhone 与 iPad）以及新一代自研芯片 Mac 的网络工具生态中，**Shadowrocket（中文社区俗称「小火箭」）** 是普及度最高、机场后台兼容覆盖面最广的第三方规则代理客户端。几乎所有支持开放第三方订阅的机场服务商，都会在用户面板直接提供「一键导入 Shadowrocket」的快捷按钮。
+
+但越是普及率高的工具，围绕它的信息噪音与安全陷阱也越多：搜索引擎里充斥着诱导登录陌生共享 Apple ID 的钓鱼教程、打着「网页直装免越狱版」旗号的恶意企业签名包，以及新手拿到软件后因盲目开启全局代理、选错延迟测试模式或误装到封闭专属机场而导致的各种连接故障。本专题将围绕 Shadowrocket 的苹果生态事实、安全获取红线、订阅与本地 `Config` 规则分流逻辑、关键协议与 `UDP 转发` 调优参数，以及何时该迁移至 `Stash`、`Loon`、`Surge` 或 `Karing` 做出系统梳理。
+
+---
+
+## 一、iOS 与 Apple Silicon（Mac）生态事实及外区获取红线
+
+不同于 Android 允许自由侧载安装包、Windows 与 Linux 可以直接运行开源构建的可执行文件，iOS 与 iPadOS 将所有具备系统级流量接管能力的代理工具严格限制在 `NetworkExtension` 沙盒框架内，只能通过官方 **App Store** 签名分发。同时，中国大陆区 App Store 已下架包括 Shadowrocket 在内的绝大多数主流通用代理客户端，因此获取正版软件的前提条件是拥有一个合规的非国区 Apple ID（常见如美区、港区、日区或台区）。
+
+### 1. 苹果多端覆盖与 Apple Silicon Mac 兼容事实
+
+在站内 `PROXY_CLIENTS` 客户端台账中，Shadowrocket 的原生定位是 `iOS/iPadOS` 平台的付费买断制应用。但在硬件架构演进到 **Apple Silicon（M1 / M2 / M3 / M4 系列芯片）** 后，macOS 原生支持直接运行部分适配的 iOS 与 iPadOS 应用程序，Shadowrocket 正是其中之一：
+
+- **Apple Silicon Mac 的跨端复用**：只要你的 Mac 搭载了 M 系列芯片，登录同一购买过 Shadowrocket 的外区 Apple ID 打开 Mac App Store，在搜索结果页或「账户 — 已购项目」中切换到「iPhone 与 iPad App」标签页，即可直接下载并运行 Shadowrocket，无需在苹果移动端和桌面端分别购买两套授权。
+- **Intel Mac 的架构边界**：早期搭载 Intel 处理器的 Mac 不具备运行 iOS/iPadOS 虚拟架构的能力，无法从 Mac App Store 安装 Shadowrocket，必须使用原生桌面客户端（如 [Clash Verge Rev](/clients/clash-verge-rev/)、[v2rayN](/clients/v2rayn/)、`FlClash` 或外区商店的 `Clash Mi`、`Hiddify`、`Surge Mac`）。详细芯片辨析与安装包校验可参阅 [iOS/iPadOS 与 macOS 苹果生态客户端指南](/guides/articles/ios-macos-clients-guide/)。
+- **定价与买断透明原则**：Shadowrocket 在美区、港区等外区 App Store 显示为一次性付费买断应用（买断后不收月费），但由于不同区服的币种汇率、当地消费税与开发者调价随时可能变动，站内严格不写死历史美元金额，实际售价与购买条款请以你登录所在地区 App Store 商店页面实时显示为准。
+
+### 2. 谨防网页安装包与共享 Apple ID 诈骗的四大红线
+
+围绕「如何免费下载小火箭」，互联网上长期存在两类极高危的灰色套路，新手只要踩中其中任意一条都可能造成财产损失甚至设备变砖：
+
+1. **绝不将共享或租借的 Apple ID 登录到「系统设置 — iCloud」**：这是苹果生态中损失最惨重的骗局。骗子常在短视频评论区、网盘或低价发卡网提供「免费共享已购小火箭账号」，并诱导用户先退出自己的账号、在手机「设置」顶部登录对方提供的 Apple ID。一旦登录系统 iCloud，对方可瞬间在后台开启丢失模式并远程锁定你的手机，随后向你勒索高额解锁费。**安全铁律是：系统设置的 iCloud 永远只登录你自己的主力账号；切换外区下载软件只允许在 App Store 应用右上角头像内单独登录。**
+2. **警惕「网页直装 / 企业签名 / TF 公开测试链接」**：任何宣称无需外区账号、通过浏览器点击链接即可安装 Shadowrocket 描述文件或企业签名 IPA 包的网站，几乎全部存在中间人篡改风险。非商店渠道重打包的客户端可能静默窃取你导入的机场订阅 Token，甚至替换剪贴板地址或植入恶意根证书。
+3. **远离 App Store 山寨高仿收费软件**：在外区商店搜索「Shadowrocket」或「小火箭」时，竞价广告位或相似名称列表里常会出现名字多一个空格、图标高度相似但标榜「免费下载、内置节点」的山寨 App。这类应用往往在打开后诱导开启高额周订阅自动扣费。下载前务必点进详情页，核对开发者主体、多年连续的版本更新历史记录（Version History）以及真实的协议支持说明。
+4. **自己注册专属外区账号并留存安全密保**：哪怕只在 App Store 登录他人共享账号，一旦对方改密或账号被风控封禁，后续 Shadowrocket 更新适配新协议时你将无法升级，只能卸载重买。最稳妥的长期方案是自行注册一个专属外区 Apple ID，通过正规渠道购买对应地区礼品卡充值完成买断。
+
+---
+
+## 二、买对机场是前提：支持通用订阅 vs 仅限专属客户端
+
+在花钱购买 Shadowrocket 之前，有一个极易被忽略的前置事实：**Shadowrocket 只是一个空的本地客户端外壳，本身不自带任何免费或付费节点**；它能正常工作的绝对前提，是你购买的机场服务商开放了第三方通用订阅链接。
+
+结合站内 31 家机场品牌归档与 [专属客户端 vs 通用订阅机场深度对照](/compare/dedicated-client-vs-universal-sub/) 的台账记录，国内机场已经清晰分化为两大阵营：
+
+- **支持导入 Shadowrocket 的阵营（开放通用订阅或双端兼容）**：包括 [光速云](/brands/guangsuyun/)、[一翻云](/brands/yifan/)、[极连云](/brands/jilian/)、[光年梯](/brands/guangnian/)、[梯子云](/brands/tiziyun/)、[可信云](/brands/kexin/)、[速界](/brands/sujie/)、[大佬云](/brands/dalaoyun/)、[闪电鼠](/brands/shandianshu/) 等。它们的用户后台会提供标准订阅链接或节点列表，可以顺利接入小火箭。
+- **无法使用 Shadowrocket 的阵营（仅限官方专属客户端）**：包括 [飞猫云](/brands/feimao/)、[隐形人](/brands/yinxingren/)、[SOGO 云](/brands/sogo/)、[闪跃](/brands/shanyue/)、[全球云](/brands/quanqiu/)，以及台账标注转向专属端模式的 [Firefly（萤火虫）](/brands/firefly/)、[灵猫网络](/brands/lingmao/) 与 [无忧链接](/brands/wuyou/)。这些品牌彻底关闭了通用订阅下发，即便你在手机上买好了小火箭，也找不到可以粘贴导入的订阅 URL。
+
+此外，还有部分品牌（如暮光加速、微风网络、二猫云、唯兔云、星岛梦、灵动云等）在站内当前台账中处于 `pending` 待核实状态，下单前务必先在单月最小周期或品牌评测页确认是否明确提供第三方订阅导出入口。
+
+---
+
+## 三、订阅添加全路径与本地 `Config` 规则分流实操
+
+成功在正规外区 App Store 买断并安装 Shadowrocket 后，将机场节点导入客户端主要有三种标准路径。无论使用哪种方式，操作前都请确保手机上没有开启旧的全局代理或残留系统 VPN 连接，以免拉取订阅本身进入路由回环。
+
+### 1. 三种标准订阅添加方式与排错边界
+
+1. **URL Scheme 一键唤醒导入（最便捷）**：使用 iOS 自带的 **Safari 浏览器**（不建议用微信/QQ 内置浏览器或部分拦截跳链的第三方浏览器）登录支持通用订阅的机场用户中心，点击「一键导入 Shadowrocket」。浏览器会弹出「在 Shadowrocket 中打开」确认框，点击允许后即可自动拉取节点列表。若点击无反应，通常是浏览器屏蔽了自定义跳转协议，直接改用下面的手动复制方式即可。
+2. **剪贴板自动识别或手动添加服务器订阅（最稳妥）**：在机场后台点击「复制通用订阅链接 / 复制 Shadowrocket 订阅」，打开小火箭首页右上角的加号，将「类型」选择为 `Subscribe（订阅）`，在 URL 栏粘贴链接并填写一个好记的「备注」，点击右上角保存。如果打开小火箭时系统提示允许读取剪贴板且直接弹窗询问是否添加订阅，核对 URL 域名无误后确认即可。
+3. **扫描二维码批量导入**：当你在电脑端已经登录机场面板时，可直接点击面板生成的订阅二维码，打开 Shadowrocket 首页左上角扫一扫图标识别导入；如果是单条节点分享二维码，同样支持直接扫码入库，适合临时补充自建节点或备用专线。
+
+> **200 OK 空内容与拉取超时排查**：如果添加订阅后提示请求成功却「一个节点也没有」，或直接报错无法解析，首先检查机场是否属于仅限专属端品牌；其次排查网络运营商 DNS 劫持或机场后端对客户端请求 `User-Agent` 的限制。可以在 Shadowrocket 的「订阅」设置中检查自动更新选项，或参阅 [订阅导入与 200 OK 空内容排查](/guides/articles/subscription-and-200ok-empty-fix/) 定位后端返回值异常。
+
+### 2. 全局路由模式辨析：为什么必须停留在 `Config（配置）`？
+
+新手导入节点后点击右上角连接，往往会发现所有软件确实能访问海外了，但同时打开国内微博、微信发图、淘宝加载却明显变卡，甚至一个月几百 GB 流量几天就莫名其妙见底。这 90% 是因为首页「全局路由（Global Routing）」选项放错了位置：
+
+| 全局路由模式 | 流量调度逻辑 | 适用场景 | 常见踩坑表现 |
+| :--- | :--- | :--- | :--- |
+| **配置（Config）** | 按照本地加载的 `.conf` 分流规则逐条匹配：命中国内规则直连（DIRECT）、命中代理规则或未命中海外地址走节点（PROXY）、广告域拦截（REJECT） | **99% 日常使用的默认首选模式** | 若规则集长期未更新或缺失部分冷门国内域名，少数新网站可能绕道代理 |
+| **代理（Proxy）** | 强制设备全部流量（除极少数系统底层保留地址外）无条件转发至当前选中的海外节点 | 临时验证某个 App 是否因国内分流误判导致无法联网 | 国内网银报错、微信与视频加载变慢、国内大文件下载瞬间耗光机场流量 |
+| **直连（Direct）** | 保留 VPN 图标挂起状态，但全部请求直接走本地宽带或蜂窝网络，不经海外服务器 | 临时需要完全关闭代理测试本地网络或使用本地内网设备 | 忘记切回配置模式时，会误以为机场所有节点全挂了 |
+| **场景（Scene）** | 根据当前连接的 Wi-Fi 名称（SSID）或蜂窝移动网络环境自动切换不同的配置或直连策略 | 在公司内网需要自动直连、回家或切 4G/5G 自动启用规则代理的多环境用户 | 若未针对特定 Wi-Fi 设置清晰规则，切换网络瞬间易产生短暂断流 |
+
+### 3. 本地 `Config` 配置文件的分流逻辑与 AI 独立拆分
+
+Shadowrocket 的「配置（Config）」标签页管理着本地分流规则文件（`.conf` 后缀）。软件默认自带一份基础 `default.conf`，能够满足最基本的国内直连与常见海外代理需求；如果你对广告过滤、海外流媒体（Netflix / Disney+ / YouTube）以及 AI 生产力工具（ChatGPT / Claude / Gemini）有精细分流诉求，必须理解规则匹配的优先级机制：
+
+- **规则自上而下逐条命中**：当一个域名请求进入 Shadowrocket 时，内核会从配置文件的 `[Rule]` 段落第一行开始往下匹配，一旦命中某条规则就立刻执行对应动作，不再继续往下看。因此，**具体服务的特定规则必须排在泛域名或 `GEOIP,CN` / `FINAL` 兜底规则之前**。
+- **把香港默认主力与 AI/流媒体彻底拆开**：结合站内对 [光速云](/brands/guangsuyun/) 等品牌的历史实测归档，香港节点延迟通常最低（约 20–30ms），适合作为常规网页浏览与 GitHub 下载的默认主力，但香港出口在网页版 ChatGPT 常触发「仅 APP(HK)」受限，且几乎无法访问 Gemini 和 TikTok；而部分新加坡与台湾节点又存在 YouTube 送中（CN）样本。因此，在本地规则集中把 `openai.com`、`chatgpt.com`、`claude.ai`、`gemini.google.com` 等域名单独指派给「策略组」或固定绑定日本/新加坡/美国通过验证的节点，才是兼顾速度与可用性的标准解法。具体域名清单与策略拆解可直接对照 [AI 与流媒体 GeoIP 分流实战](/guides/articles/ai-streaming-geoip-routing/)。
+- **警惕来路不明的全局 MITM 解密懒人包**：网络上流传着大量号称「去广告全解锁」的远程 `.conf` 配置文件，部分文件内隐藏了全局通配符的 `[MITM]` HTTPS 解密和未经审计的远程 JS 脚本。如果启用了根证书信任，所有网页明文传输都将经过未知脚本。**原则上只使用来源透明、可自行读懂文本内容的标准分流配置，普通用户不要随意开启非必要的全局 HTTPS 解密。**
+
+---
+
+## 四、协议兼容边界、`UDP 转发` 与 `延迟测试方法` 调优
+
+把节点导进来并切换至「配置」模式后，能否在弱网环境下保持不断流、不误判节点死活，取决于协议支持度与底层的几项关键设置。
+
+### 1. 现代多协议兼容表现
+
+相比几年前停更的老旧客户端，Shadowrocket 的自研多协议内核保持了极高的协议迭代频率，能够覆盖当前 31 家机场库中绝大多数已知协议：
+
+- **Shadowsocks / Trojan**：兼容极佳、CPU 开销极低，配合国内中转专线（IEPL/IPLC）在手机端耗电最省。
+- **VMess / VLESS（含 XTLS-Vision 与 Reality）**：完整支持。尤其 `VLESS-Reality`（如 [一翻云](/brands/yifan/) 等品牌提供）免去了传统自签证书的特征风险，在小火箭上配合自动时间同步可稳定运行。
+- **Hysteria 2**：支持。基于 QUIC 协议的抗丢包拥塞控制机制在手机 4G/5G 信号边缘或晚高峰高丢包宽带下提速明显。
+- **AnyTLS**：如站内 [光速云](/brands/guangsuyun/) 2026-08-19 70 节点流媒体测试截图底部出现的 `AnyTLS` 电信入口节点，属于针对 TLS 握手特征优化的新型轻量协议。**如果你在手机上导入订阅后发现少了部分节点或提示未知协议，先打开外区 App Store 确认 Shadowrocket 已更新至最新版本。**
+
+### 2. `UDP 转发` 设置机制与取舍边界
+
+在 Shadowrocket 节点编辑页或全局设置中，都有「UDP 转发（UDP Relay）」开关。很多人不知道它具体管什么，习惯无脑打开或无脑关掉，其实它直接决定以下四类流量的命运：
+
+1. **QUIC / HTTP3 现代网页与流媒体传输**：包括 YouTube App、Google Chrome 与部分海外服务默认优先尝试基于 UDP 的 QUIC（HTTP/3）协议来加快首包打开速度。若节点关闭了 UDP 转发，浏览器需要等待 QUIC 超时后回退到 TCP，有时反而表现为网页「首屏白屏转圈两秒才出来」。
+2. **Hysteria 2 协议底层依赖**：Hysteria 2 本身就运行在 UDP 之上，必须确保本地网络与客户端均允许正常 UDP 通信；反之，如果你身处对 UDP 实施严厉限速或直接封锁 UDP 的校园网、企业内网环境下，切勿硬用 Hysteria 2 或强开大量 UDP 转发，应直接切回基于 TCP 的 VLESS 或 Trojan 节点。
+3. **实时语音通话与游戏联机**：Telegram 语音、WhatsApp 通话、主机联机或部分 P2P 应用高度依赖 UDP 穿透。结合 [游戏加速器与机场代理对比](/vpn/gaming/) 的实测规律，能否顺利联机不仅取决于本地开启了 UDP 转发，还要求机场服务端落地真正支持并开放了 `FullCone` 或 `RestrictedCone` NAT，如果节点本身禁止 UDP，客户端强制打开也无法生效。
+4. **DNS 查询兼容性**：在非 `Fake-IP` 场景下，部分直连或远程 DNS 解析包依赖 UDP 53 端口；若遭遇极端网络丢包导致 UDP DNS 超时，可在小火箭 DNS 设置中优先采用加密 DoH（DNS over HTTPS）走 TCP 通道解决。
+
+### 3. `延迟测试方法`：连通性（HTTPS）vs TCP Ping 的决定性差异
+
+打开 Shadowrocket 首页点击「连通性测试」，很多新手会疑惑为什么有的机场面板上写着 20ms，小火箭测出来却是 120ms 甚至超时。这通常是因为「延迟测试方法（Latency Test Method）」的测量口径完全不同：
+
+- **TCP Ping（传统默认或部分工具口径）**：客户端只向节点的**入口服务器 IP 和端口**发一个 TCP SYN 握手包，收到 SYN-ACK 就结束计时。如果一家机场用的是国内广东入口中转专线，你在深圳测 TCP Ping 可能只有 **15ms**——哪怕海外落地机此时已经宕机断网了，TCP Ping 依然会显示 15ms 绿色可用！这极易误导用户选中「入口通、出口死」的失效节点。
+- **CONNECT / URL 测试（推荐首选的真实连通性测试）**：客户端会通过完整的代理隧道，向设定的测试地址（如 `cp.cloudflare.com/generate_204` 或 `www.gstatic.com/generate_204`）发送一次完整的 HTTPS 建连并等待状态码返回。虽然这样测出来的数值（例如香港 80–130ms、日本 150–230ms）包含了「本地到入口 + 跨境隧道 + 落地到目标站点 + TLS 握手」的全链路耗时，比纯 TCP Ping 数字大得多，但它**唯一能够真实证明节点活着且能打开海外网页**。
+- **防超时与避风控提醒**：如果全节点测连通性均显示 `Timeout`（超时），切忌连续狂点几十次并发测速（可能触发机场入口防火墙频控拉黑），应第一时间对照 [节点超时与时间漂移排查步骤](/guides/articles/time-drift-timeout-troubleshooting/) 检查 iPhone「设置 — 通用 — 日期与时间」是否开启了「自动设置」，因为本地系统时间偏差超过数十秒会直接导致 TLS/VLESS 握手被服务端拒绝。
+
+### 4. iOS `NetworkExtension` 50MB 内存红线与后台保活细节
+
+苹果系统为了保证前台应用流畅运行与电池续航，给所有第三方 VPN 扩展进程（`NetworkExtension`）划定了一条非常严格的硬性内存上限（长期约 **50MB** 左右）。
+
+如果你在小火箭本地配置里塞入了动辄十几万行的超大型远程去广告列表、庞大的完整版 GeoIP/GeoSite 文本正则规则，或者同时在后台开启大量并发测速与日志记录，一旦扩展进程内存冲破系统阈值，iOS 会毫无征兆地强杀代理扩展，表现为锁屏几分钟或刷短视频时顶部状态栏「VPN 图标突然消失、海外网页断联」。**保持稳定的实战原则是：精简不必要的冗余正则拦截规则，尽量使用主流社区精简版规则集，并按需开启设置中的「按需连接（On Demand）」让系统在网络切换时自动拉起隧道。**
+
+---
+
+## 五、苹果全家桶与跨平台工具对比：何时考虑迁移至 `Stash` / `Loon` / `Surge` / `Karing`？
+
+Shadowrocket 并不是苹果生态里唯一的答案，也不是所有场景下的终点。站内整理了当前 iOS / macOS 上最核心的六款可替代或进阶工具，它们的底层引擎、配置文件范式与真实迁移门槛差异如下：
+
+| 客户端名称 | 底层引擎与配置范式 | 苹果平台分发与付费形态 | 最核心强项 | 何时建议从 Shadowrocket 迁移或改用 |
+| :--- | :--- | :--- | :--- | :--- |
+| **Shadowrocket（小火箭）** | 自研多协议内核；兼容单链、通用订阅与基础 `.conf` 规则 | 外区 App Store 买断制（实时售价为准） | 教程覆盖最全、协议跟进快、门槛极低 | **基准线**：只求稳定连网、看剧与基础 AI 分流时完全不必迁移 |
+| **Stash** | Clash 规则兼容引擎；原生读取 **Clash YAML** | 外区 App Store 买断制（实时售价为准） | 完整兼容 Clash 策略组、Rule-Providers 与配置覆写（Overrides） | 当你桌面端深度使用 `Clash Verge Rev` / `Mihomo`，厌倦维护两套分流规则、想在 iPhone 直接原样复用 YAML 与苹果电视 `tvOS` 时 |
+| **Loon** | 自研网络引擎；独立规则与插件（Plugin）体系 | 外区 App Store 买断制（实时售价为准） | 界面直观现代、社区去广告与功能增强插件生态丰富、兼顾脚本与易用性 | 当你觉得小火箭规则与脚本扩展偏弱，又觉得 Quantumult X 写法过于硬核、Surge 成本过高，想折中玩转插件生态时 |
+| **Quantumult X（圈 X）** | 自定义规则与 JS 脚本引擎（QX 专属语法） | 外区 App Store 买断制（实时售价为准） | 极强的 HTTP 重写（Rewrite）、MITM 调试与自动化脚本生态 | 当你明确需要运行圈 X 社区特定重写脚本；**注意**：若机场仅提供 Clash 格式订阅，导入前常需额外规则适配 |
+| **Surge 5 / Surge Mac** | Surge 高级网络引擎；模块与抓包体系 | 外区商店免费下载 + 高额内购 / 订阅授权 | 全量网络请求精细抓包分析、Ponte 组网、企业级调试与极高稳定性 | 当你是前端/移动端/网络工程师，把手机与 Mac 当作专业抓包调试台且认可长期授权成本时（普通翻墙用户性价比极低） |
+| **Karing / Clash Mi** | `Karing` 基于 **sing-box**；`Clash Mi` 基于 **Mihomo** | App Store 分发（跨平台另有桌面/安卓版） | 零付费门槛体验现代开源内核、多订阅格式自动识别（Karing）、全平台统一界面 | 当你暂时不便在外区商店充值买断付费软件，或希望 Windows、Android、macOS 与 iOS 用同一套免费跨平台配置逻辑时 |
+
+### 四条具体的迁移触发信号（Checklist）
+
+在实际使用中，不需要盲目追求「更贵或更高级的软件」，对照以下四个信号即可准确判断是否到了更换工具的时机：
+
+1. **信号 A：桌面端和手机端规则总是不同步** → 迁移至 **Stash**（或 **Clash Mi**）。如果你已经在 Windows/Mac 上用 `Clash Verge Rev` 精心编写了前置覆写脚本，把 OpenAI、Claude、Gemini 和 YouTube 拆得井井有条，在小火箭上手动重新写一遍 `.conf` 规则既费时又容易漏域名。换用原生支持 Clash YAML 与 Overrides 的 Stash 后，只需把同一份配置文件与覆写逻辑同步过来即可，且 Stash 对 Apple TV（tvOS）的适配也很成熟。
+2. **信号 B：想要轻度玩转社区插件与自动化重写，但不想啃复杂配置** → 关注 **Loon** 或 **Quantumult X**。两者都能比 Shadowrocket 更直观地挂载第三方去广告、流媒体解锁辅助或界面增强插件；其中 Loon 上手更偏向图形化插件开关，Quantumult X 则拥有极深的脚本积累，但两者面对纯 Clash 格式机场订阅时都需要留意格式转换适配。
+3. **信号 C：日常工作强依赖 HTTPS 请求断点、重放与多端网关组网** → 评估 **Surge 5 / Surge Mac**。如果你经常需要抓取手机 App 异常接口、调试 Webhook、或者利用 Mac 与 iPhone 组建稳定内网穿透网关，Surge 提供的生产力价值远超单纯的代理功能；否则不建议普通用户承担其高昂的内购授权开销。
+4. **信号 D：还没有外区支付渠道，或者需要帮家人多台跨品牌设备统一配置** → 选用 **Karing**（sing-box 内核）或 **Hiddify** / **Clash Mi**。它们直接覆盖 Windows、Android、iOS/iPadOS、macOS 与 Linux 五大系统，尤其 [Karing](/clients/sing-box/) 内置多订阅格式自动识别能力，不需要手动折腾 JSON 转换就能快速上手。
+
+---
+
+## 六、Shadowrocket 日常运维与高频故障排查清单
+
+最后整理四项苹果端日常使用最容易遇到的问题与最小化排查路径，遇到异常时无需重置整个手机网络，按顺序逐项核对即可快速定位：
+
+1. **导入后全节点测速超时（Timeout）**：优先检查「设置 — 通用 — 日期与时间」是否开启自动校准；其次确认当前测试方法是否为连通性测试且测试 URL 未被本地运营商干扰；再登录机场面板核对剩余流量配额与套餐有效期。
+2. **微信消息延迟、国内 App 加载卡顿**：检查首页「全局路由」是否误切换到了 `Proxy（代理）`，立即切回 `Config（配置）`；若已经在配置模式，查看正在使用的 `.conf` 文件中是否正确包含了最新的国内直连规则与 `GEOIP,CN,DIRECT`。
+3. **连接香港节点后 ChatGPT 网页报错、TikTok 黑屏、Gemini 提示地区不支持**：这不是 Shadowrocket 软件故障，而是出口节点的地域策略限制。在策略组中把香港节点保留给常规网页浏览，为 AI 平台与 TikTok 单独指派日本、新加坡或美国节点（详参 [ChatGPT 节点风控排查](/ai-media/chatgpt/) 与 [Gemini 地区分化解读](/ai-media/gemini/)）。
+4. **开着代理耗电发热明显，或锁屏后自动断流**：避免使用包含数十万行冗余正则拦截的巨型规则集以免触及 iOS `NetworkExtension` 50MB 内存红线；减少首页高频全量并发测速次数；必要时关闭不需要的本地日志抓取与 MITM 解析功能，让核心以最低功耗常驻运行。

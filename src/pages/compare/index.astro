@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import AnswerSummary from '../../components/AnswerSummary.astro';
+import { buildBreadcrumbSchema, buildItemListSchema } from '../../lib/schema';
+import { toComparePath } from '../../lib/slug';
+
+const comparisons = await getCollection('comparisons');
+const seo = {
+  title: '机场横向对比评测中心｜网络AI',
+  description: '围绕同价位、客户端生态、协议兼容性与不限时流量包等实际决策维度对比多家机场，不强行制造排名。',
+  pathname: '/compare/',
+};
+const schemas = [
+  buildBreadcrumbSchema([{ name: '首页', href: '/' }, { name: '品牌横向对比', href: '/compare/' }]),
+  buildItemListSchema({
+    name: '机场品牌横向对比列表',
+    pathname: '/compare/',
+    items: comparisons.map((c) => ({ name: c.data.h1, href: toComparePath(c.data.slug) })),
+  }),
+];
+---
+
+<BaseLayout seo={seo} schemas={schemas}>
+  <div class="container page-section">
+    <Breadcrumbs items={[{ name: '首页', href: '/' }, { name: '品牌横向对比', href: '/compare/' }]} />
+    <h1>机场品牌横向对比评测</h1>
+    <AnswerSummary summary="所有横向对比仅针对真实有记录的价格、客户端兼容、协议特性与公开资料差异，拒绝用空泛高分决定胜负。" />
+    <div class="grid-cards grid-cards--2" style="margin-top: 1.5rem;">
+      {comparisons.map((c) => (
+        <article class="surface-card">
+          <h2 style="margin-top:0; font-size:1.1rem;"><a href={toComparePath(c.data.slug)}>{c.data.h1}</a></h2>
+          <p style="font-size:0.88rem; color:var(--text-secondary);">{c.data.answerSummary}</p>
+          <a href={toComparePath(c.data.slug)} style="font-size:0.85rem; font-weight:600;">阅读完整对比 →</a>
+        </article>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

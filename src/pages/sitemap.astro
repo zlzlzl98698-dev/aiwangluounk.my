@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { NAV_PILLARS, FOOTER_META_LINKS } from '../data/navigation';
+import { ALL_BRANDS } from '../data/brands';
+import { toBrandPath, toComparePath, toGuidePath } from '../lib/slug';
+import { buildBreadcrumbSchema } from '../lib/schema';
+
+const guides = await getCollection('guides');
+const comparisons = await getCollection('comparisons');
+
+const seo = {
+  title: '全站HTML地图（Sitemap）｜网络AI',
+  description: '网络AI 全站网页索引：包含 10 个一级专题、60 个二级落地页、31 家品牌档案、横向对比与实操指南。',
+  pathname: '/sitemap/',
+};
+const schemas = [buildBreadcrumbSchema([{ name: '首页', href: '/' }, { name: '全站地图', href: '/sitemap/' }])];
+---
+
+<BaseLayout seo={seo} schemas={schemas}>
+  <div class="container page-section">
+    <Breadcrumbs items={[{ name: '首页', href: '/' }, { name: '全站地图', href: '/sitemap/' }]} />
+    <h1>全站页面地图（HTML Sitemap）</h1>
+
+    <div class="grid-cards grid-cards--2" style="margin-top:1.25rem;">
+      {NAV_PILLARS.map((p) => (
+        <section class="surface-card">
+          <h2 style="margin-top:0; font-size:1.1rem;">
+            <a href={p.href}>{p.code} · {p.title}</a>
+          </h2>
+          <ul style="margin:0; padding-left:1.2rem; font-size:0.9rem;">
+            {p.children.map((sub) => (
+              <li style="margin-block:0.25rem;"><a href={sub.href}>{sub.title}</a></li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+
+    <section class="surface-card" style="margin-top:1.5rem;">
+      <h2 style="margin-top:0; font-size:1.15rem;">31 家唯一品牌主评测页（/brands/&#123;slug&#125;/）</h2>
+      <div style="display:flex; flex-wrap:wrap; gap:0.5rem 1rem; font-size:0.9rem;">
+        {ALL_BRANDS.map((b) => (
+          <a href={toBrandPath(b.slug)}>{b.id}. {b.name}</a>
+        ))}
+      </div>
+    </section>
+
+    <div class="grid-cards grid-cards--2" style="margin-top:1.5rem;">
+      <section class="surface-card">
+        <h2 style="margin-top:0; font-size:1.1rem;">深度教程与横向对比</h2>
+        <ul style="margin:0; padding-left:1.2rem; font-size:0.9rem;">
+          <li><a href="/compare/">品牌横向对比中心</a></li>
+          {comparisons.map((c) => (
+            <li><a href={toComparePath(c.data.slug)}>{c.data.h1}</a></li>
+          ))}
+          {guides.map((g) => (
+            <li><a href={toGuidePath(g.data.slug)}>{g.data.h1}</a></li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="surface-card">
+        <h2 style="margin-top:0; font-size:1.1rem;">站点治理与信息透明度</h2>
+        <ul style="margin:0; padding-left:1.2rem; font-size:0.9rem;">
+          {FOOTER_META_LINKS.map((m) => (
+            <li><a href={m.href}>{m.title}</a></li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  </div>
+</BaseLayout>

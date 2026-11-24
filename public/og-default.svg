@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#f8fafc"/>
+  <rect x="48" y="48" width="1104" height="534" rx="20" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <rect x="96" y="104" width="180" height="36" rx="8" fill="#eff6ff"/>
+  <text x="116" y="128" font-family="system-ui, sans-serif" font-size="18" font-weight="600" fill="#1d4ed8">AIWANGLUOUNK.MY</text>
+  <text x="96" y="220" font-family="system-ui, sans-serif" font-size="60" font-weight="700" fill="#0f172a">网络AI · 中文网络服务研究库</text>
+  <text x="96" y="286" font-family="system-ui, sans-serif" font-size="28" fill="#475569">31 家机场品牌档案 · 第三方客户端指南 · 协议线路与事实核查</text>
+  <rect x="96" y="360" width="1008" height="150" rx="14" fill="#0b1324"/>
+  <text x="132" y="415" font-family="ui-monospace, monospace" font-size="20" fill="#93c5fd">NETWORK OBSERVATORY · EVIDENCE-FIRST ARCHITECTURE</text>
+  <text x="132" y="462" font-family="system-ui, sans-serif" font-size="22" fill="#e2e8f0">区分厂商宣称（Vendor）、历史记录（Historical）与独立实测（Measured）</text>
+</svg>

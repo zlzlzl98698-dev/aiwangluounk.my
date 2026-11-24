@@ -1,0 +1,153 @@
+---
+slug: "tun-vs-system-proxy-dns"
+title: "系统代理与 TUN 虚拟网卡深度对比：Fake-IP vs Redir-Host、WSL/Docker 兼容与安全回退"
+description: "讲清代理客户端系统代理与 TUN 模式的区别，解析 DNS 运行机制（Fake-IP 与 Redir-Host 差异）、局域网回环、WSL2/Docker 容器网络冲突排查与安全回退方案。"
+h1: "系统代理 vs TUN 虚拟网卡：DNS 分流机制、开发容器兼容与安全回退"
+pillar: "guides"
+categoryLabel: "网络模式与 DNS"
+targetKeyword: "TUN 模式和系统代理区别"
+secondaryKeywords:
+  - "Fake-IP vs Redir-Host"
+  - "TUN 模式 WSL2 Docker 冲突"
+  - "代理 DNS 污染"
+  - "虚拟网卡安全回退"
+appliesTo: "Windows / macOS / Linux 桌面客户端（Clash Verge Rev / v2rayN / FlClash / Hiddify 等）"
+prerequisites:
+  - "已安装支持 Mihomo 或 sing-box 内核的桌面客户端并成功导入节点"
+  - "理解启用 TUN 虚拟网卡模式通常需要管理员（Windows/macOS）或系统网络服务权限"
+  - "涉及 WSL2 或 Docker 操作时，建议先关闭生产级容器或保存当前网络配置"
+pubDate: "2026-11-23"
+updatedDate: "2026-11-23"
+answerSummary: "系统代理仅在操作系统层面设置一个本地 HTTP/SOCKS 端口，只接管主动遵守系统代理的浏览器与部分桌面软件；而 TUN 模式通过创建虚拟网卡直接在网络三层接管几乎所有本机进程（包括终端命令行、游戏、UWP 应用与不认系统代理的软件）。DNS 方面，Fake-IP 通过快速下发保留网段假 IP 减少本地解析延迟、提升规则匹配效率，但容易与特定内网服务、游戏反作弊或部分开发容器冲突；Redir-Host 返回真实解析 IP，兼容性更稳但有 DNS 泄露或首包略慢的风险。遇到 WSL2/Docker 断网或系统异常时，可通过关闭 TUN、切换 Redir-Host 或重置系统代理安全恢复。"
+faqs:
+  - q: "日常只用来浏览网页和用网页版 AI，需要开 TUN 模式吗？"
+    a: "不需要。普通浏览器（Chrome、Edge、Safari、Firefox）以及大多数桌面应用都能自动读取「系统代理」。只有当你发现终端（git/curl/npm/pip）、独立客户端应用、桌面游戏或某些命令行 AI 工具不走代理超时时，才需要开启 TUN 模式。"
+  - q: "Fake-IP 和 Redir-Host 到底选哪一个？"
+    a: "大多数普通日常用户推荐默认 Fake-IP，响应更快且能最大程度防止本地 DNS 污染；如果你经常需要通过真实域名访问公司内网、SSH 连接特定主机、运行 Docker/WSL2 开发环境，或发现部分局域网设备访问异常，建议切换回 Redir-Host 模式或把内网域名加入 fake-ip-filter 过滤名单。"
+  - q: "为什么开启 TUN 后 WSL2 或 Docker 容器突然无法联网了？"
+    a: "TUN 接管了宿主机全局路由与 DNS（尤其是 Fake-IP 返回的 198.18.0.0/16 假地址），而 WSL2 和 Docker 使用独立的虚拟网桥，跨网桥请求在默认防火墙规则或回环路由下容易被丢弃。Windows 11 可配合启用 WSL2 mirrored（镜像）网络模式并允许局域网连接，或在开发时暂时回退为系统代理加终端环境变量。"
+relatedLinks:
+  - title: "TUN 模式专题指南"
+    href: "/guides/tun/"
+    note: "查看虚拟网卡接管基础概念与权限说明"
+  - title: "DNS 错误排查专题"
+    href: "/troubleshooting/dns/"
+    note: "排查 Fake-IP 残留与局域网域名解析失败"
+  - title: "Windows 客户端全矩阵"
+    href: "/guides/articles/windows-clients-guide/"
+    note: "了解 Clash Verge Rev 与 v2rayN 的 TUN 开启条件"
+  - title: "TUN 与系统代理故障汇总"
+    href: "/troubleshooting/tun-proxy/"
+    note: "解决混合模式端口抢占与网卡状态异常"
+---
+
+## 系统代理与 TUN 虚拟网卡的核心差异
+
+很多用户安装了代理软件并连接成功，却发现浏览器能正常打开网站，而电脑上的游戏启动器、命令行工具 `git clone` / `curl`、或者某些专业软件依然显示连接超时。这正是**工作层级不同**导致的差异。
+
+| 对比维度 | 系统代理 (System Proxy) | TUN 虚拟网卡模式 (TUN Mode) |
+| :--- | :--- | :--- |
+| **工作层级** | 应用层（设置系统 HTTP/SOCKS5 端口变量） | 网络层 / 传输层（创建虚拟网卡接管 IP 数据包） |
+| **接管范围** | 仅限遵守系统代理的浏览器与 GUI 应用 | 几乎全部系统进程（含终端 CLI、游戏、UWP、容器流量） |
+| **UDP 流量支持** | 仅 HTTP 代理不支持 UDP；SOCKS5 需应用主动支持 | 原生接管 TCP 与 UDP 流量（如游戏联机、QUIC/HTTP3） |
+| **系统权限要求** | 普通用户权限即可开关 | Windows 需安装服务模式/管理员权限；macOS/Linux 需提权授权 |
+| **潜在冲突风险** | 较低；程序异常退出可能残留系统代理地址 | 中等；可能与公司 VPN、WSL2/Docker 网桥及杀毒防火墙冲突 |
+| **推荐默认策略** | **日常网页与轻度办公首选** | **终端工具、游戏、全局应用按需开启** |
+
+### 为什么不应该盲目「同时双开」？
+
+部分客户端允许同时打开「系统代理」和「TUN 模式」，但这并非更稳的“双保险”。在很多桌面环境中，双开会让浏览器走本地 HTTP 端口、其他进程走 TUN 网卡，一旦策略分流或 DNS 缓存不同步，极易出现网页卡在半加载状态或日志里出现大量重复回环连接。**标准做法是二选一**：普通使用只开系统代理；需要全局接管时关闭系统代理、仅开 TUN。
+
+## DNS 工作模式解析：Fake-IP vs Redir-Host
+
+无论是使用系统代理还是 TUN，在规则分流（Rule）下客户端都必须判断一个请求该「直连」还是「走代理」，这就涉及 DNS 解析机制的选择。目前 Mihomo（Clash.Meta）与 sing-box 生态主流采用两种 DNS 模式：
+
+### 1. Fake-IP 模式（快速、防污染，现代客户端常见默认）
+
+**工作原理**：当本机向客户端内置 DNS 发起域名查询时，客户端**不等待远端真实解析结果**，而是立即在本地内存建立一张「域名到虚拟 IP」的映射表，直接给操作系统返回一个保留网段 IP（常见为 `198.18.0.0/16`）。随后应用向这个假 IP 发起连接，代理核心再根据内存里的记录还原出原始域名，按规则直连或打包交给海外节点在远端解析。
+
+- **优势**：消除本地真实 DNS 解析等待，首包延迟更低；彻底避免国内运营商 DNS 污染干扰境外域名；能保留完整域名信息供规则引擎匹配（不会因为只看到 IP 而误判）。
+- **缺点与踩坑点**：
+  - 某些程序直接将 `198.18.x.x` IP 硬编码缓存下来，一旦关闭代理软件，程序在缓存过期前仍试图连接已经不存在的假 IP，导致**彻底断网**。
+  - 部分网银安全控件、游戏反作弊驱动或公司内网零信任客户端会对 `198.18.0.0/16` 地址产生异常告警。
+  - 同一台设备上运行多个网络虚拟化工具时，`198.18.0.0/16` 路由表容易发生重叠。
+
+### 2. Redir-Host 模式（返回真实 IP，兼容传统直连场景）
+
+**工作原理**：客户端内置 DNS 会实际向配置好的上游 DNS（如国内 DoH/UDP 解析国内域名，安全 DNS 解析海外域名）发起查询，把**真实的公网 IP**返回给操作系统；同时通过域名嗅探（Sniffer）或 GeoIP 规则决定流量去向。
+
+- **优势**：操作系统拿到的是真实 IP，几乎不会破坏任何传统软件、本地局域网解析、内网 VPN 或开发环境逻辑；即使突然关闭代理客户端，一般也不会留下假 IP 缓存残骸。
+- **缺点**：首包解析需要等待上游 DNS 返回，极端弱网下略慢于 Fake-IP；如果上游 DNS 配置不当（例如误用国内明文 DNS 解析境外站点），可能出现 DNS 泄露或结果被污染。
+
+### Fake-IP 常见安全过滤名单（`fake-ip-filter`）
+
+如果你希望保留 Fake-IP 的高性能，又不想影响 Windows 网络状态图标（防止系统误报「无 Internet 连接」）、NTP 时间同步、局域网设备发现或联机平台，建议确认客户端配置中包含如下常见过滤域（以 YAML 片段示意）：
+
+```yaml
+dns:
+  enable: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - "*.lan"
+    - "*.local"
+    - "time.*.com"
+    - "time.*.gov"
+    - "ntp.*.com"
+    - "+.msftconnecttest.com"
+    - "+.msftncsi.com"
+    - "localhost.ptlogin2.qq.com"
+```
+
+注意不要随意删除机场订阅自带或客户端内置的 `fake-ip-filter` 规则，否则很可能导致微信扫码登录卡死或 Windows 任务栏网络图标变成小地球。
+
+## 开发环境兼容性：WSL2 与 Docker 冲突排查
+
+开发者在 Windows 启用 TUN 模式（尤其配合 Fake-IP）时，经常遇到 **WSL2（Ubuntu 子系统）** 或 **Docker Desktop** 容器内无法拉取镜像、`apt update` 卡死或宿主机与容器互相无法通信的问题。
+
+### 冲突成因
+
+1. **WSL2 传统 NAT 网桥隔离**：默认 NAT 模式下，WSL2 拥有独立的虚拟子网，它发出的请求在 Windows 宿主机看来属于「来自外部/局域网的入站流量」。如果桌面代理客户端没有开启「允许局域网连接（Allow LAN）」，或 Windows 防火墙拦截了来自 `vEthernet (WSL)` 虚拟网卡的入站数据包，WSL2 就会完全断网。
+2. **Fake-IP 无法跨网卡解析**：WSL2 默认自动生成的 `/etc/resolv.conf` 指向宿主机虚拟网关；如果宿主机处于 Fake-IP 模式，WSL2 拿到的 `198.18.x.x` 地址在部分网络拓扑下无法正确被宿主机的 TUN 网卡路由回代理核心。
+
+### 稳妥解决与兼容方案（按推荐优先级）
+
+#### 方案 A：Windows 11 开启 WSL2 Mirrored（镜像）网络模式（推荐）
+
+Windows 11（22H2 及以上更新）支持镜像网络模式，让 WSL2 直接共享宿主机的网络接口与本地环回地址，能大幅减少 TUN 模式冲突。在 Windows 用户目录 `%USERPROFILE%\.wslconfig` 中添加配置并重启 WSL：
+
+```ini
+[wsl2]
+networkingMode=mirrored
+dnsTunneling=true
+autoProxy=true
+```
+
+修改后在 PowerShell 执行 `wsl --shutdown` 重启子系统即可生效。
+
+#### 方案 B：仅开启系统代理 + 开发终端显式指定环境变量（零冲突）
+
+如果你只需要在 WSL2 或 Docker 构建时加速拉取 GitHub 开源依赖或镜像，而不必让全系统都挂在 TUN 虚拟网卡下：
+
+1. 关闭客户端 TUN 模式，只保留「系统代理」。
+2. 在客户端内开启 **允许局域网连接（Allow LAN）**，并确认本地混合端口（例如 `7897`，以客户端实际端口为准）。
+3. 在 WSL2 中动态获取宿主机 IP 并设置 `http_proxy` / `https_proxy`，或者在 Docker Desktop 的「Settings — Resources — Proxies」中直接填入宿主机代理端口，避免任何底层网卡路由抢占。
+
+#### 方案 C：TUN 下切换为 Redir-Host 并将容器网段加入路由排除
+
+如果必须长期开启 TUN 模式同时使用 Docker 容器网桥，在客户端配置中将 DNS 模式切换为 **Redir-Host**，并在客户端 TUN 设置的 `route-exclude-address` 中排除 Docker 默认网段（如 `172.17.0.0/16`），防止容器内部通信流量被误吸入代理隧道。
+
+## 异常断网后的安全回退与系统还原步骤
+
+如果在尝试 TUN 模式或修改 DNS 设置后，突然发现「代理关了也上不了网」「浏览器提示代理服务器没有响应」，请严格按照以下**无损回退流程**恢复网络，切勿随便下载来路不明的「一键断网修复工具」：
+
+1. **正确退出客户端**：不要在任务管理器直接强杀进程！先在客户端界面手动关闭「TUN 模式」和「系统代理」两个开关，再从托盘图标点击「退出（Exit）」。正常退出时客户端会自动撤销其写入的系统代理设置并卸载虚拟网卡。
+2. **检查 Windows 系统代理残留**：
+   打开 Windows「设置」—「网络和 Internet」—「代理」，确认「使用代理服务器」处于 **关闭** 状态。若发现残留了 `127.0.0.1:7890` 等地址，手动点关闭并保存。
+3. **检查 macOS 网络代理残留**：
+   打开「系统设置」—「网络」— 当前连接的 Wi-Fi 或以太网 —「详细信息」—「代理」，确认网页代理（HTTP）、安全网页代理（HTTPS）与 SOCKS 代理全部处于关闭状态。
+4. **清理残留 Fake-IP DNS 缓存**：
+   - Windows 管理员命令提示符 / PowerShell：`ipconfig /flushdns`
+   - macOS 终端：`sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder`
+5. **排查适配器禁用问题**：若强制结束过 TUN 服务导致物理网卡 DNS 被锁定为 `127.0.0.1` 或 `198.18.0.2`，进入「控制面板 — 网络和共享中心 — 更改适配器设置」，右键当前物理网卡（WLAN 或以太网）—「属性」—「Internet 协议版本 4 (TCP/IPv4)」，确认已恢复为「自动获得 IP 地址」和「自动获得 DNS 服务器地址」。
+6. **重启对应应用程序**：对于缓存了假 IP 的浏览器或终端窗口，刷新 DNS 后关闭重开一次该应用即可彻底恢复正常直连。

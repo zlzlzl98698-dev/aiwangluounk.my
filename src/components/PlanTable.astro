@@ -1,0 +1,83 @@
+---
+import type { PlanRecord } from '../data/brandSchema';
+import SourceBadge from './SourceBadge.astro';
+
+interface Props {
+  brandName: string;
+  plans: PlanRecord[];
+  sourceLabel: string;
+  sourceDate: string;
+  discountPolicy: string;
+}
+
+const { brandName, plans, sourceLabel, sourceDate, discountPolicy } = Astro.props;
+---
+
+<section aria-label={`${brandName}套餐价格表`}>
+  <div class="plan-meta">
+    <span><strong>数据来源：</strong>{sourceLabel}</span>
+    <span><strong>归档日期：</strong>{sourceDate}</span>
+    <span><strong>优惠与折扣记录：</strong>{discountPolicy}</span>
+  </div>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>套餐名称</th>
+          <th>计费周期</th>
+          <th>原始标价</th>
+          <th>流量与周期</th>
+          <th>折算月均</th>
+          <th>状态 / 特殊说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        {plans.map((p) => (
+          <tr>
+            <td><strong>{p.name}</strong></td>
+            <td>{p.billingCycle}</td>
+            <td class="mono">{p.priceCny !== null ? `¥${p.priceCny}` : '待核实'}</td>
+            <td>
+              {p.trafficAmount !== null
+                ? `${p.trafficAmount}${p.trafficUnit === 'TB' && p.trafficAmount >= 1000 ? 'GB' : p.trafficUnit} / ${p.trafficResetCycle}`
+                : '待核实'}
+            </td>
+            <td class="mono">
+              {p.isOneTime
+                ? '一次性流量包'
+                : p.effectiveMonthlyCny !== null
+                  ? p.billingCycle === '月付'
+                    ? `¥${p.effectiveMonthlyCny}/月`
+                    : `约 ¥${p.effectiveMonthlyCny}/月（按${p.billingCycle}折算）`
+                  : '待核实'}
+            </td>
+            <td>
+              <SourceBadge status={p.sourceStatus} />
+              {p.specialNotes && <div class="plan-note">{p.specialNotes}</div>}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<style>
+  .plan-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 1.25rem;
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+    background: var(--bg-muted);
+    padding: 0.7rem 0.9rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.65rem;
+  }
+  .plan-note {
+    margin-top: 0.3rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+</style>

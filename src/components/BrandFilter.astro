@@ -1,0 +1,197 @@
+---
+interface Props {
+  totalCount: number;
+}
+
+const { totalCount } = Astro.props;
+---
+
+<section class="brand-filter surface-card" aria-label="品牌库检索与筛选控件">
+  <div class="bf-row">
+    <div class="bf-field bf-field--search">
+      <label for="bf-search">关键词搜索品牌或别名</label>
+      <input id="bf-search" type="search" placeholder="例如：光速云、Firefly、IEPL、不限时..." />
+    </div>
+    <div class="bf-field">
+      <label for="bf-client">客户端模式</label>
+      <select id="bf-client">
+        <option value="all">全部模式</option>
+        <option value="yes">支持通用订阅导入</option>
+        <option value="no_dedicated_only">仅限专属客户端</option>
+        <option value="pending">待核实</option>
+      </select>
+    </div>
+    <div class="bf-field">
+      <label for="bf-nonexpiring">不限时流量包</label>
+      <select id="bf-nonexpiring">
+        <option value="all">不限</option>
+        <option value="yes">包含一次性不限时</option>
+      </select>
+    </div>
+    <div class="bf-field">
+      <label for="bf-completeness">资料完整度</label>
+      <select id="bf-completeness">
+        <option value="all">全部完整度</option>
+        <option value="high">高完整度（含套餐+历史表）</option>
+        <option value="medium">中等完整度</option>
+        <option value="basic">基础档案（待核实较多）</option>
+      </select>
+    </div>
+    <div class="bf-field">
+      <label for="bf-sort">排序依据</label>
+      <select id="bf-sort">
+        <option value="priority">站内编辑候选顺位</option>
+        <option value="price-asc">折算入门价从低到高</option>
+        <option value="completeness">资料完整度优先</option>
+      </select>
+    </div>
+  </div>
+  <div class="bf-status">
+    <span id="bf-count">当前共展示 {totalCount} / {totalCount} 家唯一品牌（注意：编辑顺位不代表测速性能排名）</span>
+    <button type="button" id="bf-reset" class="btn btn-secondary bf-reset">重置筛选</button>
+  </div>
+</section>
+
+<div id="bf-empty" class="bf-empty surface-card" hidden>
+  <strong>未找到匹配的品牌记录</strong>
+  <p>请尝试清空关键词、切换客户端模式或重置筛选条件查看全部 31 家品牌档案。</p>
+</div>
+
+<script>
+  const searchInput = document.getElementById('bf-search') as HTMLInputElement | null;
+  const clientSelect = document.getElementById('bf-client') as HTMLSelectElement | null;
+  const nonExpSelect = document.getElementById('bf-nonexpiring') as HTMLSelectElement | null;
+  const compSelect = document.getElementById('bf-completeness') as HTMLSelectElement | null;
+  const sortSelect = document.getElementById('bf-sort') as HTMLSelectElement | null;
+  const resetBtn = document.getElementById('bf-reset') as HTMLButtonElement | null;
+  const countEl = document.getElementById('bf-count');
+  const emptyEl = document.getElementById('bf-empty');
+  const gridEl = document.getElementById('brand-directory-grid');
+
+  const params = new URLSearchParams(window.location.search);
+  if (searchInput && params.get('q')) searchInput.value = params.get('q') ?? '';
+
+  function applyFilter() {
+    if (!gridEl) return;
+    const cards = Array.from(gridEl.querySelectorAll<HTMLElement>('.brand-card'));
+    const q = (searchInput?.value ?? '').trim().toLowerCase();
+    const client = clientSelect?.value ?? 'all';
+    const nonExp = nonExpSelect?.value ?? 'all';
+    const comp = compSelect?.value ?? 'all';
+    const sort = sortSelect?.value ?? 'priority';
+
+    let visibleCount = 0;
+    const compScore: Record<string, number> = { high: 3, medium: 2, basic: 1 };
+
+    cards.sort((a, b) => {
+      if (sort === 'price-asc') {
+        return Number(a.dataset.price ?? 999) - Number(b.dataset.price ?? 999);
+      }
+      if (sort === 'completeness') {
+        return (compScore[b.dataset.completeness ?? 'basic'] ?? 0) - (compScore[a.dataset.completeness ?? 'basic'] ?? 0);
+      }
+      return Number(a.dataset.priority ?? 99) - Number(b.dataset.priority ?? 99);
+    });
+
+    for (const card of cards) {
+      gridEl.appendChild(card);
+      const text = `${card.dataset.name} ${card.dataset.aliases} ${card.dataset.route} ${card.textContent?.toLowerCase() ?? ''}`;
+      const matchQ = !q || text.includes(q);
+      const matchClient = client === 'all' || card.dataset.clientmode === client;
+      const matchNonExp = nonExp === 'all' || card.dataset.nonexpiring === nonExp;
+      const matchComp = comp === 'all' || card.dataset.completeness === comp;
+
+      const show = matchQ && matchClient && matchNonExp && matchComp;
+      card.hidden = !show;
+      if (show) visibleCount += 1;
+    }
+
+    if (countEl) {
+      countEl.textContent = `当前共展示 ${visibleCount} / ${cards.length} 家唯一品牌（编辑顺位不代表测速排名）`;
+    }
+    if (emptyEl) {
+      emptyEl.hidden = visibleCount > 0;
+    }
+  }
+
+  [searchInput, clientSelect, nonExpSelect, compSelect, sortSelect].forEach((el) => {
+    el?.addEventListener('input', applyFilter);
+    el?.addEventListener('change', applyFilter);
+  });
+
+  resetBtn?.addEventListener('click', () => {
+    if (searchInput) searchInput.value = '';
+    if (clientSelect) clientSelect.value = 'all';
+    if (nonExpSelect) nonExpSelect.value = 'all';
+    if (compSelect) compSelect.value = 'all';
+    if (sortSelect) sortSelect.value = 'priority';
+    applyFilter();
+  });
+
+  applyFilter();
+</script>
+
+<style>
+  .brand-filter {
+    margin-bottom: 1.25rem;
+  }
+  .bf-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  @media (min-width: 720px) {
+    .bf-row {
+      grid-template-columns: 2fr repeat(4, 1fr);
+    }
+  }
+  .bf-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .bf-field label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .bf-field input,
+  .bf-field select {
+    width: 100%;
+    height: 42px;
+    box-sizing: border-box;
+    padding: 0 0.65rem;
+    font-size: 0.88rem;
+    line-height: 1.25;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+  }
+  .bf-status {
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-hairline);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+  .bf-reset {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  .bf-empty {
+    text-align: center;
+    padding: 2rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .bf-empty p {
+    margin: 0.35rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+  }
+</style>

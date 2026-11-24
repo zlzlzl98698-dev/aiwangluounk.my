@@ -1,0 +1,126 @@
+---
+interface Props {
+  brandName: string;
+  accentColor: string;
+  protocolSummary: string;
+  routeSummary: string;
+  egressRegions: string;
+  isVerifiedPath?: boolean;
+}
+
+const {
+  brandName,
+  accentColor,
+  protocolSummary,
+  routeSummary,
+  egressRegions,
+  isVerifiedPath = false,
+} = Astro.props;
+---
+
+<section class="obs-panel" style={`--accent: ${accentColor};`} aria-label={`${brandName} 网络路径示意图`}>
+  <div class="obs-panel__head">
+    <div>
+      <div class="obs-panel__eyebrow">NETWORK PATH OBSERVATORY · CONCEPTUAL TOPOLOGY</div>
+      <h3 class="obs-panel__title">{brandName} 接入与路由架构示意图</h3>
+    </div>
+    <span class="npo-badge">
+      {isVerifiedPath ? '已核验实测路由' : '官方线路示意 · 未核验实际物理路径'}
+    </span>
+  </div>
+
+  <div class="npo-flow" role="img" aria-label={`${brandName} 接入拓扑示意图：本地终端经加密协议连接入口节点，再按资料宣称路径转至海外落地`}>
+    <div class="npo-node">
+      <div class="npo-node__tag">STEP 01 · CLIENT</div>
+      <strong>用户终端设备</strong>
+      <span>桌面 / 移动 / 软路由</span>
+    </div>
+    <div class="npo-link">
+      <span class="mono">{protocolSummary}</span>
+      <div class="npo-line"></div>
+    </div>
+    <div class="npo-node">
+      <div class="npo-node__tag">STEP 02 · INGRESS</div>
+      <strong>宣称接入/中转段</strong>
+      <span>{routeSummary}</span>
+    </div>
+    <div class="npo-link">
+      <span class="mono">跨境传输段（未独立 traceroute 验证）</span>
+      <div class="npo-line npo-line--dashed" style={`border-color: ${accentColor};`}></div>
+    </div>
+    <div class="npo-node">
+      <div class="npo-node__tag">STEP 03 · EGRESS</div>
+      <strong>海外落地出口</strong>
+      <span>{egressRegions}</span>
+    </div>
+  </div>
+
+  <p class="obs-note">
+    技术声明：此图为基于品牌文字资料绘制的逻辑示意图，并非对该品牌物理跨境电路的实测证明。不可凭“公网 IP”或“原生 IP”直接等同为物理 IEPL/IPLC 专线。
+  </p>
+</section>
+
+<style>
+  .npo-badge {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    background: rgba(245, 158, 11, 0.16);
+    color: #fcd34d;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+  }
+  .npo-flow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+    align-items: center;
+  }
+  @media (min-width: 860px) {
+    .npo-flow {
+      grid-template-columns: 1fr auto 1.2fr auto 1fr;
+    }
+  }
+  .npo-node {
+    background: var(--obs-card);
+    border: 1px solid var(--obs-border);
+    border-radius: var(--radius-md);
+    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .npo-node__tag {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: #93c5fd;
+  }
+  .npo-node strong {
+    color: #ffffff;
+    font-size: 0.92rem;
+  }
+  .npo-node span {
+    font-size: 0.78rem;
+    color: var(--obs-text-muted);
+  }
+  .npo-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--obs-text-muted);
+    min-width: 110px;
+  }
+  .npo-line {
+    width: 100%;
+    height: 2px;
+    background: rgba(148, 163, 184, 0.5);
+  }
+  .npo-line--dashed {
+    height: 0;
+    background: transparent;
+    border-top: 2px dashed;
+  }
+</style>

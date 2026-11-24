@@ -1,0 +1,108 @@
+---
+import type { NavPillar } from '../data/navigation';
+
+interface Props {
+  pillar: NavPillar;
+}
+
+const { pillar } = Astro.props;
+---
+
+<div class="mega-panel" id={`menu-${pillar.id}`} role="region" aria-label={`${pillar.title} 二级专题`}>
+  <div class="mega-panel__head">
+    <div>
+      <span class="mega-panel__code mono">{pillar.code}</span>
+      <strong>{pillar.title}</strong>
+    </div>
+    <a href={pillar.href} class="mega-panel__all">进入栏目首页 →</a>
+  </div>
+  <p class="mega-panel__summary">{pillar.summary}</p>
+  <ul class="mega-panel__grid">
+    {pillar.children.map((item) => (
+      <li>
+        <a href={item.href} class="mega-item">
+          <strong>{item.title}</strong>
+          <span>{item.description}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .mega-panel {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: min(560px, 92vw);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.14);
+    padding: 1rem 1.15rem;
+    z-index: 60;
+  }
+  :global(.nav-item.is-open) > .mega-panel,
+  :global(.nav-item:hover) > .mega-panel,
+  :global(.nav-item:focus-within) > .mega-panel {
+    display: block;
+  }
+  .mega-panel__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+  .mega-panel__code {
+    font-size: 0.74rem;
+    color: var(--brand-cyan);
+    margin-right: 0.35rem;
+  }
+  .mega-panel__all {
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .mega-panel__summary {
+    margin: 0.5rem 0 0.75rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .mega-panel__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  .mega-item {
+    display: block;
+    padding: 0.55rem 0.65rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background-color 120ms ease, border-color 120ms ease;
+  }
+  .mega-item:hover,
+  .mega-item:focus-visible {
+    background: var(--bg-subtle);
+    border-color: rgba(29, 78, 216, 0.22);
+  }
+  .mega-item strong {
+    display: block;
+    font-size: 0.86rem;
+    color: var(--text-primary);
+  }
+  .mega-item span {
+    display: block;
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin-top: 0.15rem;
+  }
+</style>

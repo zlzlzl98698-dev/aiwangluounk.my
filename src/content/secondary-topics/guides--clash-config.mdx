@@ -1,0 +1,521 @@
+---
+pillarId: "guides"
+slug: "clash-config"
+title: "Clash / Mihomo 配置文件完整结构与 Merge / Script 覆写工程教程｜网络AI"
+description: "从零拆解 Clash/Mihomo YAML 配置文件结构：系统解析全局字段、DNS 解析链路、策略组选型防风控、规则集引入与 Verge Merge 脚本无损覆写模板。"
+h1: "Clash / Mihomo 配置文件完整结构与覆写工程教程：全局字段、DNS、策略组与 Merge / Script 实战"
+intent: "配置文件拆解与覆写工程指南"
+targetKeyword: "Clash Mihomo 配置文件结构与覆写教程"
+secondaryKeywords:
+  - "Clash mixed-port allow-lan mode 含义"
+  - "Mihomo dns fake-ip redir-host nameserver fallback"
+  - "proxy-groups select url-test fallback load-balance 区别"
+  - "Clash Verge Rev Merge Script 覆写模板"
+  - "rule-providers mrs 规则集配置"
+longTailKeywords:
+  - "Clash 配置文件里 fake-ip 和 redir-host 到底有什么区别怎么选"
+  - "为什么用 Claude 和 ChatGPT 不能开 url-test 和 load-balance 策略组"
+  - "Clash Verge Rev 更新订阅后自定义规则消失怎么用 Merge 或 Script 保留"
+  - "Mihomo 配置文件 dns 模块的 nameserver 和 fallback 是怎么工作的"
+  - "Clash YAML 中 mixed-port 和 allow-lan 开启有什么安全风险"
+entities:
+  - "Clash YAML"
+  - "Mihomo"
+  - "Clash Verge Rev"
+  - "mixed-port"
+  - "allow-lan"
+  - "fake-ip"
+  - "redir-host"
+  - "nameserver"
+  - "fallback"
+  - "proxy-groups"
+  - "rule-providers"
+  - "Merge / Script 覆写"
+keywordBoundary: "聚焦 Clash / Mihomo YAML 配置文件的工程架构拆解、全局基础参数、DNS 模块原理、四大策略组类型选型、rule-providers 语法及 Clash Verge Rev Merge/Script 持久化覆写模板；分流规则语义优先级（DOMAIN/GEOSITE/GEOIP/no-resolve）与 AI/流媒体完整规则表归入 /guides/routing-rules/，桌面端安装与 TUN 服务模式权限归入 /clients/clash-verge-rev/。"
+answerFirst: "一份标准 Clash / Mihomo YAML 配置文件由五大核心区块自上而下构成：全局运行参数（mixed-port、allow-lan、mode 等）、dns 解析引擎（决定 fake-ip 与 redir-host 工作方式及 nameserver/fallback 抗污染分工）、proxies 节点池、proxy-groups 策略调度组（select、url-test、fallback、load-balance）以及 rule-providers 与 rules 分流规则树。工程实践中最关键的两条铁律是：第一，使用 Claude、ChatGPT 等高风控敏感服务时，策略组严禁采用高频自动切换的 url-test 或分散出口的 load-balance，必须使用手动锁定（select）固定单一非香港优质节点，以免 IP 跳变触发账号风控；第二，绝对不要直接手动修改导入后的机场原始订阅 YAML，因为每次定时更新订阅都会覆写抹除本地改动——正确做法是在 Clash Verge Rev 等现代客户端中启用 Merge（YAML 增量合并）或 Script（JavaScript 动态注入）覆写模板，让个人定制在订阅刷新后依然自动持久化生效。"
+updatedDate: "2026-11-24"
+ctaHeading: "深入学习规则语法或排查配置故障"
+ctaActions:
+  - label: "继续学习分流规则深度实战"
+    href: "/guides/routing-rules/"
+    style: "primary"
+  - label: "查看 Mihomo 内核架构全解"
+    href: "/clients/mihomo/"
+    style: "secondary"
+  - label: "对照 Clash Verge Rev 桌面操作"
+    href: "/clients/clash-verge-rev/"
+    style: "secondary"
+relatedLinks:
+  - title: "TUN 虚拟网卡与 DNS 回退指南"
+    href: "/guides/articles/tun-vs-system-proxy-dns/"
+    category: "使用教程"
+    reason: "理解开启 TUN 模式后 DNS 接管、fake-ip-filter 与容器冲突排查"
+  - title: "Claude 访问与防风控隔离"
+    href: "/ai-media/claude/"
+    category: "AI 与流媒体"
+    reason: "掌握为什么必须用 select 策略组固定出口 IP 以避免 Claude 会话异常"
+  - title: "DNS 污染与泄漏专项排障"
+    href: "/troubleshooting/dns/"
+    category: "故障排查"
+    reason: "排查 nameserver 配置不当导致的国内站走慢或海外域名解析失败"
+  - title: "Clash Meta 生态演进对照"
+    href: "/clients/clash-meta/"
+    category: "客户端"
+    reason: "厘清原版 Clash 与 Clash.Meta / Mihomo 配置文件字段兼容边界"
+faqs:
+  - q: "为什么每次更新机场订阅后，我在配置文件里手动改好的规则和策略组全都没了？"
+    a: "因为客户端更新订阅的机制是用服务端拉取到的最新 YAML 文件全量覆盖本地旧文件。任何直接编辑源订阅档案的操作都会在下次手动刷新或 24 小时自动更新时被抹除。要实现永久定制，必须在客户端使用「配置覆写（Clash Verge Rev 中的 Merge 全局扩展配置或 Script 全局扩展脚本）」，让客户端在每次拉取新订阅后自动把你的定制逻辑重新注入。"
+  - q: "配置文件里的 mixed-port 和早年的 port、socks-port 有什么区别？"
+    a: "早年配置需要分别占用 port（仅 HTTP/HTTPS 代理，常为 7890）和 socks-port（仅 SOCKS5 代理，常为 7891）两个端口；而 mixed-port（如 7897）允许同一个端口同时自动识别并处理 HTTP 和 SOCKS5 两种代理协议请求。现代 Mihomo 客户端基本统一使用 mixed-port，既减少端口冲突，也方便在命令行终端里同时配置 HTTP_PROXY 与 ALL_PROXY。"
+  - q: "使用 Claude 或 ChatGPT 时，为什么强烈建议把策略组从 url-test 改成 select 并禁用自动切换？"
+    a: "url-test 会在后台每隔几分钟自动测速，一旦原节点延迟波动几毫秒就自动切换到另一个节点甚至另一个国家；load-balance 更会把同一网页的并发请求轮询或哈希分摊到不同出口 IP。Anthropic（Claude）与 OpenAI 对机房 IP 与会话 IP 漂移极其敏感，短时间内多国出口 IP 跳变极易触发强制退出、人机验证死循环甚至账号风控。因此 AI 专用策略组必须设为 select 手动锁定 1–2 个稳定非香港节点。"
+  - q: "dns 模块中的 fake-ip 和 redir-host 应该怎么选？各自有什么副作用？"
+    a: "fake-ip 在客户端收到域名查询时立即返回一个 198.18.0.0/16 保留段虚构 IP 并建立映射，首包无需等待远端 DNS 解析，响应极快且规则匹配最准确，适合绝大多数普通桌面浏览与移动端。但其副作用是虚构 IP 留在缓存或传入 WSL2、Docker 容器、部分内网客户端时容易引发连不上内网或断流。如果你重度运行本地开发容器或企业内网 VPN，可改用 redir-host（配合 sniffer 域名嗅探），或在 fake-ip-filter 中显式放行内网域名。"
+  - q: "dns 配置里的 nameserver 和 fallback 分别起什么作用？能全部填国外公共 DNS 吗？"
+    a: "不能全填国外 DNS。在经典 Mihomo DNS 架构中，nameserver 负责国内域名或常规基础解析（通常填 223.5.5.5、119.29.29.29 等国内加密 DoH/DoT），保证国内 CDN 拿到最近的本地服务器 IP；fallback 填海外加密 DNS（如 Cloudflare 或 Google DoH），用于处理境外或疑似被污染的解析结果。如果把国内 CDN 域名全交给国外 DNS 解析，会导致在国内看国内视频或下载大文件时被调度到海外节点，速度暴跌。"
+  - q: "在咖啡厅、机场等公共 Wi-Fi 环境下，配置文件里的 allow-lan 为什么必须设为 false？"
+    a: "当 allow-lan 设为 true 时，Mihomo 会向局域网所有设备开放你的 mixed-port 代理端口（绑定 0.0.0.0 或局域网地址）。如果你在没有独立认证（authentication）保护的情况下连入公共 Wi-Fi，同一网络下的任何陌生设备只要扫描到你的局域网 IP 和端口，就可以直接白嫖你的机场节点与套餐流量，甚至带来本地网络审计风险。只有在家中可信内网给手机、Switch 共享代理时才应临时开启并尽量配置鉴权。"
+  - q: "写错了 Clash Verge Rev 的 Merge 或 Script 覆写代码导致核心报错无法启动，怎么快速恢复？"
+    a: "不要卸载软件或重装驱动。直接打开 Clash Verge Rev 的「订阅（Profiles）」界面，右键点击当前正在使用的配置卡片（或打开左侧「订阅设置 / 全局覆写」面板），暂时取消勾选你刚刚启用或编辑的全局扩展配置与全局扩展脚本，重新点选一次原订阅使内核恢复运行，然后再对照错误提示检查 YAML 空格缩进（严禁使用 Tab 键）或 JavaScript 括号语法。"
+---
+
+很多用户用了一两年代理软件，停留在「导入订阅、点开代理开关、选一个香港节点」的阶段，却始终没弄明白为什么一旦机场更新订阅，自己辛苦调好的规则就全没了；为什么家里千兆宽带开了代理，访问国内网盘或公司内网反而慢得像蜗牛；又或者为什么开启了「自动选择最低延迟」后，Claude 网页端隔三差五就把账号踢出登录要求重新验证。
+
+这些看似玄学的日常痛点，答案几乎全部写在 **Clash / Mihomo（原 [Clash.Meta](/clients/clash-meta/)）YAML 配置文件** 的结构里。哪怕你平时使用的是 [Clash Verge Rev](/clients/clash-verge-rev/)、`FlClash`、`Stash` 或软路由 `OpenClash` / `Nikki` 等图形界面，这些外壳程序最终交给底层引擎执行的，依然是一份标准化的 [Mihomo](/clients/mihomo/) YAML 文件。本教程将按照真实工程结构，逐块拆解一份完整的 Mihomo 配置文件，讲清每一个关键字段的运行逻辑、选型代价与避坑红线，并直接给出可直接投入使用的 `Merge` 与 `Script` 无损覆写模板。
+
+---
+
+## 一、Clash / Mihomo 配置文件的五大核心骨架与加载逻辑
+
+一份完整的 Mihomo YAML 配置文件采用严格的两空格缩进结构（**严禁使用 Tab 制表符**），核心由五大顶级字段区自上而下构成：
+
+1. **基础全局运行区（General）**：定义代理监听端口、局域网共享权限、运行模式、日志等级、IPv6 开关与外部 RESTful 控制面板接口。
+2. **域名解析模块（`dns`）**：决定本地流量如何查询域名、如何区分国内外解析链路以防止国内 CDN 绕远，以及与 `TUN` 虚拟网卡协同工作时采用 `fake-ip` 还是 `redir-host` 模式。
+3. **出站节点池（`proxies` 与 `proxy-providers`）**：存放机场下发的所有服务器节点实体（如 `VLESS`、`Shadowsocks`、`Trojan`、`Hysteria 2`、`AnyTLS` 的地址、端口与加密凭据）。
+4. **策略调度组（`proxy-groups`）**：将零散的节点按地区、用途或选路逻辑打包成可切换的分组（`select`、`url-test`、`fallback`、`load-balance`），是用户在图形界面上看到的「节点选择」「AI 专用」「流媒体」等选项卡的真正来源。
+5. **分流规则集与规则树（`rule-providers` 与 `rules`）**：规定每一条网络请求经过客户端时究竟走 `DIRECT`（直连）、`REJECT`（拦截），还是交由某一个具体的策略组转发。
+
+理解了这五块的分工，就能明白**为什么不能直接手改机场原订阅文件**：每次点击更新订阅（关于不同订阅格式与链接结构，可参见 [订阅获取与格式指南](/guides/subscription/)），机场后端都会重新下发一份全新的第 3、4、5 块（有时还会附带第 1、2 块）直接覆写你的本地文件。因此，在工程实践中，应当将「机场原订阅」视为只读的节点数据源，而把你自己的端口安全、DNS 优化、AI 分流策略组与个性化规则放进客户端的 **配置覆写（Merge / Script）** 中运行。
+
+---
+
+## 二、逐块拆解一：基础全局字段（`mixed-port`、`allow-lan`、`mode` 等）
+
+配置文件最顶部是控制内核行为的基础字段。下面先看一份兼顾安全与现代性能的推荐基础段模板：
+
+```yaml
+# ==========================================
+# 1. 基础全局配置 (General)
+# ==========================================
+mixed-port: 7897              # HTTP 与 SOCKS5 混合监听端口（替代旧版 port + socks-port）
+allow-lan: false              # 公共网络务必关闭；仅家庭可信局域网共享时临时改 true
+bind-address: "127.0.0.1"     # allow-lan 为 false 时绑定本地回环地址增强安全
+mode: rule                    # 运行模式：rule（规则分流）/ global（全局）/ direct（直连）
+log-level: info               # 日志级别：silent / error / warning / info / debug
+ipv6: false                   # 本地宽带无稳定 IPv6 或节点不支持时建议设为 false 防超时
+unified-delay: true           # 开启统一延迟计算，去除握手额外开销对测速排序的干扰
+tcp-concurrent: true          # 允许并发连接，改善多 IP 域名首包加载速度
+find-process-mode: strict     # 进程匹配模式（仅在支持进程分流的本地端生效）
+global-client-fingerprint: chrome # 统一 TLS 指纹伪装，降低部分服务端特征识别风险
+
+# 外部控制接口（供图形界面面板或本地 Web 控制台读取连接日志）
+external-controller: 127.0.0.1:9097
+```
+
+逐项解释其中最容易引发故障或安全隐患的核心字段：
+
+- **`mixed-port` 混合端口**：早期教程常同时写 `port: 7890`（仅 HTTP）与 `socks-port: 7891`（仅 SOCKS5）。Mihomo 推荐统一只配置一个 `mixed-port`（`Clash Verge Rev` 默认常为 `7897`）。单端口同时兼容 HTTP 与 SOCKS5 协议，既避免了同时占用两个端口增加冲突概率，也让开发终端设置环境变量时只需记住一个端口号。如果启动内核时报错端口被占用，通常是电脑上同时开着另一款代理工具或游戏加速器，把 `7897` 改成 `17897` 等高位端口即可。
+- **`allow-lan` 局域网共享与公共 Wi-Fi 安全防线**：设为 `false` 时，代理端口只接收来自本机 `127.0.0.1` 的流量；设为 `true` 时，内核会监听所有网卡接口（`0.0.0.0`），局域网里的手机、平板或游戏主机只要把代理指向你电脑的局域网 IP 和 `7897` 端口就能借道上网。**安全警告**：在咖啡厅、机场、酒店等公共 Wi-Fi 下，如果忘记把 `allow-lan` 关回 `false` 且未设置 `authentication` 用户名密码，同一网段的陌生主机就能直接扫描并使用你的机场流量（详见 [使用隐私与安全准则](/risks/privacy/)）。
+- **`mode` 运行模式**：日常 99% 的时间必须保持 `rule`（规则模式）。`global` 会强迫几乎所有非显式例外流量走 `GLOBAL` 策略组（容易把国内支付、网盘、视频站全拖进代理耗光流量）；`direct` 则相当于临时关闭代理分流，所有请求直接本地发出。
+- **`unified-delay` 与 `tcp-concurrent`**：`unified-delay: true` 能让客户端在测速时先排除第一次建立连接时的握手耗时抖动，使得不同节点之间的延迟对比更接近真实连续浏览体验；`tcp-concurrent: true` 在访问存在多个解析 IP 的大站时并发尝试连接最快的一个，显著减少首屏白屏时间。
+
+---
+
+## 三、逐块拆解二：`dns` 模块（`fake-ip` vs `redir-host`、`nameserver` 与 `fallback`）
+
+`dns` 模块是整份 Clash / Mihomo 配置里最复杂、也最容易导致「节点延迟很绿但网页打不开」或「国内网站变慢」的组件。想配对 DNS，首先要理清两种增强模式与两组上游服务器的分工。
+
+### 1. `enhanced-mode` 核心对照：`fake-ip` vs `redir-host`
+
+当你只开「系统代理（System Proxy）」时，浏览器会把**完整域名**直接发给代理端口，Mihomo 无需先在本地做 DNS 解析就能匹配 `DOMAIN-SUFFIX` 规则。但当你开启 **`TUN` 虚拟网卡模式** 或软路由透明代理时，操作系统底层网卡收到的往往是已经经过本地 DNS 查询后的**目标 IP 数据包**——内核如果不知道这个 IP 对应哪个域名，所有的域名分流规则就会大面积失效。`enhanced-mode` 正是为了解决这一问题而设计的：
+
+| 对比维度 | `fake-ip`（假 IP 映射模式） | `redir-host`（真实 IP 重定向模式） |
+| :--- | :--- | :--- |
+| **工作机制** | 拦截本地 DNS 请求后，立即秒回一个 `198.18.0.0/16` 保留段内的虚构假 IP，并在内存建立「假 IP 到域名」的映射表；后续流量进入内核后直接反查原域名匹配规则 | 拦截本地 DNS 请求后，先向配置的真实上游 DNS 服务器查询拿到真实 IP 再返回给应用；随后依靠历史反查映射或 `sniffer` 嗅探域名匹配规则 |
+| **首包响应速度** | **极快**，无需等待本地上游 DNS 往返即可进入策略路由决策，直连站与代理站均无解析阻塞 | 略慢半拍，必须等待上游真实 DNS 响应返回后才能发起目标 TCP/UDP 握手 |
+| **规则匹配准确度** | **最高**，只要应用走了本地 DNS，100% 精准对应域名，天然彻底隔绝本地 DNS 污染与泄漏 | 依赖多域名共用 CDN IP 时的反查表以及 `sniffer` TLS/HTTP 域名嗅探补全 |
+| **主要副作用与禁忌** | **开发容器与内网冲突高发**：`198.18.x.x` 假地址如果被 `WSL2`、`Docker` 容器、局域网设备检测工具或企业零信任 VPN 缓存，极易引发断网或连接重置 | 若 `nameserver` 未配合可靠国内加密解析或分流规则有漏洞，在本地直连前较易暴露部分解析请求或受到本地运营商污染影响 |
+| **适用人群建议** | 普通桌面办公、手机移动设备、家庭影音客户端的默认首选（配合完善的 `fake-ip-filter` 过滤列表） | 运行 `Docker` / `WSL2` 本地开发容器、高频连接公司内网 VPN，或游戏主机对真实 NAT IP 敏感的场景（需同时开启 `sniffer`） |
+
+### 2. `nameserver`、`default-nameserver` 与 `fallback` 协同分工
+
+很多新手以为把 `dns` 里的服务器全改成海外加密 DNS 就最安全，结果立刻发现打开国内视频、电商和网盘加载缓慢甚至卡死。原因是：**国内网站与 CDN 节点高度依赖发起查询的 DNS 来源所在省份与运营商来做就近调度**——如果你拿美国 DNS 去解析国内视频站域名，拿到的可能是海外回源节点 IP，走直连时跨海绕一圈反而极其卡顿。
+
+正确的多层 DNS 架构必须通过 **基础引导（`default-nameserver`）+ 国内常规主解析（`nameserver`）+ 海外防污染复核（`fallback` + `fallback-filter` / `respect-rules`）** 分工协作：
+
+```yaml
+# ==========================================
+# 2. DNS 模块工程标准模板 (Mihomo)
+# ==========================================
+dns:
+  enable: true
+  listen: 0.0.0.0:1053
+  ipv6: false
+  respect-rules: true         # 关键参数：让 DNS 上游查询本身也遵守分流规则（配合 proxy-server-nameserver 使用）
+  enhanced-mode: fake-ip      # 开发容器环境如遇冲突可改为 redir-host 并开启下方 sniffer
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    # 局域网、系统联网检测、NTP 时间校准与常见游戏/开发内网域名不返回假 IP
+    - "*.lan"
+    - "*.local"
+    - "localhost.ptlogin2.qq.com"
+    - "time.*.com"
+    - "ntp.*.com"
+    - "+.msftconnecttest.com"
+    - "+.msftncsi.com"
+    - "stun.*.*"
+  # 用于解析后续 DoH/DoT 域名地址本身的纯 IP 引导 DNS（建议填国内公共纯 IP）
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  # 专用于解析机场节点域名本身，防止陷入「先有鸡还是先有蛋」死锁
+  proxy-server-nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  # 主解析池：优先解析国内域名，确保国内 CDN 就近调度
+  nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  # 备用海外防污染池：处理海外或未命中国内直连域名的解析
+  fallback:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+  # 若使用 Mihomo 新版建议配合 nameserver-policy 精确指定国内/海外域名分流解析
+  nameserver-policy:
+    "geosite:cn,private":
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
+    "geosite:geolocation-!cn":
+      - https://1.1.1.1/dns-query
+      - https://8.8.8.8/dns-query
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+
+# 配合 redir-host 或纯 IP 连接时的域名嗅探模块
+sniffer:
+  enable: true
+  parse-pure-ip: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443]
+  skip-domain:
+    - "Mijia Cloud"
+    - "+.apple.com"
+```
+
+在上面这份配置中，`proxy-server-nameserver` 与 `nameserver-policy` 是现代 Mihomo 内核极其重要的两个工程细节：前者确保机场节点域名自己永远走国内可靠 DoH 解析、不会因为节点未连接而死锁；后者直接按 `geosite` 分流查询请求，彻底杜绝海外域名泄露给本地运营商或国内域名绕道海外解析。遇到更复杂的本地 DNS 泄漏、开发容器隔离或虚拟网卡回环异常时，可延伸阅读 [TUN 虚拟网卡原理](/guides/tun/)、[TUN 与 DNS 原理指南](/guides/articles/tun-vs-system-proxy-dns/)、[DNS 故障专项排查](/troubleshooting/dns/) 及 [TUN 与代理冲突排查](/troubleshooting/tun-proxy/)。
+
+---
+
+## 四、逐块拆解三：`proxies` 与 `proxy-groups`（四大策略组选型与 Claude 禁用自动切换）
+
+`proxies` 段存放着具体的服务器节点定义（包含 `name`、`type`、`server`、`port` 及协议专有参数），而真正决定流量调度智慧的是紧随其后的 `proxy-groups`（策略组）。Mihomo 最核心的策略组类型共有四种，选错类型往往直接导致页面掉线或账号被封。
+
+### 1. 四大策略组类型精确选型表
+
+| 策略组类型 | 内部调度机制 | 核心适用场景 | 严禁使用的场景与风险警示 |
+| :--- | :--- | :--- | :--- |
+| **`select`（手动选择）** | 完全由用户在界面中人工点选哪一个节点或子策略组，除非手动点击切换，否则出口保持恒定不变 | **日常主力出口总组**、**AI 专用组（Claude / ChatGPT / Gemini）**、网银或跨境电商登录组 | 无明显禁忌；仅在选中的单一节点彻底宕机时需要人工切一下备用节点（或组内嵌套一个 `fallback` 子组作兜底） |
+| **`url-test`（自动测速择优）** | 每隔指定 `interval`（秒）向测试网址并发探测延迟，自动选中延迟最低的节点；当新节点延迟优势超过 `tolerance`（容差毫秒数）时自动切换 | 仅适合对会话连续性无要求的**普通网页检索、大文件拉取或地区内部备用自动组** | **严禁用于 Claude 与 ChatGPT！** 延迟波动极易导致几分钟内切换不同地区或不同 ASN 的出口 IP，瞬间触发会话风控 |
+| **`fallback`（故障转移）** | 严格按列表顺序优先使用排在第一位的节点，只有当首节点连续测速超时失败时，才顺延切换至第二个备用节点 | 需要**稳定优先顺序**同时又怕主节点半夜维护断网的场景（例如把低倍率主力放第一位、高倍率备用放第二位） | 同样不建议用于极高风控敏感的长期账号，除非你能接受主节点挂掉时自动跳到同地区同 ASN 的另一台备用机 |
+| **`load-balance`（负载均衡）** | 将请求按照 `round-robin`（轮询）或 `consistent-hashing`（一致性哈希）分摊到组内多个节点 | **极少数多线程大文件下载或并发爬虫**（前提是全部节点归属同区且不限制并发） | **日常浏览与所有登录态网站（Claude、OpenAI、银行、购物、社交账号）绝对禁用！** 同一网页的不同接口从香港、日本、美国三个 IP 同时发出请求，几乎必被反作弊与风控系统秒踢 |
+
+### 2. 为什么使用 Claude（与 ChatGPT）必须禁用自动切换？
+
+在站内 [Claude 专题](/ai-media/claude/) 与 [ChatGPT 专题](/ai-media/chatgpt/) 的实测与风控复盘中，一个反复被验证的经验是：**Anthropic（Claude）对数据中心 IP 声誉与会话期间出口 IP 跳变的容忍度极低**。
+
+如果你图省事，把 `AI-Claude` 策略组设为 `url-test` 且 `interval: 300`、`tolerance: 50`，并且里面同时塞进了美国、日本、新加坡甚至香港节点，后台每隔五分钟只要日本节点晚高峰抖动了 60 毫秒，你的 Claude 对话窗口在下一句提问时就会瞬间变成新加坡或美国 IP——在服务端风控模型眼里，这等同于「账号凭据在几分钟内跨国异地登录或多人共享代理池」，轻则不断弹出人机校验、提示地区不可用，重则直接触发账号封禁评估。
+
+因此，**工程标准做法**是：
+1. AI 策略组（尤其是 `AI-Claude`、`AI-ChatGPT` 与 [Gemini 专用组](/ai-media/gemini/)）**全部采用 `type: select`**，彻底关闭自动切换与负载均衡。
+2. 利用 Mihomo 的 `exclude-filter` 正则过滤参数，直接将 `香港|HK|Hong Kong|剩余|过期|官网|2x|3x` 等受限地区（详见 [香港节点优势与限制](/routes/hong-kong/)）与高倍率、信息节点排除在 AI 候选池之外（对应站内 [光速云](/brands/guangsuyun/) 2026-08-19 实测截图揭示的香港节点多为「仅 APP(HK)」、Gemini 多失败而新加坡表现较佳的真实规律，同时也兼顾 [节点倍率防偷跑](/routes/multiplier/) 要求）。
+3. 即便必须在常规区域使用自动测速，也应把 `url-test` 的 `interval` 设到 `600` 至 `1800` 秒，并设置较大的 `tolerance: 100`–`150`（毫秒），防止 [日本节点](/routes/japan/) 等主力组因细微网络波动引发频繁无意义跳线。
+
+```yaml
+# ==========================================
+# 3. 策略组工程示范片段 (proxy-groups)
+# ==========================================
+proxy-groups:
+  # 主力总开关：手动决定日常走固定低延迟区还是自动测速子组
+  - name: "🚀 节点选择"
+    type: select
+    proxies:
+      - "♻️ 香港自动-低波动"
+      - "🛡️ 日本故障转移"
+      - DIRECT
+    include-all: true
+    exclude-filter: "剩余|过期|官网|重置|到期"
+
+  # AI 专用组：严格设为 select，正则踢出香港及信息/高倍率节点，防 Claude 与 OpenAI 风控
+  - name: "🤖 AI-Claude与OpenAI"
+    type: select
+    include-all: true
+    filter: "日本|JP|新加坡|SG|美国|US"
+    exclude-filter: "香港|HK|台湾|TW|剩余|过期|2x|3x"
+
+  # Gemini 专用组：根据站内实测样本偏向新加坡或实测验证通过地区
+  - name: "✨ AI-Gemini"
+    type: select
+    include-all: true
+    filter: "新加坡|SG|美国|US|日本|JP"
+    exclude-filter: "香港|HK|剩余|过期"
+
+  # 仅对常规香港低延迟组适度使用 url-test，调大间隔与容差防频繁抖动切换
+  - name: "♻️ 香港自动-低波动"
+    type: url-test
+    url: "https://cp.cloudflare.com/generate_204"
+    interval: 900
+    tolerance: 120
+    include-all: true
+    filter: "香港|HK"
+    exclude-filter: "2x|3x|剩余|过期"
+
+  # 故障转移组示例：首节点失效才切换次节点，保持平时出口一致
+  - name: "🛡️ 日本故障转移"
+    type: fallback
+    url: "https://cp.cloudflare.com/generate_204"
+    interval: 600
+    include-all: true
+    filter: "日本|JP"
+```
+
+---
+
+## 五、逐块拆解四：`rules` 与 `rule-providers`（外部规则集托管）
+
+早期机场配置需要把成千上万条国内域名和广告拦截域名硬编码写进主 YAML 的 `rules:` 数组里，动辄导致单个配置文件膨胀到数兆字节、图形界面打开卡顿。Mihomo 通过 `rule-providers` 与 `RULE-SET` 解决了这一工程难题——由社区持续维护的规则列表可以按周期从远端拉取并缓存为本地轻量 `.mrs` 二进制格式，主配置文件只需寥寥数行引用即可：
+
+```yaml
+# ==========================================
+# 4. 外部规则集托管 (rule-providers) 与规则树 (rules)
+# ==========================================
+rule-providers:
+  ai_custom:
+    type: http
+    behavior: domain       # 规则行为：domain（纯域名）/ ipcidr（IP段）/ classical（经典混合）
+    format: mrs            # 推荐现代 Mihomo 使用 mrs 二进制格式，加载速度极快且省内存
+    url: "https://example.invalid/rules/ai-domains.mrs"   # 示例占位 URL，实际使用需替换为可信规则源
+    path: ./ruleset/ai_custom.mrs
+    interval: 86400        # 每 24 小时同步一次，避免高频轮询
+
+  cn_domain:
+    type: http
+    behavior: domain
+    format: mrs
+    url: "https://example.invalid/rules/cn-domains.mrs"
+    path: ./ruleset/cn_domain.mrs
+    interval: 86400
+
+  cn_ip:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: "https://example.invalid/rules/cn-ip.mrs"
+    path: ./ruleset/cn_ip.mrs
+    interval: 86400
+
+rules:
+  # 1. 高优先级例外与 AI 独立出口置顶
+  - DOMAIN-SUFFIX,anthropic.com,🤖 AI-Claude与OpenAI
+  - DOMAIN-SUFFIX,claude.ai,🤖 AI-Claude与OpenAI
+  - DOMAIN-SUFFIX,openai.com,🤖 AI-Claude与OpenAI
+  - DOMAIN-SUFFIX,chatgpt.com,🤖 AI-Claude与OpenAI
+  - DOMAIN-SUFFIX,gemini.google.com,✨ AI-Gemini
+  - RULE-SET,ai_custom,🤖 AI-Claude与OpenAI
+  # 2. 局域网与国内直连规则居间（IP 类规则务必加 no-resolve 防止冗余 DNS 解析）
+  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+  - RULE-SET,cn_domain,DIRECT
+  - RULE-SET,cn_ip,DIRECT,no-resolve
+  # 3. 兜底规则必须置底
+  - MATCH,🚀 节点选择
+```
+
+需要注意 `rule-providers` 中的两个常见坑点：第一，当 `behavior` 为 `ipcidr` 或规则是 `IP-CIDR` / `GEOIP` 时，建议附上 `no-resolve` 避免纯域名命中前多余触发一次阻塞 DNS 查询；第二，部分国内网络环境下直连拉取海外规则托管源可能超时，可在 Mihomo 顶层配置中合理规划规则更新或开启代理拉取支持，确保规则集首次能顺利下载到本地 `./ruleset/` 目录。需要提醒的是，`.mrs` 仅适用于 Mihomo 内核；如果你使用的客户端是 [sing-box 生态工具](/clients/sing-box/)（如 `Karing`、`Hiddify` 或原生 `SFA`/`SFI`），则需使用对应的 `.srs` 二进制规则集与 JSON 配置格式。关于各类规则关键字的深度优先级对比，可继续阅读 [分流规则深度实战](/guides/routing-rules/) 与 [AI 与流媒体 GeoIP 分流案例](/guides/articles/ai-streaming-geoip-routing/)。
+
+---
+
+## 六、Clash Verge Rev `Merge` 与 `Script` 覆写工程模板（订阅更新不丢定制）
+
+前面反复强调过：**千万不要直接去改机场订阅的源文件**。只要你在 `Clash Verge Rev` 中配置好「全局扩展配置（Merge）」或「全局扩展脚本（Script）」，每次机场更新节点 IP 或增删服务器时，客户端都会自动把你的个性化架构「套壳焊接」到最新配置上。
+
+### 1. 什么时候用 `Merge`，什么时候用 `Script`？
+
+- **`Merge`（YAML 增量合并）**：适合**结构简单、不需要根据中文节点名动态分组**的微调场景。例如：统一覆盖 `dns` 配置（修复 `fake-ip-filter` 避免 WSL2/Docker 断网）、强制关闭 `allow-lan`、使用 `prepend-rules` 把几条特定内网直连或已知 AI 域名规则插到最前面。注意：`Merge` 中的 `prepend-rules` 指向的策略组名称，必须与机场原有订阅里已经存在的策略组名称完全一致，否则内核会报错找不到策略组。
+- **`Script`（JavaScript 全局扩展脚本）**：适合**一劳永逸的完整工程重构**。因为不同机场的策略组命名千差万别（有的叫 `Proxy`，有的叫 `节点选择`，有的根本没拆分 AI 分组），`Script` 能够通过 `main(config)` 函数直接遍历 `config.proxies` 里的所有真实节点名称，用正则表达式自动剔除香港节点与高倍率节点，动态创建全新的 `AI-Claude`、`AI-ChatGPT`、`AI-Gemini`、`流媒体` 策略组，再把对应规则插到 `config.rules` 最顶端。哪怕机场明天新增了十个美国和日本节点，只要重新点一下刷新订阅，新节点会自动被脚本纳入对应的分组中。
+
+### 2. 模板一：`Merge` 全局扩展配置（YAML 增量修补 DNS 与前置例外）
+
+适合已经对机场原有策略组结构满意，只需要加固 DNS、补充 `fake-ip-filter` 与前置少数直连规则的用户：
+
+```yaml
+# Clash Verge Rev -> 订阅 / 全局扩展配置 (Merge) 模板
+# 功能：加固安全字段、补全本地开发内网过滤，并将常用内网及指定域名置顶直连
+
+allow-lan: false
+unified-delay: true
+tcp-concurrent: true
+
+dns:
+  respect-rules: true
+  fake-ip-filter:
+    - "+.lan"
+    - "+.local"
+    - "time.*.com"
+    - "ntp.*.com"
+    - "+.msftconnecttest.com"
+    - "+.docker.internal"
+
+prepend-rules:
+  - DOMAIN-SUFFIX,company.internal,DIRECT
+  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+```
+
+### 3. 模板二：`Script` 全局扩展脚本（JS 动态筛选节点、防 Claude 跳线并锁定 AI 出口）
+
+这是面向主力依赖 ChatGPT、Claude 与 Gemini 用户的标准化工程脚本模板。它内置了空数组兜底保护（即使某家机场节点命名不规范或只有少部分地区，也不会因为生成空策略组而导致 Mihomo 启动崩溃），并将全部高风险的 AI 策略组强制锁定为 `select` 模式：
+
+```javascript
+// Clash Verge Rev -> 全局扩展脚本 (Script) 标准工程模板
+// 功能：
+// 1. 加固基础安全参数，开启 unified-delay 与 tcp-concurrent
+// 2. 自动排除信息提示节点、香港地区与高倍率节点，构建 AI 专用 select 策略组（禁用自动切点）
+// 3. 动态创建 AI-Claude / AI-ChatGPT / AI-Gemini 并把关键域名置顶拦截香港流量
+
+function main(config) {
+  if (!config || !Array.isArray(config.proxies) || config.proxies.length === 0) {
+    return config;
+  }
+
+  // 第一步：全局安全与性能基线加固
+  config["allow-lan"] = false;
+  config["unified-delay"] = true;
+  config["tcp-concurrent"] = true;
+
+  // 第二步：按名称特征清洗并筛选可用节点池
+  const noisePattern = /剩余|过期|到期|重置|官网|套餐|试用|流量|倍率|2x|3x|5x/i;
+  const hkTwPattern = /香港|HK|Hong\s*Kong|台湾|TW|Taiwan/i;
+  const usJpSgPattern = /美国|US|United\s*States|日本|JP|Japan|新加坡|SG|Singapore/i;
+  const sgPattern = /新加坡|SG|Singapore/i;
+
+  const validNames = config.proxies
+    .map((p) => p && p.name)
+    .filter((name) => typeof name === "string" && !noisePattern.test(name));
+
+  const nonHkCandidates = validNames.filter((name) => !hkTwPattern.test(name));
+  const aiPrimaryPool = nonHkCandidates.filter((name) => usJpSgPattern.test(name));
+  const sgPool = nonHkCandidates.filter((name) => sgPattern.test(name));
+
+  // 保底回退机制：防止小众机场命名缺失导致策略组出现空数组报错
+  const finalAiPool =
+    aiPrimaryPool.length > 0
+      ? aiPrimaryPool
+      : nonHkCandidates.length > 0
+        ? nonHkCandidates
+        : validNames;
+
+  const finalGeminiPool = sgPool.length > 0 ? sgPool : finalAiPool;
+
+  if (finalAiPool.length === 0) {
+    return config;
+  }
+
+  // 第三步：构建独立的手动锁定策略组（严禁在此使用 url-test 或 load-balance）
+  const injectedGroups = [
+    {
+      name: "AI-Claude",
+      type: "select",
+      proxies: finalAiPool,
+    },
+    {
+      name: "AI-ChatGPT",
+      type: "select",
+      proxies: finalAiPool,
+    },
+    {
+      name: "AI-Gemini",
+      type: "select",
+      proxies: finalGeminiPool,
+    },
+  ];
+
+  const existingGroups = Array.isArray(config["proxy-groups"]) ? config["proxy-groups"] : [];
+  const injectedNames = new Set(injectedGroups.map((g) => g.name));
+  config["proxy-groups"] = [
+    ...injectedGroups,
+    ...existingGroups.filter((g) => g && !injectedNames.has(g.name)),
+  ];
+
+  // 第四步：将 AI 规则置顶插入（自上而下短路优先匹配）
+  const prependRules = [
+    "DOMAIN-SUFFIX,anthropic.com,AI-Claude",
+    "DOMAIN-SUFFIX,claude.ai,AI-Claude",
+    "DOMAIN-SUFFIX,openai.com,AI-ChatGPT",
+    "DOMAIN-SUFFIX,chatgpt.com,AI-ChatGPT",
+    "DOMAIN-SUFFIX,oaistatic.com,AI-ChatGPT",
+    "DOMAIN-SUFFIX,oaiusercontent.com,AI-ChatGPT",
+    "DOMAIN-SUFFIX,auth0.com,AI-ChatGPT",
+    "DOMAIN-SUFFIX,gemini.google.com,AI-Gemini",
+    "DOMAIN-SUFFIX,aistudio.google.com,AI-Gemini",
+    "DOMAIN-SUFFIX,generativelanguage.googleapis.com,AI-Gemini",
+  ];
+
+  const existingRules = Array.isArray(config.rules) ? config.rules : [];
+  config.rules = [...prependRules, ...existingRules];
+
+  return config;
+}
+```
+
+### 4. 部署覆写后的三步验证与无损回滚
+
+写完 `Merge` 或 `Script` 模板后，不要只凭感觉觉得「应该生效了」，按以下三个步骤完成闭环验证：
+
+1. **检查渲染后的最终 YAML**：在 `Clash Verge Rev` 的订阅卡片右键打开「运行配置（Runtime Config）」或编辑校验界面，确认 `AI-Claude`、`AI-ChatGPT`、`AI-Gemini` 三个分组已经注入且内部列出了具体的日本、新加坡或美国节点名称，同时 `rules` 最顶部的前十行确实是脚本注入的规则。
+2. **手动锁定稳定出口并清理旧连接**：打开「代理」界面，在三个 `AI` 策略组中分别选定一个实测通过且相对稳定的节点（参考站内 [光速云](/brands/guangsuyun/) 实测数据，ChatGPT 与 Claude 优先看日本/新加坡/美国，Gemini 优先重点核查新加坡或实测绿标节点）。随后进入「连接（Connections）」页面点击「关闭全部连接」，切断浏览器原先挂在香港节点上的旧 HTTP/3 长连接复用。
+3. **观察实时请求命中结果**：重新打开 Claude 或 ChatGPT 网页，在「连接」列表的搜索框过滤 `claude` 或 `openai`，确认每一条连接的命中规则列显示为 `DOMAIN-SUFFIX` 且最终代理链路列为你刚才锁定的目标节点名称。若改完覆写后不幸遇到报错提示配置失效，只需在订阅设置页暂取消勾选全局覆写开关即可秒级还原原订阅运行，毫无系统网络破坏风险。
+
+---
+
+## 七、常见字段误配置避坑对比与真实品牌 / 客户端兼容案例
+
+哪怕看懂了 YAML 五大区块，实际部署时依然常因一两个参数的默认值误用或机场生态差异而导致断网、卡顿或覆写失效。以下按工程高频排错清单，先汇总最容易踩坑的字段对照表，再结合真实品牌与客户端矩阵讲清兼容边界。
+
+### 1. 常见字段误配置避坑对比表
+
+| 误配置字段 / 做法 | 错误写法典型表现 | 实际引发的工程故障或风险 | 推荐正确写法与处理思路 |
+| :--- | :--- | :--- | :--- |
+| **直接手改原始订阅文件** | 在订阅目录下直接编辑 `proxies` 或 `rules` 文本 | 每次手动点击或 24 小时自动刷新订阅后，个人规则与策略组瞬间被服务端下发内容全量覆盖丢失 | 保持原始订阅只读，所有定制统一放进 `Clash Verge Rev` 的 **Merge** 或 **Script** 全局覆写中持久化注入 |
+| **公共环境开启 `allow-lan`** | 咖啡厅或公司公共 Wi-Fi 下保持 `allow-lan: true` 且未设 `authentication` | 同一局域网下的任意设备扫描本地 `7897` 端口即可直接白嫖你的机场节点与套餐流量 | 日常外出锁定 `allow-lan: false` 与 `bind-address: "127.0.0.1"`，仅在可信家庭内网共享时临时开启 |
+| **`dns.nameserver` 全填国外 DoH** | 删除阿里/腾讯 DoH，把 `nameserver` 全部改成 `1.1.1.1` 与 `8.8.8.8` | 国内视频站、网盘与电商 CDN 被调度到海外边缘或绕远节点，开代理后国内业务反而卡顿 | 保留国内加密 DoH 在 `nameserver` 与 `nameserver-policy` 中解析 `geosite:cn`，海外域名交给 `fallback` 与 `geolocation-!cn` |
+| **`fake-ip` 环境缺失过滤名单** | 开启 `TUN` 与 `fake-ip` 时未配置 `fake-ip-filter` | `WSL2`、`Docker` 容器、局域网设备管理页与部分企业内网客户端缓存 `198.18.x.x` 假地址引发断流 | 补齐局域网、系统联网检测与容器内网后缀到 `fake-ip-filter`，重度容器开发改用 `redir-host` + `sniffer` |
+| **AI 策略组选用 `url-test` / `load-balance`** | 将 `AI-Claude` 或 `AI-ChatGPT` 设为 `url-test`（短间隔）或负载均衡 | 延迟轻微抖动或请求并发时出口 IP 跨国跳变，极易触发 Claude 与 OpenAI 人机校验死循环或账号封控 | 全部 AI 策略组严格使用 `type: select` 手动锁定单一非香港稳定节点，并用正则排除香港与高倍率节点 |
+| **盲目开启 `ipv6: true`** | 本地宽带或机场节点未稳定支持 IPv6 时强行开启 `ipv6: true` | 浏览器优先发起 `AAAA` 解析与 IPv6 握手并在超时后才回退 IPv4，造成网页打开间歇性白屏数秒 | 除非明确确认本地双栈网络与全部节点落地均正常，否则统一保持 `ipv6: false` 与 `dns.ipv6: false` |
+| **IP 规则漏加 `no-resolve`** | 写成 `GEOIP,CN,DIRECT` 或 `IP-CIDR,10.0.0.0/8,DIRECT` 省略尾部参数 | 纯域名请求扫描至该行时会被强行暂停并触发本地阻塞 DNS 解析，拖慢首包且可能造成 DNS 泄漏 | 所有 `IP-CIDR`、`IP-CIDR6`、`GEOIP` 与 `ipcidr` 类 `RULE-SET` 均强制附加 `no-resolve` |
+| **`external-controller` 暴露无鉴权** | 监听 `0.0.0.0:9090` 且未配置 `secret` 密钥 | 同网段其他主机可直接访问你的控制面板 API，读取连接记录并远程篡改节点路由 | 本地使用固定绑定 `127.0.0.1:9097`，若需局域网远程面板管理务必设置强 `secret` 口令 |
+
+### 2. 真实品牌与客户端配置兼容边界案例
+
+1. **通用订阅 vs 专属端边界**：本文 YAML 骨架与覆写模板**仅适用于开放通用订阅的机场**（对照 [专属客户端 vs 通用订阅对照](/compare/dedicated-client-vs-universal-sub/)）。例如 [光速云](/brands/guangsuyun/)、[一翻云](/brands/yifan/)、[梯子云](/brands/tiziyun/)、[可信云](/brands/kexin/)、[唯兔云](/brands/weitu/) 与 [大佬云](/brands/dalaoyun/) 均支持导出 Clash 订阅并接入 [Clash Verge Rev](/clients/clash-verge-rev/)；相反，[飞猫云](/brands/feimao/)、[隐形人](/brands/yinxingren/)、[SOGO 云](/brands/sogo/) 及转向专属端的 [Firefly](/brands/firefly/) 不开放订阅导出，无法进入 [Mihomo](/clients/mihomo/) 体系，只能按 [跨平台安装指南](/guides/install/) 用官方端。
+2. **协议兼容与覆写取舍**：以 [一翻云](/brands/yifan/) 的 `Hysteria 2`、`VLESS-Reality` 为例，停更的原版 Clash 无法解析新协议，必须用 [Mihomo](/clients/mihomo/) 内核或经 [订阅格式指南](/guides/subscription/) 转为 [sing-box](/clients/sing-box/) 配置。覆写选型上，仅修补 `fake-ip-filter` 或置顶内网直连用 **`Merge`** 即可；但要自动过滤 [光速云](/brands/guangsuyun/) 香港节点的 AI 限制与高倍率节点，或为标明缺乏统一实测的 [可信云](/brands/kexin/) `VLESS` 订阅单独建组测试并锁定 [ChatGPT](/ai-media/chatgpt/)、[Claude](/ai-media/claude/) 与 [Gemini](/ai-media/gemini/) 出口，必须用 **`Script`**。
+
+掌握了配置文件的五大骨架、DNS 解析分工、策略组防风控选型、避坑边界以及无损覆写机制之后，下一步真正决定日常上网体验上限的，就是如何编写一套滴水不漏的分流规则树——详见下一篇核心实战教程 [分流规则（Routing Rules）深度实战](/guides/routing-rules/)。
