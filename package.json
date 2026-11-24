@@ -13,11 +13,11 @@
     "qa": "node scripts/validate-brands.mjs && node scripts/check-links.mjs && node scripts/audit-seo.mjs"
   },
   "dependencies": {
-    "@astrojs/mdx": "^4.0.19",
-    "@astrojs/rss": "^4.0.18",
+    "@astrojs/mdx": "^8.1.6",
+    "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.6",
-    "astro": "^6.0.0",
-    "pagefind": "^1.4.0",
-    "zod": "^3.25.0"
+    "astro": "^7.4.13",
+    "pagefind": "^1.6.0",
+    "zod": "^4.6.7"
   }
 }
